@@ -18,6 +18,8 @@ except NameError:
 
 from collections import OrderedDict
 
+# The following MARC Code associated name and decriptions are extracted from the https://github.com/Sigil-Ebook/Sigil code source (with minor edit)
+# Some translation are also based on the work done for Sigil, see CREDITS file
 
 # For the authoritiative relator list and descriptive definitions see http://www.loc.gov/marc/relators/
 

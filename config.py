@@ -32,11 +32,6 @@ except ImportError:
                             QPushButton, QSpacerItem, QSizePolicy)
 
 try:
-    QPolicy = QSizePolicy.Policy
-except:
-    QPolicy = QSizePolicy
-
-try:
     from urllib.request import urlretrieve
 except ImportError:
     from urllib import urlretrieve
@@ -79,7 +74,12 @@ def get_library_config(db):
     library_config = None
 
     if library_config is None:
-        library_config = db.prefs.get_namespaced(PREFS_NAMESPACE, PREFS_KEY_SETTINGS, PREFS_DEFAULT)
+        library_config = db.prefs.get_namespaced(PREFS_NAMESPACE, PREFS_KEY_SETTINGS)
+    
+    for k, v in PREFS_DEFAULT.items():
+        if k not in library_config:
+            library_config[k] = v
+    
     return library_config
 
 def set_library_config(db, library_config):
@@ -114,13 +114,13 @@ class ConfigWidget(QWidget):
         add_button.setToolTip(_('Add menu item'))
         add_button.setIcon(get_icon('plus.png'))
         button_layout.addWidget(add_button)
-        button_layout.addItem(QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding))
+        button_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
         
         delete_button = QToolButton(self)
         delete_button.setToolTip(_('Delete menu item'))
         delete_button.setIcon(get_icon('minus.png'))
         button_layout.addWidget(delete_button)
-        button_layout.addItem(QSpacerItem(20, 40, QPolicy.Minimum, QPolicy.Expanding))
+        button_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
         
         add_button.clicked.connect(self.table.add_row)
         delete_button.clicked.connect(self.table.delete_rows)
@@ -218,7 +218,7 @@ class ContributorColumnTableWidget(QTableWidget):
         self.setHorizontalHeaderLabels(COL_NAMES)
         self.verticalHeader().setDefaultSectionSize(24)
         
-        if contributors_pair_list == None: contributors_pair_list = []
+        if contributors_pair_list == None: contributors_pair_list = {}
         contributors_pair_list = {k:v for k, v in contributors_pair_list.items() if k[0] != KEY.OPTION_CHAR }
         self.setRowCount(len(contributors_pair_list))
         for row, contributors_pair in enumerate(contributors_pair_list.items(), 0):
@@ -310,7 +310,7 @@ class ContributorsEditTableWidget(QTableWidget):
         self.setHorizontalHeaderLabels(COL_CONTRIBUTORS)
         self.verticalHeader().setDefaultSectionSize(24)
         
-        if contributors_list == None: contributors_list = []
+        if contributors_list == None: contributors_list = {}
         self.setRowCount(len(contributors_list))
         for row, contributors in enumerate(contributors_list, 0):
             self.populate_table_row(row, contributors)
@@ -372,9 +372,11 @@ class ContributorsComboBox(KeyValueComboBox):
         KeyValueComboBox.__init__(self, table, CONTRIBUTORS_ROLES, selected_contributors)
         self.table = table
         self.currentIndexChanged.connect(self.test_contributors_changed)
+        self.refreshToolTipContributors()
     
     def test_contributors_changed(self, val):
         de = duplicate_entry([self.table.cellWidget(row, 0).currentText() for row in range(self.table.rowCount())])
+        self.refreshToolTipContributors()
         if de.count(''): de.remove('')
         if de and de.count(self.currentText()):
             warning_dialog(self, _('Duplicate Contributors type'),
@@ -382,6 +384,12 @@ class ContributorsComboBox(KeyValueComboBox):
                 + '\n' + '\n'.join(de),
                 show=True, show_copy_button=False)
     
+    def refreshToolTipContributors(self):
+        code = self.selected_key()
+        if code and code in CONTRIBUTORS_DERCRIPTION:
+            self.setToolTip(CONTRIBUTORS_DERCRIPTION[code])
+        else:
+            self.setToolTip('')
 
 
 def duplicate_entry(lst):
