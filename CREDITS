@@ -2,3 +2,10 @@ marc_relators.py
 
 The MARC Code associated name and decriptions are extracted from the https://github.com/Sigil-Ebook/Sigil code source (with minor edit)
 Some translation of the MARC Code are also based on the translation made for Sigil https://www.transifex.com/zdpo/sigil/dashboard/ (language: FR)
+
+
+container.py
+epub_editor.py
+
+container.py by kiwidude on the MobileRead Forums https://www.mobileread.com/forums/index.php (Calibre plugin: Modify ePub https://www.mobileread.com/forums/showthread.php?t=154371)
+epub_editor.py is based on the work of kiwidude for the same plugin (to be accurate modify.py)

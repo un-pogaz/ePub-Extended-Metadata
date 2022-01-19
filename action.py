@@ -7,7 +7,7 @@ __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, time
+import os, time, copy
 # calibre Python 3 compatibility.
 from six import text_type as unicode
 
@@ -26,22 +26,25 @@ except ImportError:
     from PyQt5.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
 
 from calibre import prints
-from calibre.ebooks.metadata.book.base import Metadata
 from calibre.constants import numeric_version as calibre_version
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
-from calibre.library import current_library_name
 from polyglot.builtins import iteritems
 
-from calibre_plugins.edit_contributors_metadata.config import ICON
+from calibre_plugins.edit_contributors_metadata.config import ICON, get_library_PREFS, KEY, KEY_EXCLUDE_OPTION, KEY_EXCLUDE_INVALIDE
 from calibre_plugins.edit_contributors_metadata.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
+from calibre_plugins.edit_contributors_metadata.epub_editor import read_contributors, write_contributors
 
+class VALUE:
+    EMBED = 'embed'
+    IMPORT = 'import'
 
 class EditContributorsMetadataAction(InterfaceAction):
     
     name = 'Edit Contributors Metadata'
     # Create our top-level menu/toolbar action (text, icon_path, tooltip, keyboard shortcut)
     action_spec = ('Edit Contributors Metadata', None, _('Apply a list of multiple saved Find and Replace operations'), None)
+    #popup_type = QToolButton.MenuButtonPopup
     popup_type = QToolButton.InstantPopup
     action_type = 'current'
     dont_add_to = frozenset(['context-menu-device'])
@@ -50,74 +53,102 @@ class EditContributorsMetadataAction(InterfaceAction):
         self.is_library_selected = True
         self.menu = QMenu(self.gui)
         
+        # Read the plugin icons and store for potential sharing with the config widget
         icon_resources = self.load_resources(ICON.ALL)
         set_plugin_icon_resources(self.name, icon_resources)
         
+        self.build_menus()
         
         # Assign our menu to this action and an icon
         self.qaction.setMenu(self.menu)
         self.qaction.setIcon(get_icon(ICON.PLUGIN))
+        self.qaction.triggered.connect(self.toolbar_triggered)
     
-    def initialization_complete(self):
-        # we implement here to have access to current_db
-        # if we try this in genesis() we get the error:
-        # AttributeError: 'Main' object has no attribute 'current_db'
+    def build_menus(self):
+        self.menu.clear()
         
         create_menu_action_unique(self, self.menu, _('&Embed contributors'), None,
                                              triggered=self.embedContributors,
                                              unique_name='&Embed contributors')
+        self.menu.addSeparator()
         
         create_menu_action_unique(self, self.menu, _('&Import contributors'), None,
                                              triggered=self.importContributors,
                                              unique_name='&Import contributors')
         self.menu.addSeparator()
         
-        create_menu_action_unique(self, self.menu, _('&Avanced editor'), None,
-                                             triggered=self.editContributors,
-                                             unique_name='&Avanced editor')
-        
-        self.menu.addSeparator()
+        ## TODO
+        ##
+        ##create_menu_action_unique(self, self.menu, _('&Bulk avanced editor'), None,
+        ##                                     triggered=self.editBulkContributors,
+        ##                                     unique_name='&Bulk avanced editor')
+        ##
+        ##create_menu_action_unique(self, self.menu, _('&Avanced editor, book by book'), None,
+        ##                                     triggered=self.editBookContributors,
+        ##                                     unique_name='&Avanced editor, book by book')
+        ##
+        ##self.menu.addSeparator()
         
         create_menu_action_unique(self, self.menu, _('&Customize plugin...'), 'config.png',
                                              triggered=self.show_configuration,
                                              unique_name='&Customize plugin')
         
-        self.gui.keyboard.finalize
+        self.gui.keyboard.finalize()
+        
+    
+    def toolbar_triggered(self):
+        self.embedContributors()
     
     def embedContributors(self):
-        
-        return None
+        self.runContributorsProgressDialog({id:VALUE.EMBED for id in self.getBookIds()}) 
         
     def importContributors(self):
-        
-        return None
+        self.runContributorsProgressDialog({id:VALUE.IMPORT for id in self.getBookIds()}) 
     
-    def editContributors(self):
+    def editBulkContributors(self):
+        debug_print('editBulkContributors')
+        PREFS = get_library_PREFS(self.gui.current_db)
+        self.getBookIds()
         
-        return None
     
-    def writeContributors(self, contributors):
+    def editBookContributors(self):
+        debug_print('editBookContributors')
+        PREFS = get_library_PREFS(self.gui.current_db)
+        self.getBookIds()
         
-        if not self.is_library_selected:
-            return error_dialog(self.gui, _('Could not to launch Edit Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
-        
-        rows = self.gui.library_view.selectionModel().selectedRows()
-        if not rows or len(rows) == 0:
-            return error_dialog(self.gui, _('Could not to launch Edit Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
-        
-        book_ids = self.gui.library_view.get_selected_ids()
-        
-        srpg = EditContributorsProgressDialog(self, book_ids, contributors)
-        srpg.close()
-        del srpg
     
     def show_configuration(self):
         self.interface_action_base_plugin.do_user_config(self.gui)
+    
+    def getBookIds(self):
+        if not self.is_library_selected:
+            error_dialog(self.gui, _('Could not to launch Edit Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
+            return []
+        
+        rows = self.gui.library_view.selectionModel().selectedRows()
+        if not rows or len(rows) == 0:
+            error_dialog(self.gui, _('Could not to launch Edit Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
+            return []
+        
+        return self.gui.library_view.get_selected_ids()
+    
+    def runContributorsProgressDialog(self, book_ids):
+        srpg = EditContributorsProgressDialog(self, book_ids)
+        srpg.close()
+        del srpg
 
 
+def set_new_size_DB(epub_path, book_id, dbAPI):
+    
+    new_size = os.path.getsize(epub_path)
+    
+    if new_size is not None:
+        fname = dbAPI.fields['formats'].format_fname(book_id, 'EPUB')
+        max_size = dbAPI.fields['formats'].table.update_fmt(book_id, 'EPUB', fname, new_size, dbAPI.backend)
+        dbAPI.fields['size'].table.update_sizes({book_id:max_size})
 
 class EditContributorsProgressDialog(QProgressDialog):
-    def __init__(self, plugin_action, book_ids, contributors):
+    def __init__(self, plugin_action, book_ids):
         
         # plugin_action
         self.plugin_action = plugin_action
@@ -135,18 +166,10 @@ class EditContributorsProgressDialog(QProgressDialog):
         self.book_count = len(self.book_ids)
         
         # Count update
-        self.books_update = 0
-        self.fields_update = 0
-        
-        
-        
-        
-        # Count of Search/Replace
-        self.operation_count = len(self.operation_list)
-        
-        # Count of Search/Replace
-        self.total_operation_count = self.book_count*self.operation_count
-        
+        self.no_epub_count = 0
+        self.import_count = 0
+        self.import_field_count = 0
+        self.export_count = 0
         
         # Exception
         self.exception = []
@@ -157,7 +180,7 @@ class EditContributorsProgressDialog(QProgressDialog):
         self.time_execut = 0
         
         
-        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.total_operation_count, self.gui)
+        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, self.gui)
         
         self.setWindowTitle(_('Edit Contributors Metadata Progress'))
         self.setWindowIcon(get_icon(ICON.PLUGIN))
@@ -176,127 +199,117 @@ class EditContributorsProgressDialog(QProgressDialog):
         self.exec_()
         
         
-        if self.wasCanceled():
-            debug_print('Edit Contributors Metadata was cancelled. No change.')
-        
-        elif self.exception_unhandled:
+        if self.exception_unhandled:
             debug_print('Edit Contributors Metadata was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg=_('Mass Search/Replace encountered an unhandled exception.')+'\n')
-        
+            CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg=_('Edit Contributors Metadata encountered an unhandled exception.')+'\n')
+            
         else:
             
-            #info debug
-            debug_print('Edit Contributors launched for {:d} books.'.format(self.book_count, self.operation_count))
+            if self.wasCanceled():
+                debug_print('Edit Contributors Metadata was aborted.')
             
-            debug_print('Search/Replace execute in {:0.3f} seconds.\n'.format(self.time_execut))
+            #info debug
+            debug_print('Edit Contributors launched for {:d} books.'.format(self.book_count))
+            if self.no_epub_count:
+                debug_print('{:d} books didn\'t have an ePub format.'.format(self.no_epub_count))
+            
+            if self.import_count:
+                debug_print('Contributors read for {:d} books with a total of {:d} fields modify.'.format(self.import_count, self.import_field_count))
+            else:
+                debug_print('No Contributors read from books.')
+            
+            if self.export_count:
+                debug_print('Contributors write for {:d} books.'.format(self.export_count))
+            else:
+                debug_print('No Contributors write in books.')
+            
+            debug_print('Edit Contributors execute in {:0.3f} seconds.\n'.format(self.time_execut))
             
         
         self.close()
     
     def close(self):
-        self.s_r.close()
         QProgressDialog.close(self)
     
     
     def _run_search_replaces(self):
-        lst_id = []
-        book_id_update = defaultdict(dict)
         start = time.time()
         alreadyOperationError = False
-        try:
-            self.setValue(0)
-            self.show()
-            
+        typeString = type('')
         
-        except Exception as e:
-            self.exception_unhandled = True
-            self.exception = e
+        PREFS = KEY_EXCLUDE_INVALIDE(get_library_PREFS(self.db), self.gui)
         
-        else:
+        import_id = {}
+        export_id = []
+        no_epub_id = []
+        
+        self.setValue(0)
+        self.show()
+        
+        for num, (book_id, contributors) in enumerate(self.book_ids.items(), 1):
+            #update Progress
+            self.setValue(num)
+            self.setLabelText(_('Book {:d} of {:d}.').format(num, self.book_count))
             
-            lst_id = []
-            for field, book_id_val_map in iteritems(self.s_r.updated_fields):
-                lst_id += book_id_val_map.keys()
-            self.fields_update = len(lst_id)
+            if self.book_count < 100:
+                self.hide()
+            else:
+                self.show()
             
-            lst_id = list(dict.fromkeys(lst_id))
-            self.books_update = len(lst_id)
+            ###
+            epub_path = self.dbAPI.format_abspath(book_id, 'EPUB')
+            miA = self.dbAPI.get_proxy_metadata(book_id)
+            book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') [book: '+str(num)+'/'+str(self.book_count)+']{id: '+str(book_id)+'}'
             
-            book_id_update = defaultdict(dict)
-            
-            if self.books_update > 0:
+            if not epub_path:
+                no_epub_id.append(book_id)
+                debug_print('No ePub for', book_info,'\n')
                 
-                debug_print('Update the database for {:d} books with a total of {:d} fields...\n'.format(self.books_update, self.fields_update))
-                self.setLabelText(_('Update the library for {:d} books with a total of {:d} fields...').format(self.books_update, self.fields_update))
-                self.setValue(self.total_operation_count)
-                
-                if self.exceptionStrategy == ERROR_UPDATE.SAFELY or self.exceptionStrategy == ERROR_UPDATE.DONT_STOP:
+            
+            if epub_path:
+                if contributors == VALUE.IMPORT:
+                    contributors = read_contributors(epub_path)
                     
-                    dont_stop = self.exceptionStrategy == ERROR_UPDATE.DONT_STOP
+                    debug_print('Read ePub Contributors for', book_info,'\n')
                     
-                    if self.exception:
-                        self.exception_safely = True
-                    
-                    for id in iter(lst_id):
-                        if self.exception and not dont_stop:
-                            break
-                        for field, book_id_val_map in iteritems(self.s_r.updated_fields):
-                            if self.exception and not dont_stop:
-                                break
-                            if id in book_id_val_map:
-                                try:
-                                    val = self.s_r.updated_fields[field][id]
-                                    self.dbAPI.set_field(field, {id:val})
-                                    book_id_update[field][id] = ''
-                                except Exception as e:
-                                    self.exception_safely = True
-                                    
-                                    miA = self.dbAPI.get_proxy_metadata(id)
-                                    #title (author & author)
-                                    book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
-                                    self.exception.append( (id, book_info, field, e) )
+                    for k, v in PREFS.items():
+                        if k in contributors and miA.get(v) != contributors[k]:
+                            self.dbAPI.set_field(v, {book_id:contributors[k]})
+                            if book_id not in import_id:
+                                import_id[book_id] = []
+                            import_id[book_id].append(v)
                     
                 else:
-                    try:
-                        
-                        backup_fields = None
-                        is_restore = self.exceptionStrategy == ERROR_UPDATE.RESTORE
-                        if is_restore:
-                            backup_fields = defaultdict(dict)
-                        
-                        if self.exception:
-                            raise Exception('raise')
-                        
-                        for field, book_id_val_map in iteritems(self.s_r.updated_fields):
-                            if is_restore:
-                                src_field = self.dbAPI.all_field_for(field, book_id_val_map.keys())
-                                backup_fields[field] = src_field
-                            
-                            self.dbAPI.set_field(field, book_id_val_map)
-                            book_id_update[field] = {id:'' for id in book_id_val_map.keys()}
-                        
-                    except Exception as e:
-                        self.exception_update = True
-                        self.exception.append( (None, None, None, e) )
-                        
-                        if is_restore:
-                            for field, book_id_val_map in iteritems(backup_fields):
-                               self.dbAPI.set_field(field, book_id_val_map)
-                
-                self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
-                
+                    if contributors == VALUE.EMBED:
+                        contributors = copy.deepcopy(PREFS)
+                    
+                    debug_print('Write ePub Contributors for', book_info,'\n')
+                    
+                    for k, v in contributors.items():
+                        if typeString == type(v):
+                            contributors[k] = miA.get(v)
+                    
+                    for k, v in contributors.items():
+                        if not v:
+                            contributors[k] = []
+                    
+                    if write_contributors(epub_path, contributors):
+                        set_new_size_DB(epub_path, book_id, self.dbAPI)
+                        export_id.append(book_id)
+                    
             
+            #
         
-        finally:
-            
-            lst_id = []
-            for field, book_id_map in iteritems(book_id_update):
-                lst_id += book_id_map.keys()
-            self.fields_update = len(lst_id)
-            
-            lst_id = list(dict.fromkeys(lst_id))
-            self.books_update = len(lst_id)
-            
-            self.time_execut = round(time.time() - start, 3)
-            self.db.clean()
-            self.hide()
+        self.no_epub_count = len(no_epub_id)
+        self.export_count = len(export_id)
+        self.import_count = len(import_id)
+        self.import_field_count = 0
+        for v in import_id.values():
+            self.import_field_count += len(v)
+        
+        lst_id = list(import_id.keys()) + export_id
+        self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
+        
+        self.time_execut = round(time.time() - start, 3)
+        self.db.clean()
+        self.hide()

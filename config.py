@@ -56,6 +56,7 @@ class ICON:
         WARNING,
     ]
 
+
 class KEY:
     CONTRIBUTOR = 'role'
     COLUMN = 'column'
@@ -64,17 +65,42 @@ class KEY:
     AUTO_IMPORT = OPTION_CHAR + 'auto_import'
 
 
+def KEY_EXCLUDE_OPTION(contributors_pair_list):
+    return {k:v for k, v in contributors_pair_list.items() if k[0] != KEY.OPTION_CHAR}
+
+def KEY_EXCLUDE_INVALIDE(contributors_pair_list, gui):
+    contributors_pair_list = KEY_EXCLUDE_OPTION(contributors_pair_list)
+    valide_columns = get_valide_columns(gui)
+    for k, v in copy.copy(contributors_pair_list).items():
+        if not k or k not in CONTRIBUTORS_ROLES or not v or v not in valide_columns:
+            contributors_pair_list.pop(k, '')
+    
+    return contributors_pair_list
+
 
 PREFS_NAMESPACE = 'EditContributors'
 PREFS_KEY_SETTINGS = 'settings'
 PREFS_DEFAULT = { KEY.AUTO_IMPORT : False }
 
-def get_library_config(db):
+def get_valide_columns(gui):
+    '''
+    Gets matching custom columns for column_type
+    '''
+    custom_columns = gui.library_view.model().custom_columns
+    available_columns = {}
+    for key, column in custom_columns.items():
+        if (column["datatype"] == "text" and bool(column["is_multiple"]) == True
+          and column['display'].get('is_names', False) == True):
+            available_columns[key] = column
+    return available_columns
+
+
+def get_library_PREFS(db):
     library_id = get_library_uuid(db)
     library_config = None
 
     if library_config is None:
-        library_config = db.prefs.get_namespaced(PREFS_NAMESPACE, PREFS_KEY_SETTINGS)
+        library_config = db.prefs.get_namespaced(PREFS_NAMESPACE, PREFS_KEY_SETTINGS, PREFS_DEFAULT)
     
     for k, v in PREFS_DEFAULT.items():
         if k not in library_config:
@@ -82,7 +108,8 @@ def get_library_config(db):
     
     return library_config
 
-def set_library_config(db, library_config):
+
+def set_library_PREFS(db, library_config):
     db.prefs.set_namespaced(PREFS_NAMESPACE, PREFS_KEY_SETTINGS, library_config)
 
 
@@ -97,7 +124,7 @@ class ConfigWidget(QWidget):
         title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('Edit Contributor Metatadata option'))
         layout.addLayout(title_layout)
         
-        PREFS = get_library_config(self.plugin_action.gui.current_db)
+        PREFS = get_library_PREFS(self.plugin_action.gui.current_db)
         
         # Add a horizontal layout containing the table and the buttons next to it
         table_layout = QHBoxLayout()
@@ -135,23 +162,29 @@ class ConfigWidget(QWidget):
         keyboard_layout.insertStretch(-1)
         
         
-        self.updateReport = QCheckBox(_('Auto import '), self)
+        self.autoImport = QCheckBox(_('Auto import'), self)
+        self.autoImport.setVisible(False)
         if PREFS[KEY.AUTO_IMPORT]:
-            self.updateReport.setCheckState(Qt.Checked)
+            self.autoImport.setCheckState(Qt.Checked)
         else:
-            self.updateReport.setCheckState(Qt.Unchecked)
+            self.autoImport.setCheckState(Qt.Unchecked)
         
-        keyboard_layout.addWidget(self.updateReport)
+        keyboard_layout.addWidget(self.autoImport)
     
     def validate(self):
-        return True
+        valide = self.table.valide_contributors_columns()
+        if not valide: warning_dialog(self, _('Duplicate values'),
+                _('The current parameters contain duplicate values. Your changes have been cancelled.'),
+                show=True, show_copy_button=False)
+            
+        return valide
     
     def save_settings(self):
         
         PREFS = self.table.get_contributors_columns()
-        PREFS[KEY.AUTO_IMPORT] = self.updateReport.checkState() == Qt.Checked
+        PREFS[KEY.AUTO_IMPORT] = self.autoImport.checkState() == Qt.Checked
         
-        set_library_config(self.plugin_action.gui.current_db, PREFS)
+        set_library_PREFS(self.plugin_action.gui.current_db, PREFS)
         debug_print('Save settings:\n{0}\n'.format(PREFS))
     
     
@@ -219,7 +252,7 @@ class ContributorColumnTableWidget(QTableWidget):
         self.verticalHeader().setDefaultSectionSize(24)
         
         if contributors_pair_list == None: contributors_pair_list = {}
-        contributors_pair_list = {k:v for k, v in contributors_pair_list.items() if k[0] != KEY.OPTION_CHAR }
+        contributors_pair_list = KEY_EXCLUDE_OPTION(contributors_pair_list)
         self.setRowCount(len(contributors_pair_list))
         for row, contributors_pair in enumerate(contributors_pair_list.items(), 0):
             self.populate_table_row(row, contributors_pair)
@@ -230,8 +263,8 @@ class ContributorColumnTableWidget(QTableWidget):
         self.blockSignals(True)
         
         if contributors_pair == None: contributors_pair = ('','')
-        self.setCellWidget(row, 0, ContributorsComboBox(self, contributors_pair[0]))
-        self.setCellWidget(row, 1, CustomColumnComboBox(self, self.get_custom_columns(), contributors_pair[1]))
+        self.setCellWidget(row, 0, ContributorsComboBox(self, 0, contributors_pair[0]))
+        self.setCellWidget(row, 1, DuplicColumnComboBox(self, 1, get_valide_columns(self.gui), contributors_pair[1]))
         
         self.resizeColumnsToContents()
         self.blockSignals(False)
@@ -266,17 +299,14 @@ class ContributorColumnTableWidget(QTableWidget):
         self.selectRow(row)
         self.scrollToItem(self.currentItem())
     
-    def get_custom_columns(self):
-        '''
-        Gets matching custom columns for column_type
-        '''
-        custom_columns = self.gui.library_view.model().custom_columns
-        available_columns = {}
-        for key, column in custom_columns.items():
-            if (column["datatype"] == "text" and bool(column["is_multiple"]) == True
-              and column['display'].get('is_names', False) == True):
-                available_columns[key] = column
-        return available_columns
+    
+    def valide_contributors_columns(self):
+        key = [ self.cellWidget(row, 0).selected_key() for row in range(self.rowCount()) ]
+        if '' in key: key.remove('')
+        
+        val = [ self.cellWidget(row, 1).get_selected_column() for row in range(self.rowCount()) ]
+        if '' in val: val.remove('')
+        return not(bool(duplicate_entry(key)) or bool(duplicate_entry(val)))
     
     def get_contributors_columns(self):
         contributors_columns = {}
@@ -285,7 +315,7 @@ class ContributorColumnTableWidget(QTableWidget):
             v = self.cellWidget(row, 1).get_selected_column()
             
             if k or v:
-                contributors_columns[k if k != None else str(row) ] = v if v != None else ''
+                contributors_columns[k if k else str(row)] = v if v else ''
         
         return contributors_columns
 
@@ -321,7 +351,7 @@ class ContributorsEditTableWidget(QTableWidget):
         self.blockSignals(True)
         
         if contributors == None: contributors = ('','')
-        self.setCellWidget(row, 0, ContributorsComboBox(self, contributors[0]))
+        self.setCellWidget(row, 0, ContributorsComboBox(self, 0, contributors[0]))
         self.setCellWidget(row, 1, QTableWidgetItem(' & '.joint(contributors[1])))
         
         self.resizeColumnsToContents()
@@ -367,20 +397,24 @@ class ContributorsEditTableWidget(QTableWidget):
         
         return contributors_columns
 
+
+#__init__(self, parent, values, selected_key)
+
 class ContributorsComboBox(KeyValueComboBox):
-    def __init__(self, table, selected_contributors):
+    def __init__(self, table, column, selected_contributors):
         KeyValueComboBox.__init__(self, table, CONTRIBUTORS_ROLES, selected_contributors)
         self.table = table
+        self.column = column
         self.currentIndexChanged.connect(self.test_contributors_changed)
         self.refreshToolTipContributors()
     
     def test_contributors_changed(self, val):
-        de = duplicate_entry([self.table.cellWidget(row, 0).currentText() for row in range(self.table.rowCount())])
+        de = duplicate_entry([self.table.cellWidget(row, self.column).currentText() for row in range(self.table.rowCount())])
         self.refreshToolTipContributors()
         if de.count(''): de.remove('')
         if de and de.count(self.currentText()):
             warning_dialog(self, _('Duplicate Contributors type'),
-                _('A Contributor was duplicated! Change the settings so that each contributor is present only once, otherwise the settings can not be saved.\nDuplicate type:')
+                _('A Contributor was duplicated!\nChange the settings so that each contributor is present only once, otherwise the settings can not be saved.\n\nDuplicate type:')
                 + '\n' + '\n'.join(de),
                 show=True, show_copy_button=False)
     
@@ -390,6 +424,22 @@ class ContributorsComboBox(KeyValueComboBox):
             self.setToolTip(CONTRIBUTORS_DERCRIPTION[code])
         else:
             self.setToolTip('')
+
+class DuplicColumnComboBox(CustomColumnComboBox):
+    def __init__(self, table, column, customColumns, selected_column):
+        CustomColumnComboBox.__init__(self, table, customColumns, selected_column)
+        self.table = table
+        self.column = column
+        self.currentIndexChanged.connect(self.test_column_changed)
+        
+    def test_column_changed(self, val):
+        de = duplicate_entry([self.table.cellWidget(row, self.column).currentText() for row in range(self.table.rowCount())])
+        if de.count(''): de.remove('')
+        if de and de.count(self.currentText()):
+            warning_dialog(self, _('Duplicate Custom column'),
+                _('A Custom column was duplicated!\nChange the settings so that each Custom column is present only once, otherwise the settings can not be saved.\n\nDuplicate column:')
+                + '\n' + '\n'.join(de),
+                show=True, show_copy_button=False)
 
 
 def duplicate_entry(lst):
