@@ -20,6 +20,7 @@ from functools import partial
 from datetime import datetime
 from collections import defaultdict
 
+from lxml import etree
 
 from calibre import prints
 from calibre.constants import numeric_version as calibre_version
@@ -101,6 +102,7 @@ def _write_contributors(container, contributors):
     debug_print('read_contributors', read_contributors)
     
     write_contributors = {}
+    is_modified = False
     
     if version[0] == 2:
         
@@ -117,7 +119,8 @@ def _write_contributors(container, contributors):
                 metadata.remove(node)
             container.set(container.opf_name, container.opf)
         
-        is_modified = False # bool(to_remove)
+        
+        
     
     if version[0] == 3:
         debug_print('version 3')

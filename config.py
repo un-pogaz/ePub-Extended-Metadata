@@ -41,9 +41,7 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, warning_dia
 from calibre.gui2.widgets2 import Dialog
 from calibre.ebooks.metadata import string_to_authors
 
-from calibre_plugins.epub_contributors_metadata.common_utils import (ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog,
-                                                              get_icon, get_library_uuid, debug_print)
-                                                              
+from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, PREFS_library, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
 from calibre_plugins.epub_contributors_metadata.marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DERCRIPTION
 
 
@@ -78,9 +76,9 @@ def KEY_EXCLUDE_INVALIDE(contributors_pair_list, gui):
     return contributors_pair_list
 
 
-PREFS_NAMESPACE = 'ePubContributors'
-PREFS_KEY_SETTINGS = 'settings'
+PREFS = {}
 PREFS_DEFAULT = { KEY.AUTO_IMPORT : False }
+
 
 def get_valide_columns(gui):
     '''
@@ -95,39 +93,6 @@ def get_valide_columns(gui):
     return available_columns
 
 
-class PREFSclass(dict):
-    def __init__(self, gui):
-        self.gui = gui
-        self.db = None
-    
-    def refresh(self):
-        if self.db != getattr(self.gui, 'current_db', None):
-            self.db = self.gui.current_db
-            self.clear()
-            self.update(get_library_PREFS(self.db))
-
-    def __call__(self, *args, **kwargs):
-        self.refresh()
-        return self
-
-def get_library_PREFS(db):
-    library_id = get_library_uuid(db)
-    library_config = None
-
-    if library_config is None:
-        library_config = db.prefs.get_namespaced(PREFS_NAMESPACE, PREFS_KEY_SETTINGS, PREFS_DEFAULT)
-    
-    for k, v in PREFS_DEFAULT.items():
-        if k not in library_config:
-            library_config[k] = v
-    
-    return library_config
-
-
-def set_library_PREFS(db, library_config):
-    db.prefs.set_namespaced(PREFS_NAMESPACE, PREFS_KEY_SETTINGS, library_config)
-
-
 class ConfigWidget(QWidget):
     def __init__(self, plugin_action):
         QWidget.__init__(self)
@@ -139,7 +104,9 @@ class ConfigWidget(QWidget):
         title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Contributor Metatadata option'))
         layout.addLayout(title_layout)
         
-        PREFS = get_library_PREFS(self.plugin_action.gui.current_db)
+        global PREFS
+        if not PREFS: PREFS = PREFS_library(self.plugin_action.gui, defaults=PREFS_DEFAULT)
+        PREFS()
         
         # Add a horizontal layout containing the table and the buttons next to it
         table_layout = QHBoxLayout()
@@ -195,13 +162,11 @@ class ConfigWidget(QWidget):
         return valide
     
     def save_settings(self):
+        prefs = self.table.get_contributors_columns()
+        prefs[KEY.AUTO_IMPORT] = self.autoImport.checkState() == Qt.Checked
         
-        PREFS = self.table.get_contributors_columns()
-        PREFS[KEY.AUTO_IMPORT] = self.autoImport.checkState() == Qt.Checked
-        
-        set_library_PREFS(self.plugin_action.gui.current_db, PREFS)
+        PREFS.set_in_library(prefs)
         debug_print('Save settings:\n{0}\n'.format(PREFS))
-    
     
     def edit_shortcuts(self):
         d = KeyboardConfigDialog(self.plugin_action.gui, self.plugin_action.action_spec[0])
@@ -317,11 +282,16 @@ class ContributorColumnTableWidget(QTableWidget):
     
     def valide_contributors_columns(self):
         key = [ self.cellWidget(row, 0).selected_key() for row in range(self.rowCount()) ]
-        if '' in key: key.remove('')
-        
         val = [ self.cellWidget(row, 1).get_selected_column() for row in range(self.rowCount()) ]
-        if '' in val: val.remove('')
-        return not(bool(duplicate_entry(key)) or bool(duplicate_entry(val)))
+        
+        dk = duplicate_entry(key)
+        if '' in dk: dk.remove('')
+        bk = bool(dk)
+        dv = duplicate_entry(val)
+        if '' in dv: dv.remove('')
+        bv = bool(dv)
+        
+        return not(bv or bv)
     
     def get_contributors_columns(self):
         contributors_columns = {}

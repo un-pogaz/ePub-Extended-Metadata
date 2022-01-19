@@ -18,6 +18,7 @@ except NameError:
 from calibre.customize import InterfaceActionBase, FileTypePlugin
 
 DEBUG_PRE = 'ePubContributorsMetadata'
+PREFS_NAMESPACE = 'ePubContributorsMetadata'
 
 class ActionMassSearchReplace(InterfaceActionBase):  ## FileTypePlugin
     '''

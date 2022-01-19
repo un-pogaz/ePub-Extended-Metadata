@@ -29,6 +29,7 @@ except ImportError:
                             QTextEdit, QListWidget, QAbstractItemView)
 
 
+from calibre import prints
 from calibre.constants import iswindows, DEBUG
 from calibre.gui2 import gprefs, error_dialog, UNDEFINED_QDATETIME, info_dialog
 from calibre.gui2.actions import menu_action_unique_name
@@ -38,7 +39,6 @@ from calibre.gui2.widgets import EnLineEdit
 from calibre.utils.config import config_dir, tweaks
 from calibre.utils.date import now, format_date, qt_to_dt, UNDEFINED_DATE
 from calibre.utils.icu import sort_key
-from calibre import prints
 
 
 # Global definition of our plugin name. Used for common functions that require this.
@@ -47,26 +47,35 @@ plugin_name = None
 # classes if you need any zip images to be displayed on the configuration dialog.
 plugin_icon_resources = {}
 
-DEBUG_PRE = None
+def get__init__attribut(name, default=None):
+    '''
+    Retrieve a custom global values at the root of __init__.py // __init__.name
+    '''
+    ns = __name__.split('.')
+    ns.pop(-1)
+    
+    import importlib
+    rslt = getattr(importlib.import_module('.'.join(ns)), name, default)
+    
+    if not rslt: #if no attribut and no default, use module name
+        rslt = ns[-1]
+    return rslt
+
+'''
+Defined a custom prefix of this plugin at the root of __init__.py // __init__.DEBUG_PRE
+'''
+DEBUG_PRE = get__init__attribut('DEBUG_PRE')
 BASE_TIME = None
 def debug_print(*args):
     
-    global BASE_TIME, DEBUG_PRE
+    global BASE_TIME
     if BASE_TIME is None:
         BASE_TIME = time.time()
-    
-    if DEBUG_PRE is None:
-        ns = __name__.split('.')
-        ns.pop(-1)
-        DEBUG_PRE = ns[-1]
-        
-        import importlib
-        DEBUG_PRE = getattr(importlib.import_module('.'.join(ns)), 'DEBUG_PRE', DEBUG_PRE)
-        
     
     if DEBUG:
         prints('DEBUG', DEBUG_PRE+':', *args)
         #prints('DEBUG', DEBUG_PRE+': %6.1f'%(time.time()-BASE_TIME), *args)
+
 
 def set_plugin_icon_resources(name, resources):
     '''
@@ -77,7 +86,6 @@ def set_plugin_icon_resources(name, resources):
     global plugin_icon_resources, plugin_name
     plugin_name = name
     plugin_icon_resources = resources
-
 
 def get_icon(icon_name=None):
     '''
@@ -144,6 +152,56 @@ def get_library_uuid(db):
     except:
         library_uuid = ''
     return library_uuid
+
+
+class PREFS_library(dict):
+    '''
+    Create a dictionary of preference stored in the library
+    '''
+    def __init__(self, gui, defaults={}, key='settings'):
+        from calibre.gui2.actions import InterfaceAction
+        self.gui = gui
+        self.db = None
+        self.key = key if key else ''
+        self.defaults = defaults if defaults else {}
+        
+        '''
+        Defined a custom namespase at the root of __init__.py // __init__.PREFS_NAMESPACE
+        '''
+        self.namespace = get__init__attribut('PREFS_NAMESPACE')
+        
+        self.refresh()
+    
+    def __call__(self):
+        self.refresh()
+        return self
+    
+    
+    def refresh(self):
+        if self.db != getattr(self.gui, 'current_db', None):
+            debug_print('PREFS_library reload: switch library')
+            self.db = self.gui.current_db
+            self.clear()
+            self.update(self.get_from_library())
+    
+    def get_from_library(self):
+        rslt = self.db.prefs.get_namespaced(self.namespace, self.key, self.defaults)
+        
+        for k, v in self.defaults.items():
+            if k not in rslt:
+                rslt[k] = v
+        
+        return rslt
+    
+    def set_in_library(self, prefs=None):
+        if prefs is not None:
+            self.clear()
+            self.update(prefs)
+        if len(self):
+            self.refresh()
+        
+        self.db.prefs.set_namespaced(self.namespace, self.key, self)
+
 
 def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
                      shortcut=(), triggered=None, is_checked=None):

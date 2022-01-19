@@ -31,8 +31,8 @@ from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dia
 from calibre.gui2.actions import InterfaceAction
 from polyglot.builtins import iteritems
 
-from calibre_plugins.epub_contributors_metadata.config import ICON, PREFSclass, KEY, KEY_EXCLUDE_OPTION, KEY_EXCLUDE_INVALIDE
-from calibre_plugins.epub_contributors_metadata.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
+from calibre_plugins.epub_contributors_metadata.config import ICON, PREFS_DEFAULT, KEY, KEY_EXCLUDE_OPTION, KEY_EXCLUDE_INVALIDE
+from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, PREFS_library, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, CustomExceptionErrorDialog
 from calibre_plugins.epub_contributors_metadata.epub_editor import read_contributors, write_contributors
 
 class VALUE:
@@ -59,7 +59,8 @@ class ePubContributorsMetadataAction(InterfaceAction):
         set_plugin_icon_resources(self.name, icon_resources)
         
         global PREFS
-        PREFS = PREFSclass(self.gui)
+        if not PREFS: PREFS = PREFS_library(self.gui, defaults=PREFS_DEFAULT)
+        PREFS()
         
         self.build_menus()
         
@@ -143,13 +144,13 @@ class ePubContributorsMetadataAction(InterfaceAction):
 
 
 def set_new_size_DB(epub_path, book_id, dbAPI):
-    
     new_size = os.path.getsize(epub_path)
     
     if new_size is not None:
         fname = dbAPI.fields['formats'].format_fname(book_id, 'EPUB')
         max_size = dbAPI.fields['formats'].table.update_fmt(book_id, 'EPUB', fname, new_size, dbAPI.backend)
         dbAPI.fields['size'].table.update_sizes({book_id:max_size})
+
 
 class ePubContributorsProgressDialog(QProgressDialog):
     def __init__(self, plugin_action, book_ids):
@@ -164,6 +165,9 @@ class ePubContributorsProgressDialog(QProgressDialog):
         # DB API
         self.dbAPI = self.db.new_api
         
+        # prefs
+        self.prefs = KEY_EXCLUDE_INVALIDE(PREFS(), self.gui)
+        
         # liste of book id
         self.book_ids = book_ids
         # Count book
@@ -174,6 +178,7 @@ class ePubContributorsProgressDialog(QProgressDialog):
         self.import_count = 0
         self.import_field_count = 0
         self.export_count = 0
+        
         
         # Exception
         self.exception = None
@@ -195,7 +200,8 @@ class ePubContributorsProgressDialog(QProgressDialog):
         self.setAutoReset(False)
         
         self.hide()
-        debug_print('Launch ePub Contributors for {:d} books.\n'.format(self.book_count))
+        debug_print('Launch ePub Contributors for {:d} books.'.format(self.book_count))
+        debug_print(self.prefs,'\n')
         
         QTimer.singleShot(0, self._run_search_replaces)
         self.exec_()
@@ -236,8 +242,6 @@ class ePubContributorsProgressDialog(QProgressDialog):
         alreadyOperationError = False
         typeString = type('')
         
-        prefs = KEY_EXCLUDE_INVALIDE(PREFS(), self.gui)
-        
         import_id = {}
         export_id = []
         no_epub_id = []
@@ -267,11 +271,9 @@ class ePubContributorsProgressDialog(QProgressDialog):
             
             if epub_path:
                 if contributors == VALUE.IMPORT:
-                    contributors = read_contributors(epub_path)
-                    
                     debug_print('Read ePub Contributors for', book_info,'\n')
-                    
-                    for k, v in prefs.items():
+                    contributors = read_contributors(epub_path)
+                    for k, v in self.prefs.items():
                         if k in contributors and miA.get(v) != contributors[k]:
                             self.dbAPI.set_field(v, {book_id:contributors[k]})
                             if book_id not in import_id:
@@ -279,10 +281,9 @@ class ePubContributorsProgressDialog(QProgressDialog):
                             import_id[book_id].append(v)
                     
                 else:
-                    if contributors == VALUE.EMBED:
-                        contributors = copy.deepcopy(prefs)
-                    
                     debug_print('Write ePub Contributors for', book_info,'\n')
+                    if contributors == VALUE.EMBED:
+                        contributors = copy.deepcopy(self.prefs)
                     
                     for k, v in contributors.items():
                         if typeString == type(v):
