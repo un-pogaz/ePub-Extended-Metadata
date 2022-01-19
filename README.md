@@ -1,4 +1,4 @@
-# Edit Contributors Metadata
+# ePub Contributors Metadata
 
 Calibre plugin to edit (read/write) the contributors metadata in ePub
 

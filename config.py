@@ -41,10 +41,10 @@ from calibre.gui2 import error_dialog, question_dialog, info_dialog, warning_dia
 from calibre.gui2.widgets2 import Dialog
 from calibre.ebooks.metadata import string_to_authors
 
-from calibre_plugins.edit_contributors_metadata.common_utils import (ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog,
+from calibre_plugins.epub_contributors_metadata.common_utils import (ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog,
                                                               get_icon, get_library_uuid, debug_print)
                                                               
-from calibre_plugins.edit_contributors_metadata.marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DERCRIPTION
+from calibre_plugins.epub_contributors_metadata.marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DERCRIPTION
 
 
 class ICON:
@@ -78,7 +78,7 @@ def KEY_EXCLUDE_INVALIDE(contributors_pair_list, gui):
     return contributors_pair_list
 
 
-PREFS_NAMESPACE = 'EditContributors'
+PREFS_NAMESPACE = 'ePubContributors'
 PREFS_KEY_SETTINGS = 'settings'
 PREFS_DEFAULT = { KEY.AUTO_IMPORT : False }
 
@@ -94,6 +94,21 @@ def get_valide_columns(gui):
             available_columns[key] = column
     return available_columns
 
+
+class PREFSclass(dict):
+    def __init__(self, gui):
+        self.gui = gui
+        self.db = None
+    
+    def refresh(self):
+        if self.db != getattr(self.gui, 'current_db', None):
+            self.db = self.gui.current_db
+            self.clear()
+            self.update(get_library_PREFS(self.db))
+
+    def __call__(self, *args, **kwargs):
+        self.refresh()
+        return self
 
 def get_library_PREFS(db):
     library_id = get_library_uuid(db)
@@ -121,7 +136,7 @@ class ConfigWidget(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('Edit Contributor Metatadata option'))
+        title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Contributor Metatadata option'))
         layout.addLayout(title_layout)
         
         PREFS = get_library_PREFS(self.plugin_action.gui.current_db)
@@ -201,7 +216,7 @@ class ContributorsEditDialog(Dialog):
         self.parent = parent
         self.contributors_list = contributors_list
         self.widget = ContributorsEditTableWidget(plugin_action, contributors_list)
-        Dialog.__init__(self, _('Configuration of a Search/Replace operation'), 'config_query_SearchReplace', parent)
+        Dialog.__init__(self, _('_________________'), 'config_query_SearchReplace', parent)
     
     def setup_ui(self):
         l = QVBoxLayout()

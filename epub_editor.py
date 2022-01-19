@@ -24,65 +24,39 @@ from collections import defaultdict
 from calibre import prints
 from calibre.constants import numeric_version as calibre_version
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
-from polyglot.builtins import iteritems
 
-from calibre_plugins.edit_contributors_metadata.common_utils import debug_print
-
-from lxml import etree
-from calibre import CurrentDir
-from calibre.libunzip import extract as zipextract
-from calibre.ptempfile import TemporaryDirectory
-from calibre.utils.logging import Log
-from calibre_plugins.edit_contributors_metadata.container import ExtendedContainer, NS_OPF, NS_DC
-
-class FakeLog(object):
-
-    def __init__(self, level=None):
-        pass
-
-    def prints(self, level, *args, **kwargs):
-        pass
-
-    def print_with_flush(self, level, *args, **kwargs):
-        pass
-
-    def exception(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        pass
-
-    def __enter__(self):
-        pass
-
-    def __exit__(self, *args):
-        pass
-
-    def flush(self):
-        pass
-
-    def close(self):
-        pass
+from calibre_plugins.epub_contributors_metadata.common_utils import debug_print
+from calibre_plugins.epub_contributors_metadata.container import ContainerOpfStream, NAMESPACES
 
 
-NAMESPACES={'opf':NS_OPF, 'dc':NS_DC}
 
-def _get_version(container):
-    return tuple([ int(i) for i in container.opf.xpath('/opf:package', namespaces=NAMESPACES)[0].get('version', '2.0').split('.')])
 
 def read_contributors(epub_path):
     contributors = {}
-    # Extract the epub into a temp directory
-    with TemporaryDirectory('_edit-contributors') as tdir:
-        with CurrentDir(tdir):
-            zipextract(epub_path, tdir)
-            
-            # Use our own simplified wrapper around an ePub that will
-            # preserve the file structure and css
-            container = ExtendedContainer(tdir, FakeLog())
-            contributors = _read_contributors(container)
+    
+    # Use a "stream" to read the OPF without any extracting
+    with ContainerOpfStream(epub_path) as container:
+        contributors = _read_contributors(container)
     
     return contributors
+
+
+def write_contributors(epub_path, contributors):
+    debug_print('write_contributors()')
+    debug_print('contributors', contributors)
+    
+    # Use a "stream" to read the OPF without any extracting
+    with ContainerOpfStream(epub_path) as container:
+        is_modified = _write_contributors(container, contributors)
+        
+        if is_modified:
+            container.save()
+    
+    return is_modified
+
+
+def _get_version(container):
+    return tuple([ int(i) for i in container.opf.xpath('/opf:package', namespaces=NAMESPACES)[0].get('version', '2.0').split('.')])
 
 def _read_contributors(container):
     if not container.opf_name:
@@ -104,23 +78,6 @@ def _read_contributors(container):
         debug_print('version 3')
     
     return contributors
-
-
-def write_contributors(epub_path, contributors):
-    debug_print('write_contributors()')
-    debug_print('contributors', contributors)
-    
-    # Extract the epub into a temp directory
-    with TemporaryDirectory('_edit-contributors') as tdir:
-        with CurrentDir(tdir):
-            zipextract(epub_path, tdir)
-            
-            # Use our own simplified wrapper around an ePub that will
-            # preserve the file structure and css
-            container = ExtendedContainer(tdir, FakeLog())
-            is_modified = _write_contributors(container, contributors)
-    
-    return is_modified
 
 def _write_contributors(container, contributors):
     if not container.opf_name:

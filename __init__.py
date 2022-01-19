@@ -29,7 +29,7 @@ class ActionMassSearchReplace(InterfaceActionBase):  ## FileTypePlugin
     The reason for having two classes is that it allows the command line
     calibre utilities to run without needing to load the GUI libraries.
     '''
-    name                    = 'Edit Contributors Metadata'
+    name                    = 'ePub Contributors Metadata'
     description             = _('Read and Write the Contributors Metadata in the ePub file')
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
@@ -39,7 +39,7 @@ class ActionMassSearchReplace(InterfaceActionBase):  ## FileTypePlugin
     #: This field defines the GUI plugin class that contains all the code
     #: that actually does something. Its format is module_path:class_name
     #: The specified class must be defined in the specified module.
-    actual_plugin           = 'calibre_plugins.edit_contributors_metadata.action:EditContributorsMetadataAction'
+    actual_plugin           = 'calibre_plugins.epub_contributors_metadata.action:ePubContributorsMetadataAction'
     
     def is_customizable(self):
         '''
@@ -72,7 +72,7 @@ class ActionMassSearchReplace(InterfaceActionBase):  ## FileTypePlugin
         # GUI libraries to be loaded, which we do not want when using calibre
         # from the command line
         if self.actual_plugin_:
-            from calibre_plugins.edit_contributors_metadata.config import ConfigWidget
+            from calibre_plugins.epub_contributors_metadata.config import ConfigWidget
             return ConfigWidget(self.actual_plugin_)
     
     def save_settings(self, config_widget):

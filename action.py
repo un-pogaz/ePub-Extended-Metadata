@@ -31,19 +31,21 @@ from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dia
 from calibre.gui2.actions import InterfaceAction
 from polyglot.builtins import iteritems
 
-from calibre_plugins.edit_contributors_metadata.config import ICON, get_library_PREFS, KEY, KEY_EXCLUDE_OPTION, KEY_EXCLUDE_INVALIDE
-from calibre_plugins.edit_contributors_metadata.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
-from calibre_plugins.edit_contributors_metadata.epub_editor import read_contributors, write_contributors
+from calibre_plugins.epub_contributors_metadata.config import ICON, PREFSclass, KEY, KEY_EXCLUDE_OPTION, KEY_EXCLUDE_INVALIDE
+from calibre_plugins.epub_contributors_metadata.common_utils import set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, debug_print, CustomExceptionErrorDialog
+from calibre_plugins.epub_contributors_metadata.epub_editor import read_contributors, write_contributors
 
 class VALUE:
     EMBED = 'embed'
     IMPORT = 'import'
 
-class EditContributorsMetadataAction(InterfaceAction):
+PREFS = {}
+
+class ePubContributorsMetadataAction(InterfaceAction):
     
     name = 'Edit Contributors Metadata'
     # Create our top-level menu/toolbar action (text, icon_path, tooltip, keyboard shortcut)
-    action_spec = ('Edit Contributors Metadata', None, _('Apply a list of multiple saved Find and Replace operations'), None)
+    action_spec = (_('Edit Contributors Metadata'), None, _('Edit the Contributors Metadata the ePub file'), None)
     #popup_type = QToolButton.MenuButtonPopup
     popup_type = QToolButton.InstantPopup
     action_type = 'current'
@@ -52,17 +54,19 @@ class EditContributorsMetadataAction(InterfaceAction):
     def genesis(self):
         self.is_library_selected = True
         self.menu = QMenu(self.gui)
-        
         # Read the plugin icons and store for potential sharing with the config widget
         icon_resources = self.load_resources(ICON.ALL)
         set_plugin_icon_resources(self.name, icon_resources)
+        
+        global PREFS
+        PREFS = PREFSclass(self.gui)
         
         self.build_menus()
         
         # Assign our menu to this action and an icon
         self.qaction.setMenu(self.menu)
         self.qaction.setIcon(get_icon(ICON.PLUGIN))
-        self.qaction.triggered.connect(self.toolbar_triggered)
+        #self.qaction.triggered.connect(self.toolbar_triggered)
     
     def build_menus(self):
         self.menu.clear()
@@ -107,13 +111,13 @@ class EditContributorsMetadataAction(InterfaceAction):
     
     def editBulkContributors(self):
         debug_print('editBulkContributors')
-        PREFS = get_library_PREFS(self.gui.current_db)
+        PREFS()
         self.getBookIds()
         
     
     def editBookContributors(self):
         debug_print('editBookContributors')
-        PREFS = get_library_PREFS(self.gui.current_db)
+        PREFS()
         self.getBookIds()
         
     
@@ -122,18 +126,18 @@ class EditContributorsMetadataAction(InterfaceAction):
     
     def getBookIds(self):
         if not self.is_library_selected:
-            error_dialog(self.gui, _('Could not to launch Edit Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
+            error_dialog(self.gui, _('Could not to launch ePub Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
             return []
         
         rows = self.gui.library_view.selectionModel().selectedRows()
         if not rows or len(rows) == 0:
-            error_dialog(self.gui, _('Could not to launch Edit Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
+            error_dialog(self.gui, _('Could not to launch ePub Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
             return []
         
         return self.gui.library_view.get_selected_ids()
     
     def runContributorsProgressDialog(self, book_ids):
-        srpg = EditContributorsProgressDialog(self, book_ids)
+        srpg = ePubContributorsProgressDialog(self, book_ids)
         srpg.close()
         del srpg
 
@@ -147,7 +151,7 @@ def set_new_size_DB(epub_path, book_id, dbAPI):
         max_size = dbAPI.fields['formats'].table.update_fmt(book_id, 'EPUB', fname, new_size, dbAPI.backend)
         dbAPI.fields['size'].table.update_sizes({book_id:max_size})
 
-class EditContributorsProgressDialog(QProgressDialog):
+class ePubContributorsProgressDialog(QProgressDialog):
     def __init__(self, plugin_action, book_ids):
         
         # plugin_action
@@ -180,7 +184,7 @@ class EditContributorsProgressDialog(QProgressDialog):
         
         QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, self.gui)
         
-        self.setWindowTitle(_('Edit Contributors Metadata Progress'))
+        self.setWindowTitle(_('ePub Contributors Metadata Progress'))
         self.setWindowIcon(get_icon(ICON.PLUGIN))
         
         self.setValue(0)
@@ -191,19 +195,19 @@ class EditContributorsProgressDialog(QProgressDialog):
         self.setAutoReset(False)
         
         self.hide()
-        debug_print('Launch Edit Contributors for {:d} books.\n'.format(self.book_count))
+        debug_print('Launch ePub Contributors for {:d} books.\n'.format(self.book_count))
         
         QTimer.singleShot(0, self._run_search_replaces)
         self.exec_()
         
         #info debug
-        debug_print('Edit Contributors launched for {:d} books.'.format(self.book_count))
+        debug_print('ePub Contributors launched for {:d} books.'.format(self.book_count))
         
         if self.wasCanceled():
-            debug_print('Edit Contributors Metadata was aborted.')
+            debug_print('ePub Contributors Metadata was aborted.')
         elif self.exception_unhandled:
-            debug_print('Edit Contributors Metadata was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(self.gui, self.exception, custome_msg=_('Edit Contributors Metadata encountered an unhandled exception.')+'\n')
+            debug_print('ePub Contributors Metadata was interupted. An exception has occurred:\n'+str(self.exception))
+            CustomExceptionErrorDialog(self.gui, self.exception, custome_msg=_('ePub Contributors Metadata encountered an unhandled exception.')+'\n')
         
         if self.no_epub_count:
             debug_print('{:d} books didn\'t have an ePub format.'.format(self.no_epub_count))
@@ -218,7 +222,7 @@ class EditContributorsProgressDialog(QProgressDialog):
         else:
             debug_print('No Contributors write in books.')
         
-            debug_print('Edit Contributors execute in {:0.3f} seconds.\n'.format(self.time_execut))
+            debug_print('ePub Contributors execute in {:0.3f} seconds.\n'.format(self.time_execut))
             
         
         self.close()
@@ -232,7 +236,7 @@ class EditContributorsProgressDialog(QProgressDialog):
         alreadyOperationError = False
         typeString = type('')
         
-        PREFS = KEY_EXCLUDE_INVALIDE(get_library_PREFS(self.db), self.gui)
+        prefs = KEY_EXCLUDE_INVALIDE(PREFS(), self.gui)
         
         import_id = {}
         export_id = []
@@ -267,7 +271,7 @@ class EditContributorsProgressDialog(QProgressDialog):
                     
                     debug_print('Read ePub Contributors for', book_info,'\n')
                     
-                    for k, v in PREFS.items():
+                    for k, v in prefs.items():
                         if k in contributors and miA.get(v) != contributors[k]:
                             self.dbAPI.set_field(v, {book_id:contributors[k]})
                             if book_id not in import_id:
@@ -276,7 +280,7 @@ class EditContributorsProgressDialog(QProgressDialog):
                     
                 else:
                     if contributors == VALUE.EMBED:
-                        contributors = copy.deepcopy(PREFS)
+                        contributors = copy.deepcopy(prefs)
                     
                     debug_print('Write ePub Contributors for', book_info,'\n')
                     
