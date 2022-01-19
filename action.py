@@ -172,10 +172,8 @@ class EditContributorsProgressDialog(QProgressDialog):
         self.export_count = 0
         
         # Exception
-        self.exception = []
+        self.exception = None
         self.exception_unhandled = False
-        self.exception_update = False
-        self.exception_safely = False
         
         self.time_execut = 0
         
@@ -198,31 +196,28 @@ class EditContributorsProgressDialog(QProgressDialog):
         QTimer.singleShot(0, self._run_search_replaces)
         self.exec_()
         
+        #info debug
+        debug_print('Edit Contributors launched for {:d} books.'.format(self.book_count))
         
-        if self.exception_unhandled:
+        if self.wasCanceled():
+            debug_print('Edit Contributors Metadata was aborted.')
+        elif self.exception_unhandled:
             debug_print('Edit Contributors Metadata was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(self.gui ,self.exception, custome_msg=_('Edit Contributors Metadata encountered an unhandled exception.')+'\n')
-            
+            CustomExceptionErrorDialog(self.gui, self.exception, custome_msg=_('Edit Contributors Metadata encountered an unhandled exception.')+'\n')
+        
+        if self.no_epub_count:
+            debug_print('{:d} books didn\'t have an ePub format.'.format(self.no_epub_count))
+        
+        if self.import_count:
+            debug_print('Contributors read for {:d} books with a total of {:d} fields modify.'.format(self.import_count, self.import_field_count))
         else:
-            
-            if self.wasCanceled():
-                debug_print('Edit Contributors Metadata was aborted.')
-            
-            #info debug
-            debug_print('Edit Contributors launched for {:d} books.'.format(self.book_count))
-            if self.no_epub_count:
-                debug_print('{:d} books didn\'t have an ePub format.'.format(self.no_epub_count))
-            
-            if self.import_count:
-                debug_print('Contributors read for {:d} books with a total of {:d} fields modify.'.format(self.import_count, self.import_field_count))
-            else:
-                debug_print('No Contributors read from books.')
-            
-            if self.export_count:
-                debug_print('Contributors write for {:d} books.'.format(self.export_count))
-            else:
-                debug_print('No Contributors write in books.')
-            
+            debug_print('No Contributors read from books.')
+        
+        if self.export_count:
+            debug_print('Contributors write for {:d} books.'.format(self.export_count))
+        else:
+            debug_print('No Contributors write in books.')
+        
             debug_print('Edit Contributors execute in {:0.3f} seconds.\n'.format(self.time_execut))
             
         
@@ -299,6 +294,13 @@ class EditContributorsProgressDialog(QProgressDialog):
                     
             
             #
+        
+        try:
+            self.exception_unhandled = False
+            
+        except Exception as e:
+            self.exception_unhandled = True
+            self.exception = e
         
         self.no_epub_count = len(no_epub_id)
         self.export_count = len(export_id)

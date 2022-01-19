@@ -40,23 +40,33 @@ from calibre.utils.date import now, format_date, qt_to_dt, UNDEFINED_DATE
 from calibre.utils.icu import sort_key
 from calibre import prints
 
+
 # Global definition of our plugin name. Used for common functions that require this.
 plugin_name = None
 # Global definition of our plugin resources. Used to share between the xxxAction and xxxBase
 # classes if you need any zip images to be displayed on the configuration dialog.
 plugin_icon_resources = {}
 
+DEBUG_PRE = None
 BASE_TIME = None
 def debug_print(*args):
-    global BASE_TIME
+    
+    global BASE_TIME, DEBUG_PRE
     if BASE_TIME is None:
         BASE_TIME = time.time()
+    
+    if DEBUG_PRE is None:
+        ns = __name__.split('.')
+        ns.pop(-1)
+        DEBUG_PRE = ns[-1]
+        
+        import importlib
+        DEBUG_PRE = getattr(importlib.import_module('.'.join(ns)), 'DEBUG_PRE', DEBUG_PRE)
+        
+    
     if DEBUG:
-        prints('DEBUG ContributorsMetadata: ', *args)
-        #prints('DEBUG CommentsCleaner: %6.1f'%(time.time()-BASE_TIME), *args)
-
-def debug_text(pre, text):
-    debug_print(pre+':::\n'+text+'\n')
+        prints('DEBUG', DEBUG_PRE+':', *args)
+        #prints('DEBUG', DEBUG_PRE+': %6.1f'%(time.time()-BASE_TIME), *args)
 
 def set_plugin_icon_resources(name, resources):
     '''
@@ -394,6 +404,11 @@ class KeyValueComboBox(QComboBox):
             if value == unicode(self.currentText()).strip():
                 return key
 
+class NoWheelComboBox(QComboBox):
+    def wheelEvent (self, event):
+        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
+        event.ignore()
+
 class CustomColumnComboBox(QComboBox):
     def __init__(self, parent, custom_columns={}, selected_column='', initial_items=['']):
         QComboBox.__init__(self, parent)
@@ -637,6 +652,20 @@ class regexException(BaseException):
         return self.msg
 
 
+def CSS_CleanRules(css):
+    #remove space and invalid character
+    r = regex()
+    css = r.loop(r'[.*!()?+<>\\]', r'', css.lower())
+    css = r.loop(r'(,|;|:|\n|\r|\s{2,})', r' ', css)
+    css = r.simple(r'^\s*(.*?)\s*$', r'\1', css); 
+    # split to table and remove duplicate
+    css = list(dict.fromkeys(css.split(' ')))
+    # sort
+    css = sorted(css)
+    # join in a string
+    css = ' '.join(css)
+    return css
+
 def CustomExceptionErrorDialog(parent, exception, custome_title=None, custome_msg=None, show=True):
     
     from polyglot.io import PolyglotStringIO
@@ -650,7 +679,11 @@ def CustomExceptionErrorDialog(parent, exception, custome_title=None, custome_ms
     except:
         pass
     
-    traceback.print_exception(type(exception), exception, exception.__traceback__, file=sio)
+    try:
+        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sio)
+    except:
+        traceback.print_exception(type(exception), exception, sys.exc_traceback, file=sio)
+        pass
     
     fe = sio.getvalue()
     
