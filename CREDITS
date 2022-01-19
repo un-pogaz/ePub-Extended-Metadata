@@ -1,0 +1,4 @@
+marc_relators.py
+
+The MARC Code associated name and decriptions are extracted from the https://github.com/Sigil-Ebook/Sigil code source (with minor edit)
+Some translation of the MARC Code are also based on the translation made for Sigil https://www.transifex.com/zdpo/sigil/dashboard/ (language: FR)
