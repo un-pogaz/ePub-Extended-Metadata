@@ -20,7 +20,7 @@ from calibre.customize import InterfaceActionBase, FileTypePlugin
 DEBUG_PRE = 'ePubContributorsMetadata'
 PREFS_NAMESPACE = 'ePubContributorsMetadata'
 
-class ActionMassSearchReplace(InterfaceActionBase):  ## FileTypePlugin
+class ActionMassSearchReplace(InterfaceActionBase, FileTypePlugin):  ## FileTypePlugin
     '''
     This class is a simple wrapper that provides information about the actual
     plugin class. The actual interface plugin class is called InterfacePlugin
@@ -94,11 +94,11 @@ class ActionMassSearchReplace(InterfaceActionBase):  ## FileTypePlugin
     #: Set of file types for which this plugin should be run.
     #: Use '*' for all file types.
     #: For example: ``{'lit', 'mobi', 'prc'}``
-    file_types     = set('EPUB')
+    file_types     = {'epub'}
     
     #: If True, this plugin is run when books are added
     #: to the database
-    on_import      = True
+    on_import      = False
     
     #: If True, this plugin is run after books are added
     #: to the database. In this case the postimport and postadd
@@ -114,63 +114,17 @@ class ActionMassSearchReplace(InterfaceActionBase):  ## FileTypePlugin
     
     #type = _('File type')
     
-    def run(self, path_to_ebook):
-        '''
-        Run the plugin. Must be implemented in subclasses.
-        It should perform whatever modifications are required
-        on the e-book and return the absolute path to the
-        modified e-book. If no modifications are needed, it should
-        return the path to the original e-book. If an error is encountered
-        it should raise an Exception. The default implementation
-        simply return the path to the original e-book. Note that the path to
-        the original file (before any file type plugins are run, is available as
-        self.original_path_to_file).
-        
-        The modified e-book file should be created with the
-        :meth:`temporary_file` method.
-        
-        :param path_to_ebook: Absolute path to the e-book.
-        
-        :return: Absolute path to the modified e-book.
-        '''
-        # Default implementation does nothing
-        print('|| FileTypePlugin | path_to_ebook' + str(path_to_ebook))
-        return path_to_ebook
-    
-    def postimport(self, book_id, book_format, db):
-        '''
-        Called post import, i.e., after the book file has been added to the database. Note that
-        this is different from :meth:`postadd` which is called when the book record is created for
-        the first time. This method is called whenever a new file is added to a book record. It is
-        useful for modifying the book record based on the contents of the newly added file.
-    
-        :param book_id: Database id of the added book.
-        :param book_format: The file type of the book that was added.
-        :param db: Library database.
-        '''
-        print('|| FileTypePlugin | path_to_ebook')
-        pass  # Default implementation does nothing
-    
     def postadd(self, book_id, fmt_map, db):
-        '''
-        Called post add, i.e. after a book has been added to the db. Note that
-        this is different from :meth:`postimport`, which is called after a single book file
-        has been added to a book. postadd() is called only when an entire book record
-        with possibly more than one book file has been created for the first time.
-        This is useful if you wish to modify the book record in the database when the
-        book is first added to calibre.
+        global import_postadd 
+        if not import_postadd:
+            import importlib
+            import_postadd = getattr(importlib.import_module('calibre_plugins.epub_contributors_metadata.action'), 'import_postadd', None )
         
-        :param book_id: Database id of the added book.
-        :param fmt_map: Map of file format to path from which the file format
-            was added. Note that this might or might not point to an actual
-            existing file, as sometimes files are added as streams. In which case
-            it might be a dummy value or a non-existent path.
-        :param db: Library database
-        '''
-        print('|| FileTypePlugin | postadd')
-        pass  # Default implementation does nothing
-    
+        if import_postadd:
+            import_postadd(book_id, fmt_map, db)
 
+
+import_postadd = None
 
 # }}}
 # For testing, run from command line with this:

@@ -29,17 +29,18 @@ from calibre import prints
 from calibre.constants import numeric_version as calibre_version
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
+from calibre.gui2.ui import get_gui
 from polyglot.builtins import iteritems
 
-from calibre_plugins.epub_contributors_metadata.config import ICON, PREFS_DEFAULT, KEY, KEY_EXCLUDE_OPTION, KEY_EXCLUDE_INVALIDE
-from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, PREFS_library, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, CustomExceptionErrorDialog
+from calibre_plugins.epub_contributors_metadata.config import ICON, PREFS, KEY, KEY_EXCLUDE_OPTION, KEY_EXCLUDE_INVALIDE
+from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, CustomExceptionErrorDialog
 from calibre_plugins.epub_contributors_metadata.epub_editor import read_contributors, write_contributors
+
+GUI = get_gui()
 
 class VALUE:
     EMBED = 'embed'
     IMPORT = 'import'
-
-PREFS = {}
 
 class ePubContributorsMetadataAction(InterfaceAction):
     
@@ -53,23 +54,19 @@ class ePubContributorsMetadataAction(InterfaceAction):
     
     def genesis(self):
         self.is_library_selected = True
-        self.menu = QMenu(self.gui)
+        self.menu = QMenu(GUI)
         # Read the plugin icons and store for potential sharing with the config widget
         icon_resources = self.load_resources(ICON.ALL)
         set_plugin_icon_resources(self.name, icon_resources)
         
-        global PREFS
-        if not PREFS: PREFS = PREFS_library(self.gui, defaults=PREFS_DEFAULT)
-        PREFS()
-        
-        self.build_menus()
+        self.rebuild_menus()
         
         # Assign our menu to this action and an icon
         self.qaction.setMenu(self.menu)
         self.qaction.setIcon(get_icon(ICON.PLUGIN))
         #self.qaction.triggered.connect(self.toolbar_triggered)
     
-    def build_menus(self):
+    def rebuild_menus(self):
         self.menu.clear()
         
         create_menu_action_unique(self, self.menu, _('&Embed contributors'), None,
@@ -98,7 +95,7 @@ class ePubContributorsMetadataAction(InterfaceAction):
                                              triggered=self.show_configuration,
                                              unique_name='&Customize plugin')
         
-        self.gui.keyboard.finalize()
+        GUI.keyboard.finalize()
         
     
     def toolbar_triggered(self):
@@ -123,22 +120,22 @@ class ePubContributorsMetadataAction(InterfaceAction):
         
     
     def show_configuration(self):
-        self.interface_action_base_plugin.do_user_config(self.gui)
+        self.interface_action_base_plugin.do_user_config(GUI)
     
     def getBookIds(self):
         if not self.is_library_selected:
-            error_dialog(self.gui, _('Could not to launch ePub Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
+            error_dialog(GUI, _('Could not to launch ePub Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
             return []
         
-        rows = self.gui.library_view.selectionModel().selectedRows()
+        rows = GUI.library_view.selectionModel().selectedRows()
         if not rows or len(rows) == 0:
-            error_dialog(self.gui, _('Could not to launch ePub Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
+            error_dialog(GUI, _('Could not to launch ePub Contributors Metadata'), _('No book selected'), show=True, show_copy_button=False)
             return []
         
-        return self.gui.library_view.get_selected_ids()
+        return GUI.library_view.get_selected_ids()
     
     def runContributorsProgressDialog(self, book_ids):
-        srpg = ePubContributorsProgressDialog(self, book_ids)
+        srpg = ePubContributorsProgressDialog(book_ids)
         srpg.close()
         del srpg
 
@@ -151,22 +148,47 @@ def set_new_size_DB(epub_path, book_id, dbAPI):
         max_size = dbAPI.fields['formats'].table.update_fmt(book_id, 'EPUB', fname, new_size, dbAPI.backend)
         dbAPI.fields['size'].table.update_sizes({book_id:max_size})
 
+def import_postadd(book_id, fmt_map, db):
+    PREFS()
+    dbAPI = db.new_api
+    debug_print('AUTO_IMPORT', PREFS[KEY.AUTO_IMPORT])
+    if PREFS[KEY.AUTO_IMPORT] and 'epub' in fmt_map:
+        
+        miA = self.dbAPI.get_proxy_metadata(book_id)
+        
+        book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') {id: '+str(book_id)+'}'
+        
+        debug_print('import', book_info)
+        debug_print('src', fmt_map['epub'])
+        debug_print('lib', dbAPI.format_abspath(book_id, 'EPUB'))
+        
+        contributors = {}
+        try:
+            contributors = read_contributors(epub_path)
+        except:
+            contributors = {}
+        
+        for role, field in KEY_EXCLUDE_INVALIDE(PREFS).items():
+            set_contributor_DB(book_id, dbAPI, miA, role, field, contributors)
+
+def set_contributor_DB(book_id, dbAPI, metadata, role, field, contributors):
+    if role in contributors and field != KEY.AUTHOR and metadata.get(field) != contributors[role]:
+        dbAPI.set_field(field, {book_id:contributors[role]})
+        return True
+    else:
+        return False
+    
+    
 
 class ePubContributorsProgressDialog(QProgressDialog):
-    def __init__(self, plugin_action, book_ids):
-        
-        # plugin_action
-        self.plugin_action = plugin_action
-        # gui
-        self.gui = self.plugin_action.gui
-        
+    def __init__(self, book_ids):
         # DB
-        self.db = self.gui.current_db
+        self.db = GUI.current_db
         # DB API
         self.dbAPI = self.db.new_api
         
         # prefs
-        self.prefs = KEY_EXCLUDE_INVALIDE(PREFS(), self.gui)
+        self.prefs = KEY_EXCLUDE_INVALIDE(PREFS())
         
         # liste of book id
         self.book_ids = book_ids
@@ -187,7 +209,7 @@ class ePubContributorsProgressDialog(QProgressDialog):
         self.time_execut = 0
         
         
-        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, self.gui)
+        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, GUI)
         
         self.setWindowTitle(_('ePub Contributors Metadata Progress'))
         self.setWindowIcon(get_icon(ICON.PLUGIN))
@@ -213,7 +235,7 @@ class ePubContributorsProgressDialog(QProgressDialog):
             debug_print('ePub Contributors Metadata was aborted.')
         elif self.exception_unhandled:
             debug_print('ePub Contributors Metadata was interupted. An exception has occurred:\n'+str(self.exception))
-            CustomExceptionErrorDialog(self.gui, self.exception, custome_msg=_('ePub Contributors Metadata encountered an unhandled exception.')+'\n')
+            CustomExceptionErrorDialog(GUI, self.exception, custome_msg=_('ePub Contributors Metadata encountered an unhandled exception.')+'\n')
         
         if self.no_epub_count:
             debug_print('{:d} books didn\'t have an ePub format.'.format(self.no_epub_count))
@@ -315,7 +337,7 @@ class ePubContributorsProgressDialog(QProgressDialog):
             self.import_field_count += len(v)
         
         lst_id = list(import_id.keys()) + export_id
-        self.gui.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
+        GUI.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
         
         self.time_execut = round(time.time() - start, 3)
         self.db.clean()

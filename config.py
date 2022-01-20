@@ -38,12 +38,15 @@ except ImportError:
 
 from functools import partial
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, warning_dialog
+from calibre.gui2.ui import get_gui
 from calibre.gui2.widgets2 import Dialog
 from calibre.ebooks.metadata import string_to_authors
+from calibre.library.field_metadata import FieldMetadata
 
-from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, PREFS_library, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
+from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, PREFS_library, equals_no_case, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
 from calibre_plugins.epub_contributors_metadata.marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DERCRIPTION
 
+GUI = get_gui()
 
 class ICON:
     PLUGIN    = 'images/plugin.png'
@@ -56,42 +59,51 @@ class ICON:
 
 
 class KEY:
-    CONTRIBUTOR = 'role'
-    COLUMN = 'column'
-    NAMES = 'names'
     OPTION_CHAR = '_'
-    AUTO_IMPORT = OPTION_CHAR + 'auto_import'
-
+    AUTO_IMPORT = OPTION_CHAR + 'autoImport'
+    FIRST = OPTION_CHAR + 'firstLauch'
+    
+    LINK_AUTHOR = OPTION_CHAR + 'linkAuthors'
+    
+    # ROLE<>AUTHOR
+    ROLE = 'aut'
+    AUTHOR = 'authors'
+    
+    AUTHOR_LOCAL = FieldMetadata()._tb_cats['authors']['name']
+    AUTHOR_COLUMN = '{:s} ({:s})'.format(AUTHOR, AUTHOR_LOCAL)
 
 def KEY_EXCLUDE_OPTION(contributors_pair_list):
-    return {k:v for k, v in contributors_pair_list.items() if k[0] != KEY.OPTION_CHAR}
+    return {k:v for k, v in contributors_pair_list.items() if not k.startswith(KEY.OPTION_CHAR)}
 
-def KEY_EXCLUDE_INVALIDE(contributors_pair_list, gui):
+def KEY_EXCLUDE_INVALIDE(contributors_pair_list):
+    link = contributors_pair_list[KEY.LINK_AUTHOR]
+    valide_columns = get_valide_columns(GUI).keys()
+    
     contributors_pair_list = KEY_EXCLUDE_OPTION(contributors_pair_list)
-    valide_columns = get_valide_columns(gui)
     for k, v in copy.copy(contributors_pair_list).items():
         if not k or k not in CONTRIBUTORS_ROLES or not v or v not in valide_columns:
-            contributors_pair_list.pop(k, '')
+            contributors_pair_list.pop(k, None)
     
+    if link:
+        contributors_pair_list[KEY.ROLE] = KEY.AUTHOR
     return contributors_pair_list
 
 
-PREFS = {}
-PREFS_DEFAULT = { KEY.AUTO_IMPORT : False }
+PREFS_DEFAULT = { KEY.AUTO_IMPORT:False, KEY.LINK_AUTHOR:False, KEY.FIRST:True }
+PREFS = PREFS_library(defaults=PREFS_DEFAULT)
 
 
-def get_valide_columns(gui):
+def get_valide_columns():
     '''
     Gets matching custom columns for column_type
     '''
-    custom_columns = gui.library_view.model().custom_columns
+    custom_columns = GUI.library_view.model().custom_columns
     available_columns = {}
     for key, column in custom_columns.items():
         if (column["datatype"] == "text" and bool(column["is_multiple"]) == True
           and column['display'].get('is_names', False) == True):
             available_columns[key] = column
     return available_columns
-
 
 class ConfigWidget(QWidget):
     def __init__(self, plugin_action):
@@ -104,8 +116,6 @@ class ConfigWidget(QWidget):
         title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Contributor Metatadata option'))
         layout.addLayout(title_layout)
         
-        global PREFS
-        if not PREFS: PREFS = PREFS_library(self.plugin_action.gui, defaults=PREFS_DEFAULT)
         PREFS()
         
         # Add a horizontal layout containing the table and the buttons next to it
@@ -113,7 +123,7 @@ class ConfigWidget(QWidget):
         layout.addLayout(table_layout)
         
         # Create a table the user can edit the menu list
-        self.table = ContributorColumnTableWidget(plugin_action, PREFS, self)
+        self.table = ContributorColumnTableWidget(PREFS, self)
         table_layout.addWidget(self.table)
         
         # Add a vertical layout containing the the buttons to move ad/del etc.
@@ -144,14 +154,22 @@ class ConfigWidget(QWidget):
         keyboard_layout.insertStretch(-1)
         
         
+        self.linkAuthors = QCheckBox(_('Embed "{:s}" column').format(KEY.AUTHOR_COLUMN), self)
+        self.linkAuthors.setToolTip(_('Embed the "{:s}" column in the Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column.').format(KEY.AUTHOR_COLUMN, KEY.AUTHOR_LOCAL))
+        if PREFS[KEY.LINK_AUTHOR]:
+            self.linkAuthors.setCheckState(Qt.Checked)
+        else:
+            self.linkAuthors.setCheckState(Qt.Unchecked)
+        keyboard_layout.addWidget(self.linkAuthors)
+        
         self.autoImport = QCheckBox(_('Auto import'), self)
-        self.autoImport.setVisible(False)
         if PREFS[KEY.AUTO_IMPORT]:
             self.autoImport.setCheckState(Qt.Checked)
         else:
             self.autoImport.setCheckState(Qt.Unchecked)
-        
         keyboard_layout.addWidget(self.autoImport)
+        
+        self.autoImport.setVisible(True)
     
     def validate(self):
         valide = self.table.valide_contributors_columns()
@@ -163,25 +181,31 @@ class ConfigWidget(QWidget):
     
     def save_settings(self):
         prefs = self.table.get_contributors_columns()
+        prefs[KEY.LINK_AUTHOR] = self.linkAuthors.checkState() == Qt.Checked
         prefs[KEY.AUTO_IMPORT] = self.autoImport.checkState() == Qt.Checked
+        prefs[KEY.FIRST] = False
         
-        PREFS.set_in_library(prefs)
+        if prefs[KEY.LINK_AUTHOR]:
+            poped = prefs.pop(KEY.ROLE, None)
+            if poped:
+                prefs[str(len(prefs)+1)] = poped
+        
+        PREFS(prefs)
         debug_print('Save settings:\n{0}\n'.format(PREFS))
     
     def edit_shortcuts(self):
-        d = KeyboardConfigDialog(self.plugin_action.gui, self.plugin_action.action_spec[0])
+        self.plugin_action.rebuild_menus()
+        d = KeyboardConfigDialog(self.plugin_action.action_spec[0])
         if d.exec_() == d.Accepted:
-            self.plugin_action.gui.keyboard.finalize()
+            GUI.keyboard.finalize()
     
 
 
 class ContributorsEditDialog(Dialog):
-    def __init__(self, parent, plugin_action, contributors_list=None, book_ids=[]):
-        self.plugin_action = plugin_action
-        self.parent = parent
+    def __init__(self, contributors_list=None, book_ids=[]):
         self.contributors_list = contributors_list
-        self.widget = ContributorsEditTableWidget(plugin_action, contributors_list)
-        Dialog.__init__(self, _('_________________'), 'config_query_SearchReplace', parent)
+        self.widget = ContributorsEditTableWidget(contributors_list)
+        Dialog.__init__(self, _('_________________'), 'config_query_SearchReplace')
     
     def setup_ui(self):
         l = QVBoxLayout()
@@ -211,11 +235,8 @@ class ContributorsEditDialog(Dialog):
 
 COL_NAMES = [_('Contributor type'), _('Column')]
 class ContributorColumnTableWidget(QTableWidget):
-    def __init__(self, plugin_action, contributors_pair_list=None, *args):
+    def __init__(self, contributors_pair_list=None, *args):
         QTableWidget.__init__(self, *args)
-        self.plugin_action = plugin_action
-        self.gui = plugin_action.gui
-        
         
         self.setAlternatingRowColors(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -232,7 +253,18 @@ class ContributorColumnTableWidget(QTableWidget):
         self.verticalHeader().setDefaultSectionSize(24)
         
         if contributors_pair_list == None: contributors_pair_list = {}
+        first = contributors_pair_list.get(KEY.FIRST, PREFS_DEFAULT[KEY.FIRST])
         contributors_pair_list = KEY_EXCLUDE_OPTION(contributors_pair_list)
+        
+        if first and not contributors_pair_list:
+            columns = get_valide_columns()
+            
+            for role in CONTRIBUTORS_ROLES:
+                for column in columns:
+                    if equals_no_case('#'+role, column):
+                        contributors_pair_list[role] = column
+        
+        
         self.setRowCount(len(contributors_pair_list))
         for row, contributors_pair in enumerate(contributors_pair_list.items(), 0):
             self.populate_table_row(row, contributors_pair)
@@ -244,7 +276,7 @@ class ContributorColumnTableWidget(QTableWidget):
         
         if contributors_pair == None: contributors_pair = ('','')
         self.setCellWidget(row, 0, ContributorsComboBox(self, 0, contributors_pair[0]))
-        self.setCellWidget(row, 1, DuplicColumnComboBox(self, 1, get_valide_columns(self.gui), contributors_pair[1]))
+        self.setCellWidget(row, 1, DuplicColumnComboBox(self, 1, get_valide_columns(), contributors_pair[1]))
         
         self.resizeColumnsToContents()
         self.blockSignals(False)
@@ -306,10 +338,8 @@ class ContributorColumnTableWidget(QTableWidget):
 
 COL_CONTRIBUTORS = [_('Contributor type'), _('Names')]
 class ContributorsEditTableWidget(QTableWidget):
-    def __init__(self, plugin_action, contributors_list=None, *args):
+    def __init__(self, contributors_list=None, *args):
         QTableWidget.__init__(self, *args)
-        self.plugin_action = plugin_action
-        self.gui = plugin_action.gui
         
         self.setAlternatingRowColors(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -382,8 +412,6 @@ class ContributorsEditTableWidget(QTableWidget):
         
         return contributors_columns
 
-
-#__init__(self, parent, values, selected_key)
 
 class ContributorsComboBox(KeyValueComboBox):
     def __init__(self, table, column, selected_contributors):

@@ -34,12 +34,16 @@ from calibre.constants import iswindows, DEBUG
 from calibre.gui2 import gprefs, error_dialog, UNDEFINED_QDATETIME, info_dialog
 from calibre.gui2.actions import menu_action_unique_name
 from calibre.gui2.complete2 import EditWithComplete
+from calibre.gui2.ui import get_gui
 from calibre.gui2.keyboard import ShortcutConfig
 from calibre.gui2.widgets import EnLineEdit
 from calibre.utils.config import config_dir, tweaks
 from calibre.utils.date import now, format_date, qt_to_dt, UNDEFINED_DATE
 from calibre.utils.icu import sort_key
 
+
+PYTHON = sys.version_info
+GUI = get_gui()
 
 # Global definition of our plugin name. Used for common functions that require this.
 plugin_name = None
@@ -75,6 +79,13 @@ def debug_print(*args):
     if DEBUG:
         prints('DEBUG', DEBUG_PRE+':', *args)
         #prints('DEBUG', DEBUG_PRE+': %6.1f'%(time.time()-BASE_TIME), *args)
+
+
+def equals_no_case(left, right):
+    if PYTHON >= (3, 3):
+        return left.casefold() == right.casefold()
+    else:
+        return left.upper().lower() == right.upper().lower()
 
 
 def set_plugin_icon_resources(name, resources):
@@ -158,9 +169,7 @@ class PREFS_library(dict):
     '''
     Create a dictionary of preference stored in the library
     '''
-    def __init__(self, gui, defaults={}, key='settings'):
-        from calibre.gui2.actions import InterfaceAction
-        self.gui = gui
+    def __init__(self, defaults={}, key='settings'):
         self.db = None
         self.key = key if key else ''
         self.defaults = defaults if defaults else {}
@@ -172,15 +181,17 @@ class PREFS_library(dict):
         
         self.refresh()
     
-    def __call__(self):
-        self.refresh()
+    def __call__(self, prefs=None):
+        if prefs is not None:
+            self.set_in_library(prefs)
+        else:
+            self.refresh()
         return self
     
     
     def refresh(self):
-        if self.db != getattr(self.gui, 'current_db', None):
-            debug_print('PREFS_library reload: switch library')
-            self.db = self.gui.current_db
+        if self.db != getattr(GUI, 'current_db', None):
+            self.db = GUI.current_db
             self.clear()
             self.update(self.get_from_library())
     
@@ -194,13 +205,13 @@ class PREFS_library(dict):
         return rslt
     
     def set_in_library(self, prefs=None):
+        self.refresh()
         if prefs is not None:
             self.clear()
             self.update(prefs)
-        if len(self):
-            self.refresh()
         
         self.db.prefs.set_namespaced(self.namespace, self.key, self)
+        self.refresh()
 
 
 def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
@@ -239,7 +250,7 @@ def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=No
     whether a shortcut is specified it will appear in Preferences->Keyboard
     '''
     orig_shortcut = shortcut
-    kb = ia.gui.keyboard
+    kb = GUI.keyboard
     if unique_name is None:
         unique_name = menu_text
     if not shortcut == False:
@@ -259,7 +270,7 @@ def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=No
     ac = ia.create_menu_action(parent_menu, unique_name, menu_text, icon=None, shortcut=shortcut,
         description=tooltip, triggered=triggered, shortcut_name=shortcut_name)
     if shortcut == False and not orig_shortcut == False:
-        if ac.calibre_shortcut_unique_name in ia.gui.keyboard.shortcuts:
+        if ac.calibre_shortcut_unique_name in GUI.keyboard.shortcuts:
             kb.replace_action(ac.calibre_shortcut_unique_name, ac)
     if image:
         ac.setIcon(get_icon(image))
@@ -616,9 +627,8 @@ class KeyboardConfigDialog(SizePersistedDialog):
     '''
     This dialog is used to allow editing of keyboard shortcuts.
     '''
-    def __init__(self, gui, group_name):
-        SizePersistedDialog.__init__(self, gui, _('Keyboard shortcut dialog'))
-        self.gui = gui
+    def __init__(self, group_name):
+        SizePersistedDialog.__init__(self, GUI, _('Keyboard shortcut dialog'))
         self.setWindowTitle(_('Keyboard shortcuts'))
         layout = QVBoxLayout(self)
         self.setLayout(layout)
@@ -637,18 +647,13 @@ class KeyboardConfigDialog(SizePersistedDialog):
         self.initialize()
     
     def initialize(self):
-        self.keyboard_widget.initialize(self.gui.keyboard)
+        self.keyboard_widget.initialize(GUI.keyboard)
         self.keyboard_widget.highlight_group(self.group_name)
     
     def commit(self):
         self.keyboard_widget.commit()
         self.accept()
 
-
-import sys
-PYTHON = sys.version_info
-PYTHON2 = (sys.version_info[0] == 2)
-PYTHON3 = (sys.version_info[0] == 3)
 
 import re
 # Simple Regex
@@ -659,7 +664,7 @@ class regex():
         #set the default flag
         self.flag = flag
         if self.flag == None:
-            if PYTHON2:
+            if PYTHON[0] == 2:
                 self.flag = re.MULTILINE + re.DOTALL
             else:
                 self.flag = re.ASCII + re.MULTILINE + re.DOTALL

@@ -23,7 +23,7 @@ from calibre.ebooks.chardet import xml_to_unicode
 from calibre.ebooks.oeb.parse_utils import RECOVER_PARSER
 from calibre.utils.zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED
 
-from calibre_plugins.epub_contributors_metadata.common_utils import debug_print
+from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, equals_no_case
 
 
 NS_OCF = 'urn:oasis:names:tc:opendocument:xmlns:container'
@@ -45,13 +45,6 @@ class ParseError(ValueError):
             _('Failed to parse: %(name)s with error: %(err)s')%dict(
                 name=name, err=desc))
 
-def linux_path(path):
-    if path: path.replace('\\', '/').strip().strip('/')
-    return path
-
-
-def equals_no_case(left, right):
-    return left.upper().lower() == right.upper().lower()
 
 class ContainerOpfStream(object):
     def __init__(self, epub_path):
@@ -90,7 +83,7 @@ class ContainerOpfStream(object):
     
     def get_zip_entry(self, name):
         for entry in self.ZIP.namelist():
-            if equals_no_case(linux_path(entry), linux_path(name)):
+            if equals_no_case(entry, name):
                 return entry
     
     def _parse_xml(self, data):
