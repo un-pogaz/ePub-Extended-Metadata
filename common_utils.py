@@ -7,7 +7,7 @@ __license__   = 'GPL v3'
 __copyright__ = '2011, Grant Drake <grant.drake@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, sys, time
+import os, sys, copy, time
 # calibre Python 3 compatibility.
 from six import text_type as unicode
 
@@ -169,17 +169,28 @@ class PREFS_library(dict):
     '''
     Create a dictionary of preference stored in the library
     '''
-    def __init__(self, defaults={}, key='settings'):
-        self.db = None
+    def __init__(self, key='settings', defaults={}):
+        self._db = None
         self.key = key if key else ''
         self.defaults = defaults if defaults else {}
         
+        if not isinstance(key, unicode) and not isinstance(key, str):
+            raise TypeError("The 'key' for the namespaced preference is not a string")
+            
+        if not isinstance(defaults, dict):
+            raise TypeError("The 'defaults' for the namespaced preference is not a dict")
+        
+        
         '''
-        Defined a custom namespase at the root of __init__.py // __init__.PREFS_NAMESPACE
+        Defined a custom namespaced at the root of __init__.py // __init__.PREFS_NAMESPACE
         '''
-        self.namespace = get__init__attribut('PREFS_NAMESPACE')
+        self._namespace = get__init__attribut('PREFS_NAMESPACE')
         
         self.refresh()
+    
+    @property
+    def namespace(self):
+        return self._namespace
     
     def __call__(self, prefs=None):
         if prefs is not None:
@@ -188,20 +199,61 @@ class PREFS_library(dict):
             self.refresh()
         return self
     
+    def __getitem__(self, key):
+        self.refresh()
+        try:
+            return dict.__getitem__(self, key)
+        except KeyError:
+            return self.defaults[key]
+    
+    def get(self, key, default=None):
+        self.refresh()
+        try:
+            return dict.__getitem__(self, key)
+        except KeyError:
+            return self.defaults.get(key, default)
+    
+    def __setitem__(self, key, val):
+        self.refresh()
+        dict.__setitem__(self, key, val)
+    
+    def set(self, key, val):
+        self.__setitem__(key, val)
+    
+    def __delitem__(self, key):
+        self.refresh()
+        try:
+            dict.__delitem__(self, key)
+        except KeyError:
+            pass  # ignore missing keys
+    
+    def __enter__(self):
+        self.refresh()
+    
+    def __exit__(self):
+        self.set_in_library()
+    
+    def __str__(self):
+        self.refresh()
+        return dict.__str__(self._append_defaults(copy.copy(self)))
+    
+    
+    def _append_defaults(self, prefs):
+        for k, v in self.defaults.items():
+            if k not in prefs:
+                prefs[k] = v
+        return prefs
+    
     
     def refresh(self):
-        if self.db != getattr(GUI, 'current_db', None):
-            self.db = GUI.current_db
+        if self._db != getattr(GUI, 'current_db', None):
+            self._db = GUI.current_db
             self.clear()
             self.update(self.get_from_library())
     
     def get_from_library(self):
-        rslt = self.db.prefs.get_namespaced(self.namespace, self.key, self.defaults)
-        
-        for k, v in self.defaults.items():
-            if k not in rslt:
-                rslt[k] = v
-        
+        rslt = self._db.prefs.get_namespaced(self.namespace, self.key, {})
+        rslt = self._append_defaults(rslt)
         return rslt
     
     def set_in_library(self, prefs=None):
@@ -210,7 +262,7 @@ class PREFS_library(dict):
             self.clear()
             self.update(prefs)
         
-        self.db.prefs.set_namespaced(self.namespace, self.key, self)
+        self._db.prefs.set_namespaced(self.namespace, self.key, self)
         self.refresh()
 
 

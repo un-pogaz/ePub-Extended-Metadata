@@ -25,14 +25,13 @@ try:
 except ImportError:
     from PyQt5.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
 
-from calibre import prints
 from calibre.constants import numeric_version as calibre_version
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 from polyglot.builtins import iteritems
 
-from calibre_plugins.epub_contributors_metadata.config import ICON, PREFS, KEY, KEY_EXCLUDE_OPTION, KEY_EXCLUDE_INVALIDE
+from calibre_plugins.epub_contributors_metadata.config import ICON, PREFS, KEY
 from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, CustomExceptionErrorDialog
 from calibre_plugins.epub_contributors_metadata.epub_editor import read_contributors, write_contributors
 
@@ -149,26 +148,24 @@ def set_new_size_DB(epub_path, book_id, dbAPI):
         dbAPI.fields['size'].table.update_sizes({book_id:max_size})
 
 def import_postadd(book_id, fmt_map, db):
-    PREFS()
-    dbAPI = db.new_api
-    debug_print('AUTO_IMPORT', PREFS[KEY.AUTO_IMPORT])
     if PREFS[KEY.AUTO_IMPORT] and 'epub' in fmt_map:
-        
-        miA = self.dbAPI.get_proxy_metadata(book_id)
+        dbAPI = db.new_api
+        miA = dbAPI.get_proxy_metadata(book_id)
         
         book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') {id: '+str(book_id)+'}'
         
-        debug_print('import', book_info)
-        debug_print('src', fmt_map['epub'])
-        debug_print('lib', dbAPI.format_abspath(book_id, 'EPUB'))
+        prefs = KEY.exclude_invalide(PREFS())
+        debug_print('({}: {})'.format(KEY.AUTO_IMPORT, PREFS[KEY.AUTO_IMPORT]), ' Read ePub Contributors for', book_info)
+        debug_print(prefs,'\n')
         
         contributors = {}
         try:
-            contributors = read_contributors(epub_path)
+            contributors = read_contributors(dbAPI.format_abspath(book_id, 'EPUB'))
         except:
             contributors = {}
         
-        for role, field in KEY_EXCLUDE_INVALIDE(PREFS).items():
+        
+        for role, field in prefs.items():
             set_contributor_DB(book_id, dbAPI, miA, role, field, contributors)
 
 def set_contributor_DB(book_id, dbAPI, metadata, role, field, contributors):
@@ -188,7 +185,7 @@ class ePubContributorsProgressDialog(QProgressDialog):
         self.dbAPI = self.db.new_api
         
         # prefs
-        self.prefs = KEY_EXCLUDE_INVALIDE(PREFS())
+        self.prefs = KEY.exclude_invalide(PREFS())
         
         # liste of book id
         self.book_ids = book_ids
@@ -289,35 +286,36 @@ class ePubContributorsProgressDialog(QProgressDialog):
             if not epub_path:
                 no_epub_id.append(book_id)
                 debug_print('No ePub for', book_info,'\n')
-                
             
             if epub_path:
                 if contributors == VALUE.IMPORT:
                     debug_print('Read ePub Contributors for', book_info,'\n')
-                    contributors = read_contributors(epub_path)
-                    for k, v in self.prefs.items():
-                        if k in contributors and miA.get(v) != contributors[k]:
-                            self.dbAPI.set_field(v, {book_id:contributors[k]})
-                            if book_id not in import_id:
-                                import_id[book_id] = []
-                            import_id[book_id].append(v)
-                    
                 else:
                     debug_print('Write ePub Contributors for', book_info,'\n')
-                    if contributors == VALUE.EMBED:
-                        contributors = copy.deepcopy(self.prefs)
                     
-                    for k, v in contributors.items():
-                        if typeString == type(v):
-                            contributors[k] = miA.get(v)
+                if self.prefs:  #no need to read/write in the ePub when no columns are defined
+                    if contributors == VALUE.IMPORT:
+                        for role, field in self.prefs.items():
+                            if set_contributor_DB(book_id, self.dbAPI, miA, role, field, contributors):
+                                if book_id not in import_id:
+                                    import_id[book_id] = []
+                                import_id[book_id].append(field)
                     
-                    for k, v in contributors.items():
-                        if not v:
-                            contributors[k] = []
-                    
-                    if write_contributors(epub_path, contributors):
-                        set_new_size_DB(epub_path, book_id, self.dbAPI)
-                        export_id.append(book_id)
+                    else:
+                        if contributors == VALUE.EMBED:
+                            contributors = copy.deepcopy(self.prefs)
+                        
+                        for k, v in contributors.items():
+                            if typeString == type(v):
+                                contributors[k] = miA.get(v)
+                        
+                        for k, v in contributors.items():
+                            if not v:
+                                contributors[k] = []
+                        
+                        if write_contributors(epub_path, contributors):
+                            set_new_size_DB(epub_path, book_id, self.dbAPI)
+                            export_id.append(book_id)
                     
             
             #

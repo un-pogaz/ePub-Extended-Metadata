@@ -62,6 +62,7 @@ class KEY:
     OPTION_CHAR = '_'
     AUTO_IMPORT = OPTION_CHAR + 'autoImport'
     FIRST = OPTION_CHAR + 'firstLauch'
+    FIRST_DEFAULT = True
     
     LINK_AUTHOR = OPTION_CHAR + 'linkAuthors'
     
@@ -71,26 +72,30 @@ class KEY:
     
     AUTHOR_LOCAL = FieldMetadata()._tb_cats['authors']['name']
     AUTHOR_COLUMN = '{:s} ({:s})'.format(AUTHOR, AUTHOR_LOCAL)
-
-def KEY_EXCLUDE_OPTION(contributors_pair_list):
-    return {k:v for k, v in contributors_pair_list.items() if not k.startswith(KEY.OPTION_CHAR)}
-
-def KEY_EXCLUDE_INVALIDE(contributors_pair_list):
-    link = contributors_pair_list[KEY.LINK_AUTHOR]
-    valide_columns = get_valide_columns(GUI).keys()
     
-    contributors_pair_list = KEY_EXCLUDE_OPTION(contributors_pair_list)
-    for k, v in copy.copy(contributors_pair_list).items():
-        if not k or k not in CONTRIBUTORS_ROLES or not v or v not in valide_columns:
-            contributors_pair_list.pop(k, None)
+    @staticmethod
+    def exclude_option(contributors_pair_list):
+        return {k:v for k, v in contributors_pair_list.items() if not k.startswith(KEY.OPTION_CHAR)}
     
-    if link:
-        contributors_pair_list[KEY.ROLE] = KEY.AUTHOR
-    return contributors_pair_list
+    @staticmethod
+    def exclude_invalide(contributors_pair_list):
+        link = contributors_pair_list[KEY.LINK_AUTHOR]
+        valide_columns = get_valide_columns().keys()
+        
+        contributors_pair_list = KEY.exclude_option(contributors_pair_list)
+        for k, v in copy.copy(contributors_pair_list).items():
+            if not k or k not in CONTRIBUTORS_ROLES or not v or v not in valide_columns:
+                contributors_pair_list.pop(k, None)
+        
+        if link:
+            contributors_pair_list[KEY.ROLE] = KEY.AUTHOR
+        return contributors_pair_list
 
 
-PREFS_DEFAULT = { KEY.AUTO_IMPORT:False, KEY.LINK_AUTHOR:False, KEY.FIRST:True }
-PREFS = PREFS_library(defaults=PREFS_DEFAULT)
+PREFS = PREFS_library()
+PREFS.defaults[KEY.AUTO_IMPORT] = False
+PREFS.defaults[KEY.LINK_AUTHOR] = False
+PREFS.defaults[KEY.FIRST] = KEY.FIRST_DEFAULT
 
 
 def get_valide_columns():
@@ -104,6 +109,7 @@ def get_valide_columns():
           and column['display'].get('is_names', False) == True):
             available_columns[key] = column
     return available_columns
+    
 
 class ConfigWidget(QWidget):
     def __init__(self, plugin_action):
@@ -116,14 +122,12 @@ class ConfigWidget(QWidget):
         title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Contributor Metatadata option'))
         layout.addLayout(title_layout)
         
-        PREFS()
-        
         # Add a horizontal layout containing the table and the buttons next to it
         table_layout = QHBoxLayout()
         layout.addLayout(table_layout)
         
         # Create a table the user can edit the menu list
-        self.table = ContributorColumnTableWidget(PREFS, self)
+        self.table = ContributorColumnTableWidget(PREFS(), self)
         table_layout.addWidget(self.table)
         
         # Add a vertical layout containing the the buttons to move ad/del etc.
@@ -168,8 +172,6 @@ class ConfigWidget(QWidget):
         else:
             self.autoImport.setCheckState(Qt.Unchecked)
         keyboard_layout.addWidget(self.autoImport)
-        
-        self.autoImport.setVisible(True)
     
     def validate(self):
         valide = self.table.valide_contributors_columns()
@@ -253,8 +255,8 @@ class ContributorColumnTableWidget(QTableWidget):
         self.verticalHeader().setDefaultSectionSize(24)
         
         if contributors_pair_list == None: contributors_pair_list = {}
-        first = contributors_pair_list.get(KEY.FIRST, PREFS_DEFAULT[KEY.FIRST])
-        contributors_pair_list = KEY_EXCLUDE_OPTION(contributors_pair_list)
+        first = contributors_pair_list.get(KEY.FIRST, KEY.FIRST_DEFAULT)
+        contributors_pair_list = KEY.exclude_option(contributors_pair_list)
         
         if first and not contributors_pair_list:
             columns = get_valide_columns()
