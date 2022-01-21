@@ -26,7 +26,6 @@ from collections import OrderedDict
 t = _("//// MARC CONTRIBUTORS ROLES")
 # https://www.loc.gov/marc/relators/relacode.html
 CONTRIBUTORS_ROLES = OrderedDict([
-    ("" , ""),
     ("abr", _("Abridger")),
     ("act", _("Actor")),
     ("adp", _("Adapter")),

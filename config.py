@@ -43,7 +43,7 @@ from calibre.gui2.widgets2 import Dialog
 from calibre.ebooks.metadata import string_to_authors
 from calibre.library.field_metadata import FieldMetadata
 
-from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, PREFS_library, equals_no_case, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
+from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, PREFS_library, CustomColumns, equals_no_case, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
 from calibre_plugins.epub_contributors_metadata.marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DERCRIPTION
 
 GUI = get_gui()
@@ -110,6 +110,7 @@ def get_valide_columns():
             available_columns[key] = column
     return available_columns
     
+
 
 class ConfigWidget(QWidget):
     def __init__(self, plugin_action):
@@ -258,13 +259,14 @@ class ContributorColumnTableWidget(QTableWidget):
         first = contributors_pair_list.get(KEY.FIRST, KEY.FIRST_DEFAULT)
         contributors_pair_list = KEY.exclude_option(contributors_pair_list)
         
+        
+        
         if first and not contributors_pair_list:
-            columns = get_valide_columns()
-            
+            columns = CustomColumns.get_names()
             for role in CONTRIBUTORS_ROLES:
                 for column in columns:
-                    if equals_no_case('#'+role, column):
-                        contributors_pair_list[role] = column
+                    if equals_no_case('#'+role, column.name):
+                        contributors_pair_list[role] = column.name
         
         
         self.setRowCount(len(contributors_pair_list))
@@ -278,7 +280,7 @@ class ContributorColumnTableWidget(QTableWidget):
         
         if contributors_pair == None: contributors_pair = ('','')
         self.setCellWidget(row, 0, ContributorsComboBox(self, 0, contributors_pair[0]))
-        self.setCellWidget(row, 1, DuplicColumnComboBox(self, 1, get_valide_columns(), contributors_pair[1]))
+        self.setCellWidget(row, 1, DuplicColumnComboBox(self, 1, CustomColumns.get_names(), contributors_pair[1]))
         
         self.resizeColumnsToContents()
         self.blockSignals(False)
@@ -316,7 +318,7 @@ class ContributorColumnTableWidget(QTableWidget):
     
     def valide_contributors_columns(self):
         key = [ self.cellWidget(row, 0).selected_key() for row in range(self.rowCount()) ]
-        val = [ self.cellWidget(row, 1).get_selected_column() for row in range(self.rowCount()) ]
+        val = [ self.cellWidget(row, 1).selected_column() for row in range(self.rowCount()) ]
         
         dk = duplicate_entry(key)
         if '' in dk: dk.remove('')
@@ -331,12 +333,13 @@ class ContributorColumnTableWidget(QTableWidget):
         contributors_columns = {}
         for row in range(self.rowCount()):
             k = self.cellWidget(row, 0).selected_key()
-            v = self.cellWidget(row, 1).get_selected_column()
+            v = self.cellWidget(row, 1).selected_column()
             
             if k or v:
                 contributors_columns[k if k else str(row)] = v if v else ''
         
         return contributors_columns
+
 
 COL_CONTRIBUTORS = [_('Contributor type'), _('Names')]
 class ContributorsEditTableWidget(QTableWidget):
@@ -417,7 +420,7 @@ class ContributorsEditTableWidget(QTableWidget):
 
 class ContributorsComboBox(KeyValueComboBox):
     def __init__(self, table, column, selected_contributors):
-        KeyValueComboBox.__init__(self, table, CONTRIBUTORS_ROLES, selected_contributors)
+        KeyValueComboBox.__init__(self, table, CONTRIBUTORS_ROLES, selected_contributors, initial_items=[''])
         self.table = table
         self.column = column
         self.currentIndexChanged.connect(self.test_contributors_changed)
@@ -442,7 +445,7 @@ class ContributorsComboBox(KeyValueComboBox):
 
 class DuplicColumnComboBox(CustomColumnComboBox):
     def __init__(self, table, column, customColumns, selected_column):
-        CustomColumnComboBox.__init__(self, table, customColumns, selected_column)
+        CustomColumnComboBox.__init__(self, table, customColumns, selected_column, initial_items=[''])
         self.table = table
         self.column = column
         self.currentIndexChanged.connect(self.test_column_changed)

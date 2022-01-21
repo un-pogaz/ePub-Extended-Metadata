@@ -112,7 +112,6 @@ def get_icon(icon_name=None):
             return QIcon(pixmap)
     return QIcon()
 
-
 def get_pixmap(icon_name):
     '''
     Retrieve a QPixmap for the named image
@@ -144,7 +143,6 @@ def get_pixmap(icon_name):
         return pixmap
     return None
 
-
 def get_local_images_dir(subfolder=None):
     '''
     Returns a path to the user's local resources/images folder
@@ -157,113 +155,13 @@ def get_local_images_dir(subfolder=None):
         images_dir = os.path.normpath(images_dir)
     return images_dir
 
+
 def get_library_uuid(db):
     try:
         library_uuid = db.library_id
     except:
         library_uuid = ''
     return library_uuid
-
-
-class PREFS_library(dict):
-    '''
-    Create a dictionary of preference stored in the library
-    '''
-    def __init__(self, key='settings', defaults={}):
-        self._db = None
-        self.key = key if key else ''
-        self.defaults = defaults if defaults else {}
-        
-        if not isinstance(key, unicode) and not isinstance(key, str):
-            raise TypeError("The 'key' for the namespaced preference is not a string")
-            
-        if not isinstance(defaults, dict):
-            raise TypeError("The 'defaults' for the namespaced preference is not a dict")
-        
-        
-        '''
-        Defined a custom namespaced at the root of __init__.py // __init__.PREFS_NAMESPACE
-        '''
-        self._namespace = get__init__attribut('PREFS_NAMESPACE')
-        
-        self.refresh()
-    
-    @property
-    def namespace(self):
-        return self._namespace
-    
-    def __call__(self, prefs=None):
-        if prefs is not None:
-            self.set_in_library(prefs)
-        else:
-            self.refresh()
-        return self
-    
-    def __getitem__(self, key):
-        self.refresh()
-        try:
-            return dict.__getitem__(self, key)
-        except KeyError:
-            return self.defaults[key]
-    
-    def get(self, key, default=None):
-        self.refresh()
-        try:
-            return dict.__getitem__(self, key)
-        except KeyError:
-            return self.defaults.get(key, default)
-    
-    def __setitem__(self, key, val):
-        self.refresh()
-        dict.__setitem__(self, key, val)
-    
-    def set(self, key, val):
-        self.__setitem__(key, val)
-    
-    def __delitem__(self, key):
-        self.refresh()
-        try:
-            dict.__delitem__(self, key)
-        except KeyError:
-            pass  # ignore missing keys
-    
-    def __enter__(self):
-        self.refresh()
-    
-    def __exit__(self):
-        self.set_in_library()
-    
-    def __str__(self):
-        self.refresh()
-        return dict.__str__(self._append_defaults(copy.copy(self)))
-    
-    
-    def _append_defaults(self, prefs):
-        for k, v in self.defaults.items():
-            if k not in prefs:
-                prefs[k] = v
-        return prefs
-    
-    
-    def refresh(self):
-        if self._db != getattr(GUI, 'current_db', None):
-            self._db = GUI.current_db
-            self.clear()
-            self.update(self.get_from_library())
-    
-    def get_from_library(self):
-        rslt = self._db.prefs.get_namespaced(self.namespace, self.key, {})
-        rslt = self._append_defaults(rslt)
-        return rslt
-    
-    def set_in_library(self, prefs=None):
-        self.refresh()
-        if prefs is not None:
-            self.clear()
-            self.update(prefs)
-        
-        self._db.prefs.set_namespaced(self.namespace, self.key, self)
-        self.refresh()
 
 
 def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
@@ -340,6 +238,7 @@ def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=No
         ac.setEnabled(True)
     return ac
 
+
 class ImageTitleLayout(QHBoxLayout):
     '''
     A reusable layout widget displaying an image followed by a title
@@ -358,7 +257,6 @@ class ImageTitleLayout(QHBoxLayout):
         self.insertStretch(-1)
     
     def update_title_icon(self, icon_name):
-        #debug_print("Icon: ", icon_name)
         pixmap = get_pixmap(icon_name)
         if pixmap is None:
             error_dialog(self.parent(), _('Restart required'),
@@ -505,61 +403,56 @@ class ListComboBox(QComboBox):
         return unicode(self.currentText())
 
 class KeyValueComboBox(QComboBox):
-    def __init__(self, parent, values, selected_key):
+    def __init__(self, parent, values, selected_key=None, initial_items=None):
         QComboBox.__init__(self, parent)
-        self.values = values
-        self.populate_combo(selected_key)
+        self.populate_combo(values, selected_key, initial_items)
     
-    def populate_combo(self, selected_key):
+    def populate_combo(self, values, selected_key=None, initial_items=None):
         self.clear()
-        selected_idx = idx = -1
-        for key, value in list(self.values.items()):
-            idx = idx + 1
+        self.values = values
+        if initial_items == None: initial_items = []
+        
+        selected_idx = start = 0
+        for start, init in enumerate(initial_items, 1):
+            self.addItem(init)
+        
+        for idx, (key, value) in enumerate(self.values.items(), start):
             self.addItem(value)
             if key == selected_key:
                 selected_idx = idx
+        
         self.setCurrentIndex(selected_idx)
     
     def selected_key(self):
-        for key, value in list(self.values.items()):
-            if value == unicode(self.currentText()).strip():
+        currentText = unicode(self.currentText()).strip()
+        for key, value in self.values.items():
+            if value == currentText:
                 return key
-
-class NoWheelComboBox(QComboBox):
-    def wheelEvent (self, event):
-        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
-        event.ignore()
 
 class CustomColumnComboBox(QComboBox):
     def __init__(self, parent, custom_columns={}, selected_column='', initial_items=['']):
         QComboBox.__init__(self, parent)
         self.populate_combo(custom_columns, selected_column, initial_items)
     
-    def populate_combo(self, custom_columns, selected_column, initial_items=['']):
+    def populate_combo(self, custom_columns, selected_column='', initial_items=['']):
         self.clear()
-        self.column_names = list(initial_items)
-        if len(initial_items) > 0:
-            self.addItems(initial_items)
-        selected_idx = 0
-        for idx, value in enumerate(initial_items):
-            if value == selected_column:
-                selected_idx = idx
-        for key in sorted(custom_columns.keys()):
+        self.column_names = list()
+        if initial_items == None: initial_items = []
+        
+        selected_idx = start = 0
+        for start, init in enumerate(initial_items, 1):
+            self.column_names.append('')
+            self.addItem(init)
+        
+        for idx, (key, value) in enumerate(custom_columns.items(), start):
             self.column_names.append(key)
-            self.addItem('{:s} ({:s})'.format(key, custom_columns[key]['name']))
+            self.addItem('{:s} ({:s})'.format(key, value.display_name))
             if key == selected_column:
-                selected_idx = len(self.column_names) - 1
+                selected_idx = idx
+        
         self.setCurrentIndex(selected_idx)
     
-    def select_column(self, key):
-        selected_idx = 0
-        for i, val in enumerate(self.column_names):
-            if val == key:
-                selected_idx = i
-                break
-        self.setCurrentIndex(selected_idx)
-    
-    def get_selected_column(self):
+    def selected_column(self):
         return self.column_names[self.currentIndex()]
 
 class ReorderedComboBox(QComboBox):
@@ -814,3 +707,495 @@ def CustomExceptionErrorDialog(parent, exception, custome_title=None, custome_ms
     
     return error_dialog(parent, custome_title, msg, det_msg=fe, show=show, show_copy_button=True)
 
+
+
+class PREFS_library(dict):
+    '''
+    Create a dictionary of preference stored in the library
+    '''
+    def __init__(self, key='settings', defaults={}):
+        self._db = None
+        self.key = key if key else ''
+        self.defaults = defaults if defaults else {}
+        
+        if not isinstance(key, unicode) and not isinstance(key, str):
+            raise TypeError("The 'key' for the namespaced preference is not a string")
+            
+        if not isinstance(defaults, dict):
+            raise TypeError("The 'defaults' for the namespaced preference is not a dict")
+        
+        
+        self._namespace = get__init__attribut('PREFS_NAMESPACE')
+        
+        self.refresh()
+    
+    @property
+    def namespace(self):
+        '''
+        Defined a custom namespaced at the root of __init__.py // __init__.PREFS_NAMESPACE
+        '''
+        return self._namespace
+    
+    def __call__(self, prefs=None):
+        if prefs is not None:
+            self.set_in_library(prefs)
+        else:
+            self.refresh()
+        return self
+    
+    def __getitem__(self, key):
+        self.refresh()
+        try:
+            return dict.__getitem__(self, key)
+        except KeyError:
+            return self.defaults[key]
+    
+    def get(self, key, default=None):
+        self.refresh()
+        try:
+            return dict.__getitem__(self, key)
+        except KeyError:
+            return self.defaults.get(key, default)
+    
+    def __setitem__(self, key, val):
+        self.refresh()
+        dict.__setitem__(self, key, val)
+    
+    def set(self, key, val):
+        self.__setitem__(key, val)
+    
+    def __delitem__(self, key):
+        self.refresh()
+        try:
+            dict.__delitem__(self, key)
+        except KeyError:
+            pass  # ignore missing keys
+    
+    def __enter__(self):
+        self.refresh()
+    
+    def __exit__(self):
+        self.set_in_library()
+    
+    def __str__(self):
+        self.refresh()
+        return dict.__str__(self._append_defaults(copy.copy(self)))
+    
+    
+    def _append_defaults(self, prefs):
+        for k, v in self.defaults.items():
+            if k not in prefs:
+                prefs[k] = v
+        return prefs
+    
+    
+    def refresh(self):
+        if self._db != getattr(GUI, 'current_db', None):
+            self._db = GUI.current_db
+            self.clear()
+            self.update(self.get_from_library())
+    
+    def get_from_library(self):
+        rslt = self._db.prefs.get_namespaced(self.namespace, self.key, {})
+        rslt = self._append_defaults(rslt)
+        return rslt
+    
+    def set_in_library(self, prefs=None):
+        self.refresh()
+        if prefs is not None:
+            self.clear()
+            self.update(prefs)
+        
+        self._db.prefs.set_namespaced(self.namespace, self.key, self)
+        self.refresh()
+
+
+class CustomColumns():
+    '''
+    You should only need the following @staticmethod and @property of the CustomColumns:
+    
+    @staticmethod to retrieve the columns by type:
+        get_names()
+        get_tags()
+        get_enumeration()
+        get_float()
+        get_datetime()
+        get_rating()
+        get_series()
+        get_text()
+        get_bool()
+        get_comments()
+        get_html()
+        get_markdown()
+        get_long_text()
+        get_title()
+        get_builded_text()
+        get_builded_tag()
+        get_from_name(name)
+        get_all_custom_columns()
+    
+    @property string (read-only) to identify the CustomColumns instance
+        name
+        display_name
+    
+    @property bool (read-only) of CustomColumns instance
+    that which identifies the type of the CustomColumns
+        is_bool
+        is_builded_tag
+        is_builded_text
+        is_comments
+        is_composite
+        is_datetime
+        is_enumeration
+        is_float
+        is_integer
+        is_names
+        is_rating
+        is_series
+        is_tags
+        is_text
+        is_html
+        is_long_text
+        is_markdown
+        is_title
+        
+    @property (read-only) of CustomColumns instance
+    return is None if column does not support this element
+        allow_half_stars = bool()
+        category_sort = 'value'
+        colnum = int()
+        column = 'value'
+        composite_contains_html = bool()
+        composite_make_category = bool()
+        composite_sort = string > one of then ['text', 'number', 'date', 'bool']
+        composite_template = string()
+        datatype = string()
+        description = string()
+        display = {} // contains an arbitrary data set. reanalys in other property
+        enum_colors = string[]
+        enum_values = string[]
+        heading_position = string > one of then ['text', 'number', 'date', 'bool']
+        is_category = bool()
+        is_csp = False
+        is_custom = True()
+        is_editable = True
+        is_multiple = {} // contains an arbitrary data set. reanalys in other property
+        kind = 'field'
+        label = string()
+        link_column = 'value'
+        names_split_regex_additional = string()
+        rec_index = int()
+        search_terms = []
+        table = string()
+        use_decorations = bool()
+    '''
+    _DB = None
+    _STORED = {}
+    
+    _TYPES = [
+        'is_names',
+        'is_tags',
+        
+        'is_enumeration',
+        'is_float',
+        'is_integer',
+        'is_datetime',
+        'is_rating',
+        'is_series',
+        'is_text',
+        'is_bool',
+        
+        'is_comments',
+        'is_html',
+        'is_markdown',
+        'is_long_text',
+        'is_title',
+        
+        'is_builded_text',
+        'is_builded_tag',
+    ]
+    
+    ## static method (public)
+    
+    @staticmethod
+    def get_all_custom_columns():
+        if CustomColumns._DB != getattr(GUI, 'current_db', None):
+            CustomColumns._DB = GUI.current_db
+            CustomColumns._STORED.clear()
+            lst = []
+            for k,v in GUI.library_view.model().custom_columns.items():
+                lst.append(CustomColumns(k, v))
+            
+            CustomColumns._STORED = {cc.name:cc for cc in sorted(lst,key=CustomColumns._cmp)}
+            
+        return copy.copy(CustomColumns._STORED)
+    
+    @staticmethod
+    def _get_columns_type(type_property):
+        return {cc.name:cc for cc in CustomColumns.get_all_custom_columns().values() if getattr(cc, type_property, False)}
+    
+    @staticmethod
+    def get_from_name(name):
+        return CustomColumns.get_all_custom_columns().get(name, None)
+    
+    @staticmethod
+    def get_names():
+        return CustomColumns._get_columns_type('is_names')
+    @staticmethod
+    def get_tags():
+        return CustomColumns._get_columns_type('is_tags')
+    @staticmethod
+    def get_enumeration():
+        return CustomColumns._get_columns_type('is_enumeration')
+    @staticmethod
+    def get_float():
+        return CustomColumns._get_columns_type('is_float')
+    @staticmethod
+    def get_datetime():
+        return CustomColumns._get_columns_type('is_datetime')
+    @staticmethod
+    def get_rating():
+        return CustomColumns._get_columns_type('is_rating')
+    @staticmethod
+    def get_series():
+        return CustomColumns._get_columns_type('is_series')
+    @staticmethod
+    def get_text():
+        return CustomColumns._get_columns_type('is_text')
+    @staticmethod
+    def get_bool():
+        return CustomColumns._get_columns_type('is_bool')
+    @staticmethod
+    def get_comments():
+        return CustomColumns._get_columns_type('is_comments')
+    @staticmethod
+    def get_html():
+        return CustomColumns._get_columns_type('is_html')
+    @staticmethod
+    def get_markdown():
+        return CustomColumns._get_columns_type('is_markdown')
+    @staticmethod
+    def get_long_text():
+        return CustomColumns._get_columns_type('is_long_text')
+    @staticmethod
+    def get_title():
+        return CustomColumns._get_columns_type('is_title')
+    @staticmethod
+    def get_builded_text():
+        return CustomColumns._get_columns_type('is_builded_text')
+    @staticmethod
+    def get_builded_tag():
+        return CustomColumns._get_columns_type('is_builded_tag')
+    
+    ## class method (internal)
+    
+    def __init__(self, name, src_dict):
+        self._name = name
+        self._src_dict = src_dict
+    
+    def __repr__ (self):
+        #<calibre_plugins.epub_contributors_metadata.common_utils.CustomColumns instance at 0x1148C4B8>
+        #''.join(['<', str(self.__class__), ' instance at ', hex(id(self)),'>'])
+        return ''.join(['<"',self._name,'"', str(self._get_type()),'>'])
+    
+    def _get_property_dict(self, predicate=None):
+        import inspect
+        def _predicate(key, value):
+            return True
+        
+        if not predicate:
+            predicate = _predicate
+        
+        return dict(i for i in inspect.getmembers(self) if not inspect.ismethod(i[1]) and not inspect.isfunction(i[1]) and predicate(*i))
+    
+    def _get_type(self):
+        def _predicate(key, value):
+            return key in self._TYPES and value
+        return self._get_property_dict(_predicate)
+    
+    def _cmp(self):
+        return self.name.lower()
+    
+    @property
+    def name(self):
+        return self._name
+    @property
+    def display_name(self):
+        return self._src_dict.get('name', None)
+    @property
+    def description(self):
+        return self.display.get('description', None)
+    
+    @property
+    def is_names(self):
+        return self.datatype == 'text' and self.is_multiple and self.display.get('is_names', False)
+    @property
+    def is_tags(self):
+        return self.datatype == 'text' and self.is_multiple and not self.display.get('is_names', False)
+    
+    @property
+    def names_split_regex_additional(self):
+        from calibre.utils.config import tweaks
+        return tweaks['authors_split_regex']
+    
+    @property
+    def is_text(self):
+        return self.datatype == 'text' and not self.is_multiple
+    @property
+    def is_float(self):
+        return self.datatype == 'float'
+    @property
+    def is_integer(self):
+        return self.datatype == 'int'
+    @property
+    def is_datetime(self):
+        return self.datatype == 'datetime'
+    @property
+    def is_rating(self):
+        return self.datatype == 'rating'
+    @property
+    def is_series(self):
+        return self.datatype == 'series'
+    @property
+    def is_bool(self):
+        return self.datatype == 'bool'
+    @property
+    def is_enumeration(self):
+        return self.datatype == 'enumeration'
+    
+    @property
+    def enum_values(self):
+        if self.is_enumeration:
+            return self.display.get('enum_values', None)
+        else:
+            return None
+    @property
+    def enum_colors(self):
+        if self.is_enumeration:
+            return self.display.get('enum_colors', None)
+        else:
+            return None
+    
+    @property
+    def is_comments(self):
+        return self.datatype == 'comments'
+    @property
+    def is_html(self):
+        return self.is_comments and self.display.get('interpret_as', None) == 'html'
+    @property
+    def is_markdown(self):
+        return self.is_comments and self.display.get('interpret_as', None) == 'markdown'
+    @property
+    def is_title(self):
+        return self.is_comments and self.display.get('interpret_as', None) == 'short-text'
+    @property
+    def is_long_text(self):
+        return self.is_comments and self.display.get('interpret_as', None)== 'long-text'
+    
+    @property
+    def heading_position(self):
+        #"hide", "above", "side"
+        if self.is_comments:
+            return self.display.get('heading_position', None)
+        else:
+            return None
+    
+    @property
+    def use_decorations(self):
+        #"hide", "above", "side"
+        if self.is_text or self.is_enumeration or self.is_builded_text:
+            return self.display.get('use_decorations', None)
+        else:
+            return None
+    @property
+    def allow_half_stars(self):
+        if self.is_rating:
+            return self.display.get('allow_half_stars', None)
+        else:
+            return None
+    
+    
+    @property
+    def is_composite(self):
+        return self.datatype == 'composite'
+    @property
+    def is_builded_text(self):
+        return self.is_composite and self.is_multiple
+    @property
+    def is_builded_tag(self):
+        return self.is_composite and not self.is_multiple
+    
+    @property
+    def composite_sort(self):
+        if self.is_composite:
+            return self.display.get('composite_sort', None)
+        else:
+            return None
+    @property
+    def composite_make_category(self):
+        if self.is_composite:
+            return self.display.get('make_category', None)
+        else:
+            return None
+    @property
+    def composite_contains_html(self):
+        if self.is_composite:
+            return self.display.get('contains_html', None)
+        else:
+            return None
+    @property
+    def composite_template(self):
+        if self.is_composite:
+            return self.display.get('composite_template', None)
+        else:
+            return None
+    
+    
+    @property
+    def table(self):
+        return self._src_dict.get('table', None)
+    @property
+    def column(self):
+        return self._src_dict.get('column', None)
+    @property
+    def datatype(self):
+        return self._src_dict.get('datatype', None)
+    @property
+    def kind(self):
+        return self._src_dict.get('kind', None)
+    @property
+    def search_terms(self):
+        return self._src_dict.get('search_terms', None)
+    @property
+    def label(self):
+        return self._src_dict.get('label', None)
+    @property
+    def colnum(self):
+        return self._src_dict.get('colnum', None)
+    @property
+    def display(self):
+        return self._src_dict.get('display', None)
+    @property
+    def is_custom(self):
+        return self._src_dict.get('is_custom', None)
+    @property
+    def is_category(self):
+        return self._src_dict.get('is_category', None)
+    @property
+    def is_multiple(self):
+        return self._src_dict.get('is_multiple', None)
+    @property
+    def link_column(self):
+        return self._src_dict.get('link_column', None)
+    @property
+    def category_sort(self):
+        return self._src_dict.get('category_sort', None)
+    @property
+    def rec_index(self):
+        return self._src_dict.get('rec_index', None)
+    @property
+    def is_editable(self):
+        return self._src_dict.get('is_editable', None)
+    @property
+    def is_csp(self):
+        return self._src_dict.get('is_csp', None)
