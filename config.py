@@ -43,7 +43,7 @@ from calibre.gui2.widgets2 import Dialog
 from calibre.ebooks.metadata import string_to_authors
 from calibre.library.field_metadata import FieldMetadata
 
-from .common_utils import debug_print, PREFS_library, CustomColumns, equals_no_case, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
+from .common_utils import debug_print, PREFS_library, CustomColumns, equals_no_case, duplicate_entry, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
 from .marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION
 
 GUI = get_gui()
@@ -152,7 +152,7 @@ class ConfigWidget(QWidget):
         keyboard_layout.addWidget(self.linkAuthors)
         
         self.autoImport = QCheckBox(_('Automatic import'), self)
-        self.linkAuthors.setToolTip(_('Automatically import Contributors of new added books.'))
+        self.autoImport.setToolTip(_('Automatically import Contributors of new added books.'))
         self.autoImport.setChecked(PREFS[KEY.AUTO_IMPORT])
         keyboard_layout.addWidget(self.autoImport)
     
@@ -183,7 +183,6 @@ class ConfigWidget(QWidget):
         d = KeyboardConfigDialog(self.plugin_action.action_spec[0])
         if d.exec_() == d.Accepted:
             GUI.keyboard.finalize()
-    
 
 
 class ContributorsEditDialog(Dialog):
@@ -217,19 +216,15 @@ class ContributorsEditDialog(Dialog):
         Dialog.accept(self)
 
 
-
 COL_NAMES = [_('Contributor type'), _('Column')]
 class ContributorColumnTableWidget(QTableWidget):
     def __init__(self, contributors_pair_list=None, *args):
         QTableWidget.__init__(self, *args)
-        
         self.setAlternatingRowColors(True)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSortingEnabled(False)
         self.setMinimumSize(600, 0)
-        
         self.populate_table(contributors_pair_list)
-        
     
     def populate_table(self, contributors_pair_list=None):
         self.clear()
@@ -241,15 +236,12 @@ class ContributorColumnTableWidget(QTableWidget):
         first = contributors_pair_list.get(KEY.FIRST, KEY.FIRST_DEFAULT)
         contributors_pair_list = KEY.exclude_option(contributors_pair_list)
         
-        
-        
         if first and not contributors_pair_list:
             columns = CustomColumns.get_names()
             for role in CONTRIBUTORS_ROLES:
                 for column in columns:
                     if equals_no_case('#'+role, column.name):
                         contributors_pair_list[role] = column.name
-        
         
         self.setRowCount(len(contributors_pair_list))
         for row, contributors_pair in enumerate(contributors_pair_list.items(), 0):
@@ -297,19 +289,20 @@ class ContributorColumnTableWidget(QTableWidget):
         self.selectRow(row)
         self.scrollToItem(self.currentItem())
     
+    def _duplicate_contributors(self):
+        de = duplicate_entry([ self.cellWidget(row, 0).selected_key() for row in range(self.rowCount()) ])
+        if '' in de: de.remove('')
+        return de
+    
+    def _duplicate_columns(self):
+        de = duplicate_entry([ self.cellWidget(row, 1).selected_column() for row in range(self.rowCount()) ])
+        if '' in de: de.remove('')
+        return de
     
     def valide_contributors_columns(self):
-        key = [ self.cellWidget(row, 0).selected_key() for row in range(self.rowCount()) ]
-        val = [ self.cellWidget(row, 1).selected_column() for row in range(self.rowCount()) ]
-        
-        dk = duplicate_entry(key)
-        if '' in dk: dk.remove('')
-        bk = bool(dk)
-        dv = duplicate_entry(val)
-        if '' in dv: dv.remove('')
-        bv = bool(dv)
-        
-        return not(bv or bv)
+        dk = self._valide_contributors()
+        dv = self._valide_columns()
+        return not(bk or bv)
     
     def get_contributors_columns(self):
         contributors_columns = {}
@@ -334,7 +327,6 @@ class ContributorsEditTableWidget(QTableWidget):
         self.setMinimumSize(600, 0)
         
         self.populate_table(contributors_list)
-        
     
     def populate_table(self, contributors_list=None):
         self.clear()
@@ -412,8 +404,7 @@ class ContributorsComboBox(KeyValueComboBox):
         event.ignore()
     
     def test_contributors_changed(self, val):
-        de = duplicate_entry([self.table.cellWidget(row, self.column).currentText() for row in range(self.table.rowCount())])
-        if de.count(''): de.remove('')
+        de = self.table._duplicate_contributors()
         if de and de.count(self.currentText()):
             warning_dialog(self, _('Duplicate Contributors type'),
                 _('A Contributor was duplicated!\nChange the settings so that each contributor is present only once, otherwise the settings can not be saved.\n\nDuplicate type:')
@@ -433,14 +424,9 @@ class DuplicColumnComboBox(CustomColumnComboBox):
         event.ignore()
     
     def test_column_changed(self, val):
-        de = duplicate_entry([self.table.cellWidget(row, self.column).currentText() for row in range(self.table.rowCount())])
-        if de.count(''): de.remove('')
+        de = self.table._duplicate_columns()
         if de and de.count(self.currentText()):
             warning_dialog(self, _('Duplicate Custom column'),
                 _('A Custom column was duplicated!\nChange the settings so that each Custom column is present only once, otherwise the settings can not be saved.\n\nDuplicate column:')
                 + '\n' + '\n'.join(de),
                 show=True, show_copy_button=False)
-
-
-def duplicate_entry(lst):
-    return list( set([x for x in lst if lst.count(x) > 1]) )

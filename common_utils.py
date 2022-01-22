@@ -86,6 +86,8 @@ def equals_no_case(left, right):
     else:
         return left.upper().lower() == right.upper().lower()
 
+def duplicate_entry(lst):
+    return list( set([x for x in lst if lst.count(x) > 1]) )
 
 def set_plugin_icon_resources(name, resources):
     '''
