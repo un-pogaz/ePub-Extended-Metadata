@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-01-19 14:26+0100\n"
+"POT-Creation-Date: 2022-01-22 13:50+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -14,150 +14,162 @@ msgstr ""
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: __init__.py:33
-msgid "Read and Write the Contributors Metadata in the ePub file"
-msgstr ""
+#: __init__.py:34
+msgid "Read and write the metadata of the contributors in the ePub file all by associating them to columns in your lib"
+msgstr "Lire et écrire les métadonnées des contributeurs dans le fichier ePub tout en les associant à des colonnes dans vos bibliothèques"
 
-#: action.py:46
+#: action.py:48
 msgid "Edit Contributors Metadata"
 msgstr "Modifier les Contributeurs"
 
-#: action.py:46
-msgid "Edit the Contributors Metadata the ePub file"
-msgstr ""
+#: action.py:48
+msgid "Edit the Contributors Metadata of the ePub files"
+msgstr "Modifier les métadonnées des contributeurs des fichiers ePub"
 
-#: action.py:70
+#: action.py:71
 msgid "&Embed contributors"
 msgstr "&Intégrer les Contributeurs"
 
-#: action.py:75
+#: action.py:76
 msgid "&Import contributors"
 msgstr "&Importer les Contributeurs"
 
-#: action.py:92
+#: action.py:93
 msgid "&Customize plugin..."
-msgstr ""
+msgstr "&Personnaliser l'extension..."
 
-#: action.py:125 action.py:130
-msgid "Could not to launch Edit Contributors Metadata"
-msgstr ""
+#: action.py:127 action.py:132
+msgid "Could not to launch ePub Contributors Metadata"
+msgstr "Impossible de lancé ePub Contributors Metadata"
 
-#: action.py:125 action.py:130
+#: action.py:127 action.py:132
 msgid "No book selected"
-msgstr ""
+msgstr "Aucun livre sélectionné"
 
-#: action.py:181
+#: action.py:210
 msgid "Cancel"
 msgstr "Annuler"
 
-#: action.py:183
-msgid "Edit Contributors Metadata Progress"
-msgstr ""
+#: action.py:212
+msgid "ePub Contributors Metadata Progress"
+msgstr "Progression de ePub Contributors Metadata"
 
-#: action.py:206
-msgid "Edit Contributors Metadata encountered an unhandled exception."
-msgstr ""
+#: action.py:236
+msgid "ePub Contributors Metadata encountered an unhandled exception."
+msgstr "ePub Contributors Metadata a rencontré une exception non gérée."
 
-#: action.py:247
+#: action.py:275
 msgid "Book {:d} of {:d}."
-msgstr ""
-
-#: common_utils.py:243
-msgid "Restart required"
-msgstr ""
+msgstr "Livre {:d} sur {:d}"
 
 #: common_utils.py:244
+msgid "You cannot configure this plugin before calibre is restarted."
+msgstr "Vous ne pouvez pas configurer ce plugin avant le redémarrage de Calibre."
+
+#: common_utils.py:270
+msgid "Restart required"
+msgstr "Redémarrage nécessaire"
+
+#: common_utils.py:271
 msgid "Title image not found - you must restart Calibre before using this plugin!"
-msgstr ""
+msgstr "L'image d'icone n'a pas était trouvée - vous devriez mieux redémarrer Calibre avant d'utiliser ce plugin !"
 
-#: common_utils.py:562
+#: common_utils.py:605
 msgid "Keyboard shortcut dialog"
-msgstr ""
+msgstr "Raccourcis clavier"
 
-#: common_utils.py:564
+#: common_utils.py:606
 msgid "Keyboard shortcuts"
-msgstr ""
+msgstr "Raccourcis clavier"
 
-#: common_utils.py:691
+#: common_utils.py:728
 msgid "Unhandled exception"
+msgstr "Exception non gérée"
+
+#: config.py:109
+msgid "ePub Contributor Metatadata option"
 msgstr ""
 
 #: config.py:124
-msgid "Edit Contributor Metatadata option"
-msgstr ""
-
-#: config.py:141
 msgid "Add menu item"
 msgstr ""
 
-#: config.py:147
+#: config.py:130
 msgid "Delete menu item"
 msgstr ""
 
-#: config.py:158
+#: config.py:141
 msgid "Keyboard shortcuts..."
-msgstr ""
+msgstr "Raccourcis clavier..."
 
-#: config.py:159
+#: config.py:142
 msgid "Edit the keyboard shortcuts associated with this plugin"
 msgstr ""
 
-#: config.py:165
+#: config.py:148
+msgid "Embed \"{:s}\" column"
+msgstr ""
+
+#: config.py:149
+msgid "Embed the \"{:s}\" column in the Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column."
+msgstr ""
+
+#: config.py:156
 msgid "Auto import"
 msgstr ""
 
-#: config.py:176
+#: config.py:165
 msgid "Duplicate values"
 msgstr ""
 
-#: config.py:177
+#: config.py:166
 msgid "The current parameters contain duplicate values. Your changes have been cancelled."
 msgstr ""
 
-#: config.py:204
-msgid "Configuration of a Search/Replace operation"
+#: config.py:197
+msgid "_________________"
 msgstr ""
 
-#: config.py:217
+#: config.py:210
 msgid "Invalid operation"
 msgstr ""
 
-#: config.py:218
+#: config.py:211
 msgid ""
 "The registering of Find/Replace operation has failed.\n"
 "{:s}\n"
 "Do you want discard the changes?"
 msgstr ""
 
-#: config.py:232 config.py:322
+#: config.py:225 config.py:330
 msgid "Contributor type"
 msgstr "Type de Contributeur"
 
-#: config.py:232
+#: config.py:225
 msgid "Column"
 msgstr ""
 
-#: config.py:285 config.py:373
+#: config.py:287 config.py:379
 msgid "Are you sure you want to delete this menu item?"
 msgstr ""
 
-#: config.py:287 config.py:375
+#: config.py:289 config.py:381
 msgid "Are you sure you want to delete the selected {:d} menu items?"
 msgstr ""
 
-#: config.py:288 config.py:376
+#: config.py:290 config.py:382
 msgid "Are you sure?"
 msgstr ""
 
-#: config.py:322
+#: config.py:330
 msgid "Names"
 msgstr ""
 
-#: config.py:416
+#: config.py:422
 msgid "Duplicate Contributors type"
 msgstr "Type de Contributeur en double"
 
-#: config.py:417
+#: config.py:423
 msgid ""
 "A Contributor was duplicated!\n"
 "Change the settings so that each contributor is present only once, otherwise the settings can not be saved.\n"
@@ -165,23 +177,16 @@ msgid ""
 "Duplicate type:"
 msgstr ""
 
-#: config.py:439
-#, fuzzy
-#| msgid "Duplicate Contributors type"
+#: config.py:444
 msgid "Duplicate Custom column"
-msgstr "Type de Contributeur en double"
+msgstr "Colonne personnalisée en double"
 
-#: config.py:440
+#: config.py:445
 msgid ""
 "A Custom column was duplicated!\n"
 "Change the settings so that each Custom column is present only once, otherwise the settings can not be saved.\n"
 "\n"
 "Duplicate column:"
-msgstr ""
-
-#: container.py:50
-#, python-format
-msgid "Failed to parse: %(name)s with error: %(err)s"
 msgstr ""
 
 #: marc_relators.py:26
@@ -1249,7 +1254,7 @@ msgid "Writer of supplementary textual content"
 msgstr "Auteur de contenu textuel supplémentaire"
 
 #: marc_relators.py:298
-msgid "//// MARC CONTRIBUTORS DERCRIPTION"
+msgid "//// MARC CONTRIBUTORS DESCRIPTION"
 msgstr ""
 
 #: marc_relators.py:301
@@ -1897,8 +1902,6 @@ msgid "Use for a person or organization that supervises compliance with the cont
 msgstr "Utiliser pour une personne ou un organisme qui supervise l'exécution du contrat et qui est responsable du rapport et de sa diffusion. S'appelle parfois le concessionnaire ou l'organisme de contrôle."
 
 #: marc_relators.py:462
-#, fuzzy
-#| msgid "Use for a person who transcribes or copies musical notation"
 msgid "Use for a person who transcribes or copies musical notation."
 msgstr "Utiliser pour une personne qui transcrit ou copie des notations musicales."
 

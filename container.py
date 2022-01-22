@@ -37,13 +37,11 @@ NAMESPACES={'opf':NS_OPF, 'dc':NS_DC, 'ocf':NS_OCF, 'ncx':NS_NCX}
 class InvalidEpub(ValueError):
     pass
 
-class ParseError(ValueError):
-    def __init__(self, name, desc):
+class ParseError(InvalidEpub):
+    def __init__(self, name, err):
         self.name = name
-        self.desc = desc
-        ValueError.__init__(self,
-            _('Failed to parse: %(name)s with error: %(err)s')%dict(
-                name=name, err=desc))
+        self.err = err
+        InvalidEpub.__init__(self, 'Failed to parse: {:s} with error: {:s}'.format(name, err))
 
 
 class ContainerOpfStream(object):
@@ -74,8 +72,9 @@ class ContainerOpfStream(object):
             try:
                 self.opf = self._parse_xml(self.ZIP.read(self.opf_name))
             except XMLSyntaxError as err:
+                name = self.opf_name
                 self.opf_name = None
-                raise ParseError(name, six.text_type(err))
+                raise ParseError(name, err)
         
     
     def __enter__(self):

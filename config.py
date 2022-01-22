@@ -44,7 +44,7 @@ from calibre.ebooks.metadata import string_to_authors
 from calibre.library.field_metadata import FieldMetadata
 
 from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, PREFS_library, CustomColumns, equals_no_case, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
-from calibre_plugins.epub_contributors_metadata.marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DERCRIPTION
+from calibre_plugins.epub_contributors_metadata.marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION
 
 GUI = get_gui()
 
@@ -80,7 +80,7 @@ class KEY:
     @staticmethod
     def exclude_invalide(contributors_pair_list):
         link = contributors_pair_list[KEY.LINK_AUTHOR]
-        valide_columns = get_valide_columns().keys()
+        valide_columns = CustomColumns.get_names().keys()
         
         contributors_pair_list = KEY.exclude_option(contributors_pair_list)
         for k, v in copy.copy(contributors_pair_list).items():
@@ -96,20 +96,6 @@ PREFS = PREFS_library()
 PREFS.defaults[KEY.AUTO_IMPORT] = False
 PREFS.defaults[KEY.LINK_AUTHOR] = False
 PREFS.defaults[KEY.FIRST] = KEY.FIRST_DEFAULT
-
-
-def get_valide_columns():
-    '''
-    Gets matching custom columns for column_type
-    '''
-    custom_columns = GUI.library_view.model().custom_columns
-    available_columns = {}
-    for key, column in custom_columns.items():
-        if (column["datatype"] == "text" and bool(column["is_multiple"]) == True
-          and column['display'].get('is_names', False) == True):
-            available_columns[key] = column
-    return available_columns
-    
 
 
 class ConfigWidget(QWidget):
@@ -149,6 +135,7 @@ class ConfigWidget(QWidget):
         add_button.clicked.connect(self.table.add_row)
         delete_button.clicked.connect(self.table.delete_rows)
         
+        
         # --- Keyboard shortcuts ---
         keyboard_layout = QHBoxLayout()
         layout.addLayout(keyboard_layout)
@@ -161,17 +148,12 @@ class ConfigWidget(QWidget):
         
         self.linkAuthors = QCheckBox(_('Embed "{:s}" column').format(KEY.AUTHOR_COLUMN), self)
         self.linkAuthors.setToolTip(_('Embed the "{:s}" column in the Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column.').format(KEY.AUTHOR_COLUMN, KEY.AUTHOR_LOCAL))
-        if PREFS[KEY.LINK_AUTHOR]:
-            self.linkAuthors.setCheckState(Qt.Checked)
-        else:
-            self.linkAuthors.setCheckState(Qt.Unchecked)
+        self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
         keyboard_layout.addWidget(self.linkAuthors)
         
-        self.autoImport = QCheckBox(_('Auto import'), self)
-        if PREFS[KEY.AUTO_IMPORT]:
-            self.autoImport.setCheckState(Qt.Checked)
-        else:
-            self.autoImport.setCheckState(Qt.Unchecked)
+        self.autoImport = QCheckBox(_('Automatic import'), self)
+        self.linkAuthors.setToolTip(_('Automatically import Contributors of new added books.'))
+        self.autoImport.setChecked(PREFS[KEY.AUTO_IMPORT])
         keyboard_layout.addWidget(self.autoImport)
     
     def validate(self):
@@ -280,7 +262,7 @@ class ContributorColumnTableWidget(QTableWidget):
         
         if contributors_pair == None: contributors_pair = ('','')
         self.setCellWidget(row, 0, ContributorsComboBox(self, 0, contributors_pair[0]))
-        self.setCellWidget(row, 1, DuplicColumnComboBox(self, 1, CustomColumns.get_names(), contributors_pair[1]))
+        self.setCellWidget(row, 1, DuplicColumnComboBox(self, 1, contributors_pair[1]))
         
         self.resizeColumnsToContents()
         self.blockSignals(False)
@@ -420,36 +402,36 @@ class ContributorsEditTableWidget(QTableWidget):
 
 class ContributorsComboBox(KeyValueComboBox):
     def __init__(self, table, column, selected_contributors):
-        KeyValueComboBox.__init__(self, table, CONTRIBUTORS_ROLES, selected_contributors, initial_items=[''])
+        KeyValueComboBox.__init__(self, table, CONTRIBUTORS_ROLES, selected_contributors, values_ToolTip=CONTRIBUTORS_DESCRIPTION)
         self.table = table
         self.column = column
         self.currentIndexChanged.connect(self.test_contributors_changed)
-        self.refreshToolTipContributors()
+    
+    def wheelEvent(self, event):
+        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
+        event.ignore()
     
     def test_contributors_changed(self, val):
         de = duplicate_entry([self.table.cellWidget(row, self.column).currentText() for row in range(self.table.rowCount())])
-        self.refreshToolTipContributors()
         if de.count(''): de.remove('')
         if de and de.count(self.currentText()):
             warning_dialog(self, _('Duplicate Contributors type'),
                 _('A Contributor was duplicated!\nChange the settings so that each contributor is present only once, otherwise the settings can not be saved.\n\nDuplicate type:')
                 + '\n' + '\n'.join(de),
                 show=True, show_copy_button=False)
-    
-    def refreshToolTipContributors(self):
-        code = self.selected_key()
-        if code and code in CONTRIBUTORS_DERCRIPTION:
-            self.setToolTip(CONTRIBUTORS_DERCRIPTION[code])
-        else:
-            self.setToolTip('')
+
 
 class DuplicColumnComboBox(CustomColumnComboBox):
-    def __init__(self, table, column, customColumns, selected_column):
-        CustomColumnComboBox.__init__(self, table, customColumns, selected_column, initial_items=[''])
+    def __init__(self, table, column, selected_column):
+        CustomColumnComboBox.__init__(self, table, CustomColumns.get_names(), selected_column, initial_items=[''])
         self.table = table
         self.column = column
         self.currentIndexChanged.connect(self.test_column_changed)
-        
+    
+    def wheelEvent(self, event):
+        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
+        event.ignore()
+    
     def test_column_changed(self, val):
         de = duplicate_entry([self.table.cellWidget(row, self.column).currentText() for row in range(self.table.rowCount())])
         if de.count(''): de.remove('')

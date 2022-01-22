@@ -31,9 +31,9 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 from polyglot.builtins import iteritems
 
-from calibre_plugins.epub_contributors_metadata.config import ICON, PREFS, KEY
-from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, CustomExceptionErrorDialog
-from calibre_plugins.epub_contributors_metadata.epub_editor import read_contributors, write_contributors
+from calibre_plugins.epub_contributors_metadata.config import ICON, PREFS, KEY, CustomColumns
+from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, has_restart_pending, CustomExceptionErrorDialog
+from calibre_plugins.epub_contributors_metadata.epub_contributors import read_contributors, write_contributors
 
 GUI = get_gui()
 
@@ -45,7 +45,7 @@ class ePubContributorsMetadataAction(InterfaceAction):
     
     name = 'Edit Contributors Metadata'
     # Create our top-level menu/toolbar action (text, icon_path, tooltip, keyboard shortcut)
-    action_spec = (_('Edit Contributors Metadata'), None, _('Edit the Contributors Metadata the ePub file'), None)
+    action_spec = (_('Edit Contributors Metadata'), None, _('Edit the Contributors Metadata of the ePub files'), None)
     #popup_type = QToolButton.MenuButtonPopup
     popup_type = QToolButton.InstantPopup
     action_type = 'current'
@@ -119,7 +119,8 @@ class ePubContributorsMetadataAction(InterfaceAction):
         
     
     def show_configuration(self):
-        self.interface_action_base_plugin.do_user_config(GUI)
+        if not has_restart_pending():
+            self.interface_action_base_plugin.do_user_config(GUI)
     
     def getBookIds(self):
         if not self.is_library_selected:
@@ -296,6 +297,7 @@ class ePubContributorsProgressDialog(QProgressDialog):
                 if self.prefs:  #no need to read/write in the ePub when no columns are defined
                     if contributors == VALUE.IMPORT:
                         for role, field in self.prefs.items():
+                            contributors = read_contributors(epub_path)
                             if set_contributor_DB(book_id, self.dbAPI, miA, role, field, contributors):
                                 if book_id not in import_id:
                                     import_id[book_id] = []

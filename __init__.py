@@ -31,10 +31,10 @@ class ActionMassSearchReplace(InterfaceActionBase, FileTypePlugin):  ## FileType
     calibre utilities to run without needing to load the GUI libraries.
     '''
     name                    = 'ePub Contributors Metadata'
-    description             = _('Read and Write the Contributors Metadata in the ePub file')
+    description             = _('Read and write the metadata of the contributors in the ePub file all by associating them to columns in your libraries')
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
-    version                 = (0, 1, 0)
+    version                 = (-1,'dev')
     minimum_calibre_version = (4, 0, 0)
     
     #: This field defines the GUI plugin class that contains all the code

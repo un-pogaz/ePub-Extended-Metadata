@@ -26,6 +26,7 @@ from collections import OrderedDict
 t = _("//// MARC CONTRIBUTORS ROLES")
 # https://www.loc.gov/marc/relators/relacode.html
 CONTRIBUTORS_ROLES = OrderedDict([
+    ("", ""),
     ("abr", _("Abridger")),
     ("act", _("Actor")),
     ("adp", _("Adapter")),
@@ -294,9 +295,9 @@ CONTRIBUTORS_ROLES = OrderedDict([
     ("wst", _("Writer of supplementary textual content"))
 ])
 
-t = _("//// MARC CONTRIBUTORS DERCRIPTION")
+t = _("//// MARC CONTRIBUTORS DESCRIPTION")
 #https://www.loc.gov/marc/relators/relaterm.html
-CONTRIBUTORS_DERCRIPTION = OrderedDict([
+CONTRIBUTORS_DESCRIPTION = OrderedDict([
     ("abr" , _("A person, family, or organization contributing to a resource by shortening or condensing the original work but leaving the nature and content of the original work substantially unchanged. For substantial modifications that result in the creation of a new work, see Author.") ),
     ("act" , _("Use for a person or organization who principally exhibits acting skills in a musical or dramatic presentation or entertainment.") ),
     ("adp" , _("Use for a person or organization who 1) reworks a musical composition, usually for a different medium, or 2) rewrites novels or stories for motion pictures or other audiovisual medium.") ),

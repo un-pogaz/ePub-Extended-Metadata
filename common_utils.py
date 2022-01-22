@@ -28,10 +28,9 @@ except ImportError:
                             QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
                             QTextEdit, QListWidget, QAbstractItemView)
 
-
 from calibre import prints
 from calibre.constants import iswindows, DEBUG
-from calibre.gui2 import gprefs, error_dialog, UNDEFINED_QDATETIME, info_dialog
+from calibre.gui2 import gprefs, error_dialog, info_dialog, show_restart_warning, UNDEFINED_QDATETIME
 from calibre.gui2.actions import menu_action_unique_name
 from calibre.gui2.complete2 import EditWithComplete
 from calibre.gui2.ui import get_gui
@@ -239,6 +238,15 @@ def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=No
     return ac
 
 
+def has_restart_pending(show_warning=True, msg_warning=None):
+    restart_pending = GUI.must_restart_before_config
+    if restart_pending and show_warning:
+        msg = msg_warning if msg_warning else _('You cannot configure this plugin before calibre is restarted.')
+        if show_restart_warning(msg):
+            GUI.quit(restart=True)
+    return restart_pending
+
+
 class ImageTitleLayout(QHBoxLayout):
     '''
     A reusable layout widget displaying an image followed by a title
@@ -319,7 +327,7 @@ class RatingTableWidgetItem(QTableWidgetItem):
 
 class DateTableWidgetItem(QTableWidgetItem):
     def __init__(self, date_read, is_read_only=False, default_to_today=False, fmt=None):
-        if (date_read == UNDEFINED_DATE) and default_to_today:
+        if date_read == UNDEFINED_DATE and default_to_today:
             date_read = now()
         if is_read_only:
             QTableWidgetItem.__init__(self, format_date(date_read, fmt))
@@ -331,7 +339,7 @@ class DateTableWidgetItem(QTableWidgetItem):
 
 class NoWheelComboBox(QComboBox):
     
-    def wheelEvent (self, event):
+    def wheelEvent(self, event):
         # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
         event.ignore()
 
@@ -403,19 +411,18 @@ class ListComboBox(QComboBox):
         return unicode(self.currentText())
 
 class KeyValueComboBox(QComboBox):
-    def __init__(self, parent, values, selected_key=None, initial_items=None):
+    def __init__(self, parent, values, selected_key=None, values_ToolTip={}):
         QComboBox.__init__(self, parent)
-        self.populate_combo(values, selected_key, initial_items)
+        self.populate_combo(values, selected_key, values_ToolTip)
+        self.refresh_ToolTip()
+        self.currentIndexChanged.connect(self.key_value_changed)
     
-    def populate_combo(self, values, selected_key=None, initial_items=None):
+    def populate_combo(self, values, selected_key=None, values_ToolTip={}):
         self.clear()
+        self.values_ToolTip = values_ToolTip
         self.values = values
-        if initial_items == None: initial_items = []
         
         selected_idx = start = 0
-        for start, init in enumerate(initial_items, 1):
-            self.addItem(init)
-        
         for idx, (key, value) in enumerate(self.values.items(), start):
             self.addItem(value)
             if key == selected_key:
@@ -428,23 +435,35 @@ class KeyValueComboBox(QComboBox):
         for key, value in self.values.items():
             if value == currentText:
                 return key
+    
+    def key_value_changed(self, val):
+        self.refresh_ToolTip()
+    
+    def refresh_ToolTip(self):
+        if self.values_ToolTip:
+            self.setToolTip(self.values_ToolTip.get(self.selected_key(), ''))
+        else:
+            self.setToolTip('')
 
 class CustomColumnComboBox(QComboBox):
-    def __init__(self, parent, custom_columns={}, selected_column='', initial_items=['']):
+    def __init__(self, parent, custom_columns, selected_column='', initial_items=['']):
         QComboBox.__init__(self, parent)
         self.populate_combo(custom_columns, selected_column, initial_items)
+        self.refresh_ToolTip()
+        self.currentIndexChanged.connect(self.column_changed)
     
     def populate_combo(self, custom_columns, selected_column='', initial_items=['']):
         self.clear()
+        self.custom_columns = custom_columns
         self.column_names = list()
         if initial_items == None: initial_items = []
         
         selected_idx = start = 0
         for start, init in enumerate(initial_items, 1):
-            self.column_names.append('')
+            self.column_names.append(init)
             self.addItem(init)
         
-        for idx, (key, value) in enumerate(custom_columns.items(), start):
+        for idx, (key, value) in enumerate(self.custom_columns.items(), start):
             self.column_names.append(key)
             self.addItem('{:s} ({:s})'.format(key, value.display_name))
             if key == selected_column:
@@ -454,6 +473,16 @@ class CustomColumnComboBox(QComboBox):
     
     def selected_column(self):
         return self.column_names[self.currentIndex()]
+    
+    def column_changed(self, val):
+        self.refresh_ToolTip()
+    
+    def refresh_ToolTip(self):
+        cc = self.custom_columns.get(self.selected_column(), None)
+        if cc:
+            self.setToolTip(cc.description)
+        else:
+            self.setToolTip('')
 
 class ReorderedComboBox(QComboBox):
     def __init__(self, parent, strip_items=True):
@@ -708,7 +737,6 @@ def CustomExceptionErrorDialog(parent, exception, custome_title=None, custome_ms
     return error_dialog(parent, custome_title, msg, det_msg=fe, show=show, show_copy_button=True)
 
 
-
 class PREFS_library(dict):
     '''
     Create a dictionary of preference stored in the library
@@ -837,6 +865,7 @@ class CustomColumns():
     @property string (read-only) to identify the CustomColumns instance
         name
         display_name
+        description
     
     @property bool (read-only) of CustomColumns instance
     that which identifies the type of the CustomColumns
@@ -870,7 +899,6 @@ class CustomColumns():
         composite_sort = string > one of then ['text', 'number', 'date', 'bool']
         composite_template = string()
         datatype = string()
-        description = string()
         display = {} // contains an arbitrary data set. reanalys in other property
         enum_colors = string[]
         enum_values = string[]
@@ -993,7 +1021,7 @@ class CustomColumns():
         self._name = name
         self._src_dict = src_dict
     
-    def __repr__ (self):
+    def __repr__(self):
         #<calibre_plugins.epub_contributors_metadata.common_utils.CustomColumns instance at 0x1148C4B8>
         #''.join(['<', str(self.__class__), ' instance at ', hex(id(self)),'>'])
         return ''.join(['<"',self._name,'"', str(self._get_type()),'>'])

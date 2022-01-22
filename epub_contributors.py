@@ -31,7 +31,6 @@ from calibre_plugins.epub_contributors_metadata.container import ContainerOpfStr
 
 
 
-
 def read_contributors(epub_path):
     contributors = {}
     
@@ -40,7 +39,6 @@ def read_contributors(epub_path):
         contributors = _read_contributors(container)
     
     return contributors
-
 
 def write_contributors(epub_path, contributors):
     debug_print('write_contributors()')
