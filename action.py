@@ -31,9 +31,9 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 from polyglot.builtins import iteritems
 
-from calibre_plugins.epub_contributors_metadata.config import ICON, PREFS, KEY, CustomColumns
-from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, has_restart_pending, CustomExceptionErrorDialog
-from calibre_plugins.epub_contributors_metadata.epub_contributors import read_contributors, write_contributors
+from .config import ICON, PREFS, KEY, CustomColumns
+from .common_utils import debug_print, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, has_restart_pending, CustomExceptionErrorDialog
+from .epub_contributors import read_contributors, write_contributors
 
 GUI = get_gui()
 
@@ -241,12 +241,12 @@ class ePubContributorsProgressDialog(QProgressDialog):
         if self.import_count:
             debug_print('Contributors read for {:d} books with a total of {:d} fields modify.'.format(self.import_count, self.import_field_count))
         else:
-            debug_print('No Contributors read from books.')
+            debug_print('No Contributors read from selected books.')
         
         if self.export_count:
             debug_print('Contributors write for {:d} books.'.format(self.export_count))
         else:
-            debug_print('No Contributors write in books.')
+            debug_print('No Contributors write in selected books.')
         
             debug_print('ePub Contributors execute in {:0.3f} seconds.\n'.format(self.time_execut))
             

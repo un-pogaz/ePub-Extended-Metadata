@@ -26,8 +26,8 @@ from calibre import prints
 from calibre.constants import numeric_version as calibre_version
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 
-from calibre_plugins.epub_contributors_metadata.common_utils import debug_print
-from calibre_plugins.epub_contributors_metadata.container import ContainerOpfStream, NAMESPACES
+from .common_utils import debug_print
+from .container import ContainerOpfStream, NAMESPACES
 
 
 

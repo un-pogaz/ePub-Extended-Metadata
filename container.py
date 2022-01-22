@@ -23,7 +23,7 @@ from calibre.ebooks.chardet import xml_to_unicode
 from calibre.ebooks.oeb.parse_utils import RECOVER_PARSER
 from calibre.utils.zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED
 
-from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, equals_no_case
+from .common_utils import debug_print, equals_no_case
 
 
 NS_OCF = 'urn:oasis:names:tc:opendocument:xmlns:container'

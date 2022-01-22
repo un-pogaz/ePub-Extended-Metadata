@@ -43,8 +43,8 @@ from calibre.gui2.widgets2 import Dialog
 from calibre.ebooks.metadata import string_to_authors
 from calibre.library.field_metadata import FieldMetadata
 
-from calibre_plugins.epub_contributors_metadata.common_utils import debug_print, PREFS_library, CustomColumns, equals_no_case, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
-from calibre_plugins.epub_contributors_metadata.marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION
+from .common_utils import debug_print, PREFS_library, CustomColumns, equals_no_case, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
+from .marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION
 
 GUI = get_gui()
 
