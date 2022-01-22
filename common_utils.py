@@ -157,7 +157,8 @@ def get_local_images_dir(subfolder=None):
     return images_dir
 
 
-def get_library_uuid(db):
+def get_library_uuid(db=None):
+    db = db or getattr(GUI,'current_db', None) 
     try:
         library_uuid = db.library_id
     except:
@@ -202,8 +203,8 @@ def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=No
     '''
     orig_shortcut = shortcut
     kb = GUI.keyboard
-    if unique_name is None:
-        unique_name = menu_text
+    unique_name = unique_name or menu_text
+        
     if not shortcut == False:
         full_unique_name = menu_action_unique_name(ia, unique_name)
         if full_unique_name in kb.shortcuts:
@@ -215,8 +216,7 @@ def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=No
                 else:
                     shortcut = _(shortcut)
     
-    if shortcut_name is None:
-        shortcut_name = menu_text.replace('&','')
+    shortcut_name = shortcut_name = menu_text.replace('&','')
     
     ac = ia.create_menu_action(parent_menu, unique_name, menu_text, icon=None, shortcut=shortcut,
         description=tooltip, triggered=triggered, shortcut_name=shortcut_name)
@@ -314,11 +314,12 @@ class SizePersistedDialog(QDialog):
 
 
 class ReadOnlyTableWidgetItem(QTableWidgetItem):
-    def __init__(self, text):
-        if text is None:
-            text = ''
+    def __init__(self, text, align=Qt.AlignLeft):
+        text = text or ''
+        align = align or Qt.AlignLeft
         QTableWidgetItem.__init__(self, text)
         self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
+        self.setTextAlignment(align)
 
 class RatingTableWidgetItem(QTableWidgetItem):
     def __init__(self, rating, is_read_only=False):
@@ -338,12 +339,6 @@ class DateTableWidgetItem(QTableWidgetItem):
             QTableWidgetItem.__init__(self, '')
             dt = UNDEFINED_QDATETIME if date_read is None else QDateTime(date_read)
             self.setData(Qt.DisplayRole, dt)
-
-class NoWheelComboBox(QComboBox):
-    
-    def wheelEvent(self, event):
-        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
-        event.ignore()
 
 class CheckableTableWidgetItem(QTableWidgetItem):
     def __init__(self, checked=False, is_tristate=False):
@@ -380,17 +375,22 @@ class TextIconWidgetItem(QTableWidgetItem):
             self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
 
 class ReadOnlyTextIconWidgetItem(ReadOnlyTableWidgetItem):
-    def __init__(self, text, icon):
-        ReadOnlyTableWidgetItem.__init__(self, text)
-        if icon:
-            self.setIcon(icon)
+    def __init__(self, text, icon, align=Qt.AlignLeft):
+        ReadOnlyTableWidgetItem.__init__(self, text, align)
+        if icon: self.setIcon(icon)
+
 
 class ReadOnlyLineEdit(QLineEdit):
     def __init__(self, text, parent):
-        if text is None:
-            text = ''
+        text = text or ''
         QLineEdit.__init__(self, text, parent)
         self.setEnabled(False)
+
+class NoWheelComboBox(QComboBox):
+    
+    def wheelEvent(self, event):
+        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
+        event.ignore()
 
 class ListComboBox(QComboBox):
     def __init__(self, parent, values, selected_value=None):
@@ -458,7 +458,7 @@ class CustomColumnComboBox(QComboBox):
         self.clear()
         self.custom_columns = custom_columns
         self.column_names = list()
-        if initial_items == None: initial_items = []
+        initial_items = initial_items or []
         
         selected_idx = start = 0
         for start, init in enumerate(initial_items, 1):
@@ -639,7 +639,7 @@ class regex():
         
         #set the default flag
         self.flag = flag
-        if self.flag == None:
+        if not self.flag:
             if PYTHON[0] == 2:
                 self.flag = re.MULTILINE + re.DOTALL
             else:
@@ -648,30 +648,30 @@ class regex():
             
     
     def match(self, pattern, string, flag=None):
-        if flag == None: flag = self.flag
+        flag = flag or self.flag
         return re.fullmatch(pattern, string, flag)
     
     def search(self, pattern, string, flag=None):
-        if flag == None: flag = self.flag
+        flag = flag or self.flag
         return re.search(pattern, string, flag)
     
     def searchall(self, pattern, string, flag=None):
-        if flag == None: flag = self.flag
+        flag = flag or self.flag
         if self.search(pattern, string, flag):
             return re.finditer(pattern, string, flag)
         else:
             return None
     
     def split(self, pattern, string, maxsplit=0, flag=None):
-        if flag == None: flag = self.flag
+        flag = flag or self.flag
         return re.split(pattern, string, maxsplit, flag)
     
     def simple(self, pattern, repl, string, flag=None):
-        if flag == None: flag = self.flag
+        flag = flag or self.flag
         return re.sub(pattern, repl, string, 0, flag)
     
     def loop(self, pattern, repl, string, flag=None):
-        if flag == None: flag = self.flag
+        flag = flag or self.flag
         i = 0
         while self.search(pattern, string, flag):
             if i > 1000:

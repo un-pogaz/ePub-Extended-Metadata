@@ -43,7 +43,7 @@ from calibre.gui2.widgets2 import Dialog
 from calibre.ebooks.metadata import string_to_authors
 from calibre.library.field_metadata import FieldMetadata
 
-from .common_utils import debug_print, PREFS_library, CustomColumns, equals_no_case, duplicate_entry, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, KeyboardConfigDialog, get_icon
+from .common_utils import debug_print, PREFS_library, CustomColumns, equals_no_case, duplicate_entry, ImageTitleLayout, KeyValueComboBox, CustomColumnComboBox, ReadOnlyTableWidgetItem, KeyboardConfigDialog, get_icon
 from .marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION
 
 GUI = get_gui()
@@ -184,39 +184,7 @@ class ConfigWidget(QWidget):
         if d.exec_() == d.Accepted:
             GUI.keyboard.finalize()
 
-
-class ContributorsEditDialog(Dialog):
-    def __init__(self, contributors_list=None, book_ids=[]):
-        self.contributors_list = contributors_list
-        self.widget = ContributorsEditTableWidget(contributors_list)
-        Dialog.__init__(self, _('_________________'), 'config_query_SearchReplace')
-    
-    def setup_ui(self):
-        l = QVBoxLayout()
-        self.setLayout(l)
-        l.addWidget(self.widget)
-        l.addWidget(self.bb)
-    
-    def accept(self):
-        
-        err = None
-        
-        if err:
-            if question_dialog(self, _('Invalid operation'),
-                             _('The registering of Find/Replace operation has failed.\n{:s}\nDo you want discard the changes?').format(str(err)),
-                             default_yes=True, show_copy_button=False, override_icon=get_icon('dialog_warning.png')):
-                
-                Dialog.reject(self)
-                return
-            else:
-                return
-        
-        self.operation = self.widget.save_settings()
-        debug_print('Saved operation > {0}\n{1}\n'.format(operation_string(self.operation), self.operation))
-        Dialog.accept(self)
-
-
-COL_NAMES = [_('Contributor type'), _('Column')]
+COL_COLUMNS = [_('Contributor type'), _('Column'), '']
 class ContributorColumnTableWidget(QTableWidget):
     def __init__(self, contributors_pair_list=None, *args):
         QTableWidget.__init__(self, *args)
@@ -228,11 +196,14 @@ class ContributorColumnTableWidget(QTableWidget):
     
     def populate_table(self, contributors_pair_list=None):
         self.clear()
-        self.setColumnCount(len(COL_NAMES))
-        self.setHorizontalHeaderLabels(COL_NAMES)
+        self.setColumnCount(len(COL_COLUMNS))
+        self.setHorizontalHeaderLabels(COL_COLUMNS)
         self.verticalHeader().setDefaultSectionSize(24)
+        self._columnContrib = 0
+        self._columnColumn = 1
+        self._columnSpace = 2
         
-        if contributors_pair_list == None: contributors_pair_list = {}
+        contributors_pair_list = contributors_pair_list or {}
         first = contributors_pair_list.get(KEY.FIRST, KEY.FIRST_DEFAULT)
         contributors_pair_list = KEY.exclude_option(contributors_pair_list)
         
@@ -252,9 +223,10 @@ class ContributorColumnTableWidget(QTableWidget):
     def populate_table_row(self, row, contributors_pair):
         self.blockSignals(True)
         
-        if contributors_pair == None: contributors_pair = ('','')
-        self.setCellWidget(row, 0, ContributorsComboBox(self, 0, contributors_pair[0]))
-        self.setCellWidget(row, 1, DuplicColumnComboBox(self, 1, contributors_pair[1]))
+        contributors_pair = contributors_pair or ('','')
+        self.setCellWidget(row, self._columnContrib, ContributorsComboBox(self, contributors_pair[0]))
+        self.setCellWidget(row, self._columnColumn, DuplicColumnComboBox(self, contributors_pair[1]))
+        self.setItem(row, self._columnSpace, ReadOnlyTableWidgetItem('', Qt.AlignCenter))
         
         self.resizeColumnsToContents()
         self.blockSignals(False)
@@ -289,13 +261,14 @@ class ContributorColumnTableWidget(QTableWidget):
         self.selectRow(row)
         self.scrollToItem(self.currentItem())
     
+    
     def _duplicate_contributors(self):
-        de = duplicate_entry([ self.cellWidget(row, 0).selected_key() for row in range(self.rowCount()) ])
+        de = duplicate_entry([ self.cellWidget(row, self._columnContrib).selected_key() for row in range(self.rowCount()) ])
         if '' in de: de.remove('')
         return de
     
     def _duplicate_columns(self):
-        de = duplicate_entry([ self.cellWidget(row, 1).selected_column() for row in range(self.rowCount()) ])
+        de = duplicate_entry([ self.cellWidget(row, self._columnColumn).selected_column() for row in range(self.rowCount()) ])
         if '' in de: de.remove('')
         return de
     
@@ -307,8 +280,8 @@ class ContributorColumnTableWidget(QTableWidget):
     def get_contributors_columns(self):
         contributors_columns = {}
         for row in range(self.rowCount()):
-            k = self.cellWidget(row, 0).selected_key()
-            v = self.cellWidget(row, 1).selected_column()
+            k = self.cellWidget(row, self._columnContrib).selected_key()
+            v = self.cellWidget(row, self._columnColumn).selected_column()
             
             if k or v:
                 contributors_columns[k if k else str(row)] = v if v else ''
@@ -316,7 +289,37 @@ class ContributorColumnTableWidget(QTableWidget):
         return contributors_columns
 
 
-COL_CONTRIBUTORS = [_('Contributor type'), _('Names')]
+class ContributorsEditDialog(Dialog):
+    def __init__(self, contributors_list=None, book_ids=[]):
+        self.contributors_list = contributors_list
+        self.widget = ContributorsEditTableWidget(contributors_list)
+        Dialog.__init__(self, _('_________________'), 'config_query_SearchReplace')
+    
+    def setup_ui(self):
+        l = QVBoxLayout()
+        self.setLayout(l)
+        l.addWidget(self.widget)
+        l.addWidget(self.bb)
+    
+    def accept(self):
+        
+        err = None
+        
+        if err:
+            if question_dialog(self, _('Invalid operation'),
+                             _('The registering of Find/Replace operation has failed.\n{:s}\nDo you want discard the changes?').format(str(err)),
+                             default_yes=True, show_copy_button=False, override_icon=get_icon('dialog_warning.png')):
+                
+                Dialog.reject(self)
+                return
+            else:
+                return
+        
+        self.operation = self.widget.save_settings()
+        debug_print('Saved operation > {0}\n{1}\n'.format(operation_string(self.operation), self.operation))
+        Dialog.accept(self)
+
+COL_EDITOR = [_('Contributor type'), _('Names')]
 class ContributorsEditTableWidget(QTableWidget):
     def __init__(self, contributors_list=None, *args):
         QTableWidget.__init__(self, *args)
@@ -330,11 +333,11 @@ class ContributorsEditTableWidget(QTableWidget):
     
     def populate_table(self, contributors_list=None):
         self.clear()
-        self.setColumnCount(len(COL_CONTRIBUTORS))
-        self.setHorizontalHeaderLabels(COL_CONTRIBUTORS)
+        self.setColumnCount(len(COL_EDITOR))
+        self.setHorizontalHeaderLabels(COL_EDITOR)
         self.verticalHeader().setDefaultSectionSize(24)
         
-        if contributors_list == None: contributors_list = {}
+        contributors_list = contributors_list or {}
         self.setRowCount(len(contributors_list))
         for row, contributors in enumerate(contributors_list, 0):
             self.populate_table_row(row, contributors)
@@ -344,7 +347,7 @@ class ContributorsEditTableWidget(QTableWidget):
     def populate_table_row(self, row, contributors):
         self.blockSignals(True)
         
-        if contributors == None: contributors = ('','')
+        contributors = contributors or ('','')
         self.setCellWidget(row, 0, ContributorsComboBox(self, 0, contributors[0]))
         self.setCellWidget(row, 1, QTableWidgetItem(' & '.joint(contributors[1])))
         
@@ -393,10 +396,9 @@ class ContributorsEditTableWidget(QTableWidget):
 
 
 class ContributorsComboBox(KeyValueComboBox):
-    def __init__(self, table, column, selected_contributors):
+    def __init__(self, table, selected_contributors):
         KeyValueComboBox.__init__(self, table, CONTRIBUTORS_ROLES, selected_contributors, values_ToolTip=CONTRIBUTORS_DESCRIPTION)
         self.table = table
-        self.column = column
         self.currentIndexChanged.connect(self.test_contributors_changed)
     
     def wheelEvent(self, event):
@@ -413,10 +415,9 @@ class ContributorsComboBox(KeyValueComboBox):
 
 
 class DuplicColumnComboBox(CustomColumnComboBox):
-    def __init__(self, table, column, selected_column):
+    def __init__(self, table, selected_column):
         CustomColumnComboBox.__init__(self, table, CustomColumns.get_names(), selected_column, initial_items=[''])
         self.table = table
-        self.column = column
         self.currentIndexChanged.connect(self.test_column_changed)
     
     def wheelEvent(self, event):

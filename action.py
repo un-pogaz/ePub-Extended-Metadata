@@ -31,8 +31,8 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 from polyglot.builtins import iteritems
 
-from .config import ICON, PREFS, KEY, CustomColumns
-from .common_utils import debug_print, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, has_restart_pending, CustomExceptionErrorDialog
+from .config import ICON, PREFS, KEY
+from .common_utils import debug_print, CustomColumns, set_plugin_icon_resources, get_icon, create_menu_action_unique, create_menu_item, has_restart_pending, CustomExceptionErrorDialog
 from .epub_contributors import read_contributors, write_contributors
 
 GUI = get_gui()
