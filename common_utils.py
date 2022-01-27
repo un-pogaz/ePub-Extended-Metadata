@@ -8,7 +8,8 @@ __copyright__ = '2011, Grant Drake <grant.drake@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
 import os, sys, copy, time
-# calibre Python 3 compatibility.
+# python3 compatibility
+from six.moves import range
 from six import text_type as unicode
 
 try:
@@ -16,58 +17,77 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
+from datetime import datetime
+from collections import defaultdict, OrderedDict
+from functools import partial
+
+try: #polyglot added in calibre 4.0
+    from polyglot.builtins import iteritems, itervalues
+except ImportError:
+    def iteritems(d):
+        return d.iteritems()
+    def itervalues(d):
+        return d.itervalues()
+
 try:
     from qt.core import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
                             QTableWidgetItem, QFont, QLineEdit, QComboBox,
                             QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
-                            QTextEdit, QListWidget, QAbstractItemView)
+                            QTextEdit, QListWidget, QAbstractItemView, QApplication)
     
 except ImportError:
     from PyQt5.Qt import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
                             QTableWidgetItem, QFont, QLineEdit, QComboBox,
                             QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
-                            QTextEdit, QListWidget, QAbstractItemView)
+                            QTextEdit, QListWidget, QAbstractItemView, QApplication)
 
 from calibre import prints
-from calibre.constants import iswindows, DEBUG
+from calibre.constants import iswindows, DEBUG, numeric_version as calibre_version
 from calibre.gui2 import gprefs, error_dialog, info_dialog, show_restart_warning, UNDEFINED_QDATETIME
 from calibre.gui2.actions import menu_action_unique_name
 from calibre.gui2.complete2 import EditWithComplete
 from calibre.gui2.ui import get_gui
 from calibre.gui2.keyboard import ShortcutConfig
 from calibre.gui2.widgets import EnLineEdit
-from calibre.utils.config import config_dir, tweaks
+from calibre.utils.config import config_dir, JSONConfig, tweaks, DynamicConfig
 from calibre.utils.date import now, format_date, qt_to_dt, UNDEFINED_DATE
 from calibre.utils.icu import sort_key
 
 
 PYTHON = sys.version_info
+
 GUI = get_gui()
 
-# Global definition of our plugin name. Used for common functions that require this.
-plugin_name = None
-# Global definition of our plugin resources. Used to share between the xxxAction and xxxBase
-# classes if you need any zip images to be displayed on the configuration dialog.
-plugin_icon_resources = {}
 
-def get__init__attribut(name, default=None):
+def get__init__attribut(name, default=None, use_root_has_default=False):
     '''
-    Retrieve a custom global values at the root of __init__.py // __init__.name
+    Retrieve a attribut at the root plugin (in __init__.py)
     '''
     ns = __name__.split('.')
     ns.pop(-1)
     
-    import importlib
-    rslt = getattr(importlib.import_module('.'.join(ns)), name, default)
+    if use_root_has_default:
+        default = ns[-1]
     
-    if not rslt: #if no attribut and no default, use module name
-        rslt = ns[-1]
-    return rslt
+    import importlib
+    return getattr(importlib.import_module('.'.join(ns)), name, default)
 
-'''
-Defined a custom prefix of this plugin at the root of __init__.py // __init__.DEBUG_PRE
-'''
-DEBUG_PRE = get__init__attribut('DEBUG_PRE')
+def get_plugin_attribut(name, default=None):
+        ns = __name__.split('.')
+        ns.pop(-1)
+        ns = '.'.join(ns)
+        import importlib
+        m = importlib.import_module(ns)
+        from calibre.customize.ui import _initialized_plugins
+        for p in _initialized_plugins:
+            if ns == p.__module__:
+                if hasattr(m, p.__class__.__name__):
+                    return getattr(p, name, default)
+        
+        raise EnvironmentError('The plugin could not be found.')
+
+
+DEBUG_PRE = get__init__attribut('DEBUG_PRE', use_root_has_default=True)
 BASE_TIME = None
 def debug_print(*args):
     
@@ -89,26 +109,67 @@ def equals_no_case(left, right):
 def duplicate_entry(lst):
     return list( set([x for x in lst if lst.count(x) > 1]) )
 
-def set_plugin_icon_resources(name, resources):
+
+PREFS_NAMESPACE = get__init__attribut('PREFS_NAMESPACE', use_root_has_default=True)
+
+
+# Global definition of our plugin name. Used for common functions that require this.
+PLUGIN_NAME = get_plugin_attribut('name')
+
+# Global definition of our plugin resources. Used to share between the xxxAction and xxxBase
+# classes if you need any zip images to be displayed on the configuration dialog.
+PLUGIN_RESOURCES = {}
+
+THEME_COLOR = ['', 'dark', 'light']
+
+def get_theme_color():
+    if calibre_version > (5, 90) and 'user-any' in QIcon.themeName():
+        return THEME_COLOR[1] if QApplication.instance().is_dark_theme else THEME_COLOR[2]
+    return THEME_COLOR[0]
+
+def get_icon_themed(icon_name, theme_color=None):
+    theme_color = theme_color if theme_color != None else get_theme_color()
+    return icon_name.replace('/', '/'+theme_color+'/', 1).replace('//', '/')
+
+def load_plugin_resources(plugin_path, names=[]):
     '''
     Set our global store of plugin name and icon resources for sharing between
     the InterfaceAction class which reads them and the ConfigWidget
     if needed for use on the customization dialog for this plugin.
     '''
-    global plugin_icon_resources, plugin_name
-    plugin_name = name
-    plugin_icon_resources = resources
+    names = names or []
+    
+    if plugin_path is None:
+        raise ValueError('This plugin was not loaded from a ZIP file')
+    ans = {}
+    from calibre.utils.zipfile import ZipFile
+    with ZipFile(plugin_path, 'r') as zf:
+        lst = zf.namelist()
+        for name in names:
+            for color in THEME_COLOR:
+                themed = get_icon_themed(name, color)
+                if themed in lst:
+                    ans[themed] = zf.read(themed)
+    
+    global PLUGIN_RESOURCES
+    PLUGIN_RESOURCES.update(ans)
 
 def get_icon(icon_name=None):
     '''
     Retrieve a QIcon for the named image from the zip file if it exists,
     or if not then from Calibre's image cache.
     '''
+    def themed_icon(icon_name):
+        if calibre_version < (5, 90):
+            return QIcon(I(icon_name))
+        else:
+            return QIcon.ic(icon_name)
+    
     if icon_name:
         pixmap = get_pixmap(icon_name)
         if pixmap is None:
             # Look in Calibre's cache for the icon
-            return QIcon(I(icon_name))
+            return themed_icon(icon_name)
         else:
             return QIcon(pixmap)
     return QIcon()
@@ -118,7 +179,6 @@ def get_pixmap(icon_name):
     Retrieve a QPixmap for the named image
     Any icons belonging to the plugin must be prefixed with 'images/'
     '''
-    global plugin_icon_resources, plugin_name
     
     if not icon_name.startswith('images/'):
         # We know this is definitely not an icon belonging to this plugin
@@ -126,22 +186,44 @@ def get_pixmap(icon_name):
         pixmap.load(I(icon_name))
         return pixmap
     
+    # Build the icon_name according to the theme of the OS or Qt
+    icon_themed = get_icon_themed(icon_name)
+    
     # Check to see whether the icon exists as a Calibre resource
     # This will enable skinning if the user stores icons within a folder like:
     # ...\AppData\Roaming\calibre\resources\images\Plugin Name\
-    if plugin_name:
-        local_images_dir = get_local_images_dir(plugin_name)
-        local_image_path = os.path.join(local_images_dir, icon_name.replace('images/', ''))
+    def get_from_local(name):
+        local_images_dir = get_local_images_dir(PLUGIN_NAME)
+        local_image_path = os.path.join(local_images_dir, name.replace('images/', ''))
         if os.path.exists(local_image_path):
-            pixmap = QPixmap()
-            pixmap.load(local_image_path)
+            pxm = QPixmap()
+            pxm.load(local_image_path)
+            return pxm
+        return None
+    
+    if PLUGIN_NAME:
+        pixmap = get_from_local(icon_themed)
+        if not pixmap:
+            pixmap = get_from_local(icon_name)
+        if pixmap:
             return pixmap
     
+    ##
     # As we did not find an icon elsewhere, look within our zip resources
-    if icon_name in plugin_icon_resources:
-        pixmap = QPixmap()
-        pixmap.loadFromData(plugin_icon_resources[icon_name])
+    global PLUGIN_RESOURCES
+    def get_from_resources(name):
+        if name in PLUGIN_RESOURCES:
+            pxm = QPixmap()
+            pxm.loadFromData(PLUGIN_RESOURCES[name])
+            return pxm
+        return None
+    
+    pixmap = get_from_resources(icon_themed)
+    if not pixmap:
+        pixmap = get_from_resources(icon_name)
+    if pixmap:
         return pixmap
+    
     return None
 
 def get_local_images_dir(subfolder=None):
@@ -151,20 +233,47 @@ def get_local_images_dir(subfolder=None):
     '''
     images_dir = os.path.join(config_dir, 'resources/images')
     if subfolder:
-        images_dir = os.path.join(images_dir, subfolder)
+        images_dir = os.path.join(images_dir, subfolder.replace('/','-'))
+    
     if iswindows:
         images_dir = os.path.normpath(images_dir)
     return images_dir
 
 
+def current_db():
+    '''
+    Safely provides the current_db or None
+    '''
+    return getattr(get_gui(),'current_db', None)
+
 def get_library_uuid(db=None):
-    db = db or getattr(GUI,'current_db', None) 
+    db = db or current_db()
     try:
         library_uuid = db.library_id
     except:
         library_uuid = ''
     return library_uuid
 
+
+def get_selected_BookIds(show_error=True, msg=None):
+    ids = []
+    try:
+        rows = GUI.library_view.selectionModel().selectedRows()
+        if not rows or len(rows) == 0:
+            ids = []
+            
+            if show_error:
+                title = _('No book selected')
+                error_dialog(GUI, title, title +'\n'+ _('Could not to launch {:s}').format(PLUGIN_NAME), show=True, show_copy_button=False)
+            
+        else:
+            ids = GUI.library_view.get_selected_ids()
+    except Exception as err:
+        debug_print(err)
+        CustomExceptionErrorDialog(err)
+        ids = []
+    
+    return ids
 
 def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
                      shortcut=(), triggered=None, is_checked=None):
@@ -314,12 +423,10 @@ class SizePersistedDialog(QDialog):
 
 
 class ReadOnlyTableWidgetItem(QTableWidgetItem):
-    def __init__(self, text, align=Qt.AlignLeft):
+    def __init__(self, text):
         text = text or ''
-        align = align or Qt.AlignLeft
         QTableWidgetItem.__init__(self, text)
         self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
-        self.setTextAlignment(align)
 
 class RatingTableWidgetItem(QTableWidgetItem):
     def __init__(self, rating, is_read_only=False):
@@ -375,8 +482,8 @@ class TextIconWidgetItem(QTableWidgetItem):
             self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
 
 class ReadOnlyTextIconWidgetItem(ReadOnlyTableWidgetItem):
-    def __init__(self, text, icon, align=Qt.AlignLeft):
-        ReadOnlyTableWidgetItem.__init__(self, text, align)
+    def __init__(self, text, icon):
+        ReadOnlyTableWidgetItem.__init__(self, text)
         if icon: self.setIcon(icon)
 
 
@@ -391,6 +498,19 @@ class NoWheelComboBox(QComboBox):
     def wheelEvent(self, event):
         # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
         event.ignore()
+
+class ImageComboBox(NoWheelComboBox):
+    def __init__(self, parent, image_map, selected_text):
+        NoWheelComboBox.__init__(self, parent)
+        self.populate_combo(image_map, selected_text)
+    
+    def populate_combo(self, image_map, selected_text):
+        self.clear()
+        for i, image in enumerate(get_image_names(image_map), 0):
+            self.insertItem(i, image_map.get(image, image), image)
+        idx = self.findText(selected_text)
+        self.setCurrentIndex(idx)
+        self.setItemData(0, idx)
 
 class ListComboBox(QComboBox):
     def __init__(self, parent, values, selected_value=None):
@@ -425,7 +545,7 @@ class KeyValueComboBox(QComboBox):
         self.values = values
         
         selected_idx = start = 0
-        for idx, (key, value) in enumerate(self.values.items(), start):
+        for idx, (key, value) in enumerate(iteritems(self.values), start):
             self.addItem(value)
             if key == selected_key:
                 selected_idx = idx
@@ -434,7 +554,7 @@ class KeyValueComboBox(QComboBox):
     
     def selected_key(self):
         currentText = unicode(self.currentText()).strip()
-        for key, value in self.values.items():
+        for key, value in iteritems(self.values):
             if value == currentText:
                 return key
     
@@ -465,7 +585,7 @@ class CustomColumnComboBox(QComboBox):
             self.column_names.append(init)
             self.addItem(init)
         
-        for idx, (key, value) in enumerate(self.custom_columns.items(), start):
+        for idx, (key, value) in enumerate(iteritems(self.custom_columns), start):
             self.column_names.append(key)
             self.addItem('{:s} ({:s})'.format(key, value.display_name))
             if key == selected_column:
@@ -629,6 +749,13 @@ class KeyboardConfigDialog(SizePersistedDialog):
     def commit(self):
         self.keyboard_widget.commit()
         self.accept()
+    
+    @staticmethod
+    def edit_shortcuts(plugin_action):
+        getattr(plugin_action, 'rebuild_menus', ())()
+        d = KeyboardConfigDialog(plugin_action.action_spec[0])
+        if d.exec_() == d.Accepted:
+            GUI.keyboard.finalize()
 
 
 import re
@@ -705,7 +832,7 @@ def CSS_CleanRules(css):
     css = ' '.join(css)
     return css
 
-def CustomExceptionErrorDialog(parent, exception, custome_title=None, custome_msg=None, show=True):
+def CustomExceptionErrorDialog(exception, custome_title=None, custome_msg=None, show=True):
     
     from polyglot.io import PolyglotStringIO
     import traceback
@@ -732,12 +859,20 @@ def CustomExceptionErrorDialog(parent, exception, custome_title=None, custome_ms
     if custome_msg:
         custome_msg = '<span>' + prepare_string_for_xml(as_unicode(custome_msg +'\n')).replace('\n', '<br>')
     else:
-        custome_msg = ''
+        custome_msg = '<span>' + prepare_string_for_xml(as_unicode(_('The {:s} plugin has encounter a unhandled exception.').format(PLUGIN_NAME)+'\n')).replace('\n', '<br>')
     
     msg = custome_msg + '<b>{:s}</b>: '.format(exception.__class__.__name__) + prepare_string_for_xml(as_unicode(str(exception)))
     
-    return error_dialog(parent, custome_title, msg, det_msg=fe, show=show, show_copy_button=True)
+    return error_dialog(GUI, custome_title, msg, det_msg=fe, show=show, show_copy_button=True)
 
+
+class PREFS_json(JSONConfig):
+    '''
+    Use plugin name to create a JSONConfig file
+    to store the preferences for plugin
+    '''
+    def __init__(self):
+        JSONConfig.__init__(self, 'plugins/'+PLUGIN_NAME)
 
 class PREFS_library(dict):
     '''
@@ -754,8 +889,7 @@ class PREFS_library(dict):
         if not isinstance(defaults, dict):
             raise TypeError("The 'defaults' for the namespaced preference is not a dict")
         
-        
-        self._namespace = get__init__attribut('PREFS_NAMESPACE')
+        self._namespace = PREFS_NAMESPACE
         
         self.refresh()
     
@@ -767,8 +901,8 @@ class PREFS_library(dict):
         return self._namespace
     
     def __call__(self, prefs=None):
-        if prefs is not None:
-            self.set_in_library(prefs)
+        if prefs != None:
+            self.commit(prefs)
         else:
             self.refresh()
         return self
@@ -790,6 +924,7 @@ class PREFS_library(dict):
     def __setitem__(self, key, val):
         self.refresh()
         dict.__setitem__(self, key, val)
+        self.commit()
     
     def set(self, key, val):
         self.__setitem__(key, val)
@@ -800,432 +935,125 @@ class PREFS_library(dict):
             dict.__delitem__(self, key)
         except KeyError:
             pass  # ignore missing keys
+        self.commit()
     
     def __enter__(self):
         self.refresh()
     
     def __exit__(self):
-        self.set_in_library()
+        self.commit()
     
     def __str__(self):
         self.refresh()
-        return dict.__str__(self._append_defaults(copy.copy(self)))
-    
-    
-    def _append_defaults(self, prefs):
-        for k, v in self.defaults.items():
-            if k not in prefs:
-                prefs[k] = v
-        return prefs
+        return dict.__str__(self.deepcopy())
     
     
     def refresh(self):
-        if self._db != getattr(GUI, 'current_db', None):
-            self._db = GUI.current_db
+        new_db = current_db()
+        if new_db != None and self._db != new_db:
+            self._db = new_db
             self.clear()
             self.update(self.get_from_library())
     
     def get_from_library(self):
         rslt = self._db.prefs.get_namespaced(self.namespace, self.key, {})
-        rslt = self._append_defaults(rslt)
         return rslt
     
-    def set_in_library(self, prefs=None):
+    def commit(self, prefs=None):
         self.refresh()
         if prefs is not None:
             self.clear()
             self.update(prefs)
         
-        self._db.prefs.set_namespaced(self.namespace, self.key, self)
+        self._db.prefs.set_namespaced(self.namespace, self.key, self.deepcopy())
         self.refresh()
+    
+    def copy(self):
+        '''
+        get a copy dict of this instance
+        '''
+        rslt = dict.copy(self)
+        for k, v in iteritems(self.defaults):
+            if k not in rslt:
+                rslt[k] = copy.copy(v)
+        return rslt
+    
+    def deepcopy(self):
+        '''
+        get a deepcopy dict of this instance
+        '''
+        rslt = {}
+        for k,v in iteritems(self):
+            rslt[copy.deepcopy(k)] = copy.deepcopy(v)
+        
+        for k, v in iteritems(self.defaults):
+            if k not in rslt:
+                rslt[k] = copy.deepcopy(v)
+        return rslt
+
+class PREFS_dynamic(DynamicConfig):
+    '''
+    Use plugin name to create a DynamicConfig file
+    to store the preferences for plugin
+    '''
+    def __init__(self):
+        DynamicConfig.__init__(self, 'plugins/'+PLUGIN_NAME)
+    
+    def update(self, other, *arg, **kvargs):
+        DynamicConfig.update(self, other, *arg, **kvargs)
+        DynamicConfig.commit(self)
 
 
-class CustomColumns():
-    '''
-    You should only need the following @staticmethod and @property of the CustomColumns:
-    
-    @staticmethod to retrieve the columns by type:
-        get_names()
-        get_tags()
-        get_enumeration()
-        get_float()
-        get_datetime()
-        get_rating()
-        get_series()
-        get_text()
-        get_bool()
-        get_comments()
-        get_html()
-        get_markdown()
-        get_long_text()
-        get_title()
-        get_builded_text()
-        get_builded_tag()
-        get_from_name(name)
-        get_all_custom_columns()
-    
-    @property string (read-only) to identify the CustomColumns instance
-        name
-        display_name
-        description
-    
-    @property bool (read-only) of CustomColumns instance
-    that which identifies the type of the CustomColumns
-        is_bool
-        is_builded_tag
-        is_builded_text
-        is_comments
-        is_composite
-        is_datetime
-        is_enumeration
-        is_float
-        is_integer
-        is_names
-        is_rating
-        is_series
-        is_tags
-        is_text
-        is_html
-        is_long_text
-        is_markdown
-        is_title
-        
-    @property (read-only) of CustomColumns instance
-    return is None if column does not support this element
-        allow_half_stars = bool()
-        category_sort = 'value'
-        colnum = int()
-        column = 'value'
-        composite_contains_html = bool()
-        composite_make_category = bool()
-        composite_sort = string > one of then ['text', 'number', 'date', 'bool']
-        composite_template = string()
-        datatype = string()
-        display = {} // contains an arbitrary data set. reanalys in other property
-        enum_colors = string[]
-        enum_values = string[]
-        heading_position = string > one of then ['text', 'number', 'date', 'bool']
-        is_category = bool()
-        is_csp = False
-        is_custom = True()
-        is_editable = True
-        is_multiple = {} // contains an arbitrary data set. reanalys in other property
-        kind = 'field'
-        label = string()
-        link_column = 'value'
-        names_split_regex_additional = string()
-        rec_index = int()
-        search_terms = []
-        table = string()
-        use_decorations = bool()
-    '''
-    _DB = None
-    _STORED = {}
-    
-    _TYPES = [
-        'is_names',
-        'is_tags',
-        
-        'is_enumeration',
-        'is_float',
-        'is_integer',
-        'is_datetime',
-        'is_rating',
-        'is_series',
-        'is_text',
-        'is_bool',
-        
-        'is_comments',
-        'is_html',
-        'is_markdown',
-        'is_long_text',
-        'is_title',
-        
-        'is_builded_text',
-        'is_builded_tag',
+def decorators(*args):
+    def wrapper(func):
+        for deco in args[::-1]:
+            func=deco(func)
+        func._decorators=args
+        return func
+    return wrapper
+
+#class Foo(object):
+#    @many
+#    @decos
+#    @here
+#    def bar(self):
+#        pass
+
+#class Foo(object):
+#    @decorators(many,decos,here)
+#    def bar(self):
+#        pass
+
+#print(foo.bar._decorators)
+# (<function many at 0xb76d9d14>, <function decos at 0xb76d9d4c>, <function here at 0xb76d9d84>)
+
+
+def get_decorators_names(func):
+    """Returns list of decorators names
+
+    Args:
+        func (Callable): decorated method/function
+
+    Return:
+        List of decorators as strings
+
+    Example:
+        Given:
+
+        @my_decorator
+        @another_decorator
+        def decorated_function():
+            pass
+
+        >>> get_decorators(decorated_function)
+        ['@my_decorator', '@another_decorator']
+
+    """
+    import inspect
+    source = inspect.getsource(func)
+    index = source.find("def ")
+    return [
+        line.strip().split()[0]
+        for line in source[:index].strip().splitlines()
+        if line.strip()[0] == "@"
     ]
-    
-    ## static method (public)
-    
-    @staticmethod
-    def get_all_custom_columns():
-        if CustomColumns._DB != getattr(GUI, 'current_db', None):
-            CustomColumns._DB = GUI.current_db
-            CustomColumns._STORED.clear()
-            lst = []
-            for k,v in GUI.library_view.model().custom_columns.items():
-                lst.append(CustomColumns(k, v))
-            
-            CustomColumns._STORED = {cc.name:cc for cc in sorted(lst,key=CustomColumns._cmp)}
-            
-        return copy.copy(CustomColumns._STORED)
-    
-    @staticmethod
-    def _get_columns_type(type_property):
-        return {cc.name:cc for cc in CustomColumns.get_all_custom_columns().values() if getattr(cc, type_property, False)}
-    
-    @staticmethod
-    def get_from_name(name):
-        return CustomColumns.get_all_custom_columns().get(name, None)
-    
-    @staticmethod
-    def get_names():
-        return CustomColumns._get_columns_type('is_names')
-    @staticmethod
-    def get_tags():
-        return CustomColumns._get_columns_type('is_tags')
-    @staticmethod
-    def get_enumeration():
-        return CustomColumns._get_columns_type('is_enumeration')
-    @staticmethod
-    def get_float():
-        return CustomColumns._get_columns_type('is_float')
-    @staticmethod
-    def get_datetime():
-        return CustomColumns._get_columns_type('is_datetime')
-    @staticmethod
-    def get_rating():
-        return CustomColumns._get_columns_type('is_rating')
-    @staticmethod
-    def get_series():
-        return CustomColumns._get_columns_type('is_series')
-    @staticmethod
-    def get_text():
-        return CustomColumns._get_columns_type('is_text')
-    @staticmethod
-    def get_bool():
-        return CustomColumns._get_columns_type('is_bool')
-    @staticmethod
-    def get_comments():
-        return CustomColumns._get_columns_type('is_comments')
-    @staticmethod
-    def get_html():
-        return CustomColumns._get_columns_type('is_html')
-    @staticmethod
-    def get_markdown():
-        return CustomColumns._get_columns_type('is_markdown')
-    @staticmethod
-    def get_long_text():
-        return CustomColumns._get_columns_type('is_long_text')
-    @staticmethod
-    def get_title():
-        return CustomColumns._get_columns_type('is_title')
-    @staticmethod
-    def get_builded_text():
-        return CustomColumns._get_columns_type('is_builded_text')
-    @staticmethod
-    def get_builded_tag():
-        return CustomColumns._get_columns_type('is_builded_tag')
-    
-    ## class method (internal)
-    
-    def __init__(self, name, src_dict):
-        self._name = name
-        self._src_dict = src_dict
-    
-    def __repr__(self):
-        #<calibre_plugins.epub_contributors_metadata.common_utils.CustomColumns instance at 0x1148C4B8>
-        #''.join(['<', str(self.__class__), ' instance at ', hex(id(self)),'>'])
-        return ''.join(['<"',self._name,'"', str(self._get_type()),'>'])
-    
-    def _get_property_dict(self, predicate=None):
-        import inspect
-        def _predicate(key, value):
-            return True
-        
-        if not predicate:
-            predicate = _predicate
-        
-        return dict(i for i in inspect.getmembers(self) if not inspect.ismethod(i[1]) and not inspect.isfunction(i[1]) and predicate(*i))
-    
-    def _get_type(self):
-        def _predicate(key, value):
-            return key in self._TYPES and value
-        return self._get_property_dict(_predicate)
-    
-    def _cmp(self):
-        return self.name.lower()
-    
-    @property
-    def name(self):
-        return self._name
-    @property
-    def display_name(self):
-        return self._src_dict.get('name', None)
-    @property
-    def description(self):
-        return self.display.get('description', None)
-    
-    @property
-    def is_names(self):
-        return self.datatype == 'text' and self.is_multiple and self.display.get('is_names', False)
-    @property
-    def is_tags(self):
-        return self.datatype == 'text' and self.is_multiple and not self.display.get('is_names', False)
-    
-    @property
-    def names_split_regex_additional(self):
-        from calibre.utils.config import tweaks
-        return tweaks['authors_split_regex']
-    
-    @property
-    def is_text(self):
-        return self.datatype == 'text' and not self.is_multiple
-    @property
-    def is_float(self):
-        return self.datatype == 'float'
-    @property
-    def is_integer(self):
-        return self.datatype == 'int'
-    @property
-    def is_datetime(self):
-        return self.datatype == 'datetime'
-    @property
-    def is_rating(self):
-        return self.datatype == 'rating'
-    @property
-    def is_series(self):
-        return self.datatype == 'series'
-    @property
-    def is_bool(self):
-        return self.datatype == 'bool'
-    @property
-    def is_enumeration(self):
-        return self.datatype == 'enumeration'
-    
-    @property
-    def enum_values(self):
-        if self.is_enumeration:
-            return self.display.get('enum_values', None)
-        else:
-            return None
-    @property
-    def enum_colors(self):
-        if self.is_enumeration:
-            return self.display.get('enum_colors', None)
-        else:
-            return None
-    
-    @property
-    def is_comments(self):
-        return self.datatype == 'comments'
-    @property
-    def is_html(self):
-        return self.is_comments and self.display.get('interpret_as', None) == 'html'
-    @property
-    def is_markdown(self):
-        return self.is_comments and self.display.get('interpret_as', None) == 'markdown'
-    @property
-    def is_title(self):
-        return self.is_comments and self.display.get('interpret_as', None) == 'short-text'
-    @property
-    def is_long_text(self):
-        return self.is_comments and self.display.get('interpret_as', None)== 'long-text'
-    
-    @property
-    def heading_position(self):
-        #"hide", "above", "side"
-        if self.is_comments:
-            return self.display.get('heading_position', None)
-        else:
-            return None
-    
-    @property
-    def use_decorations(self):
-        #"hide", "above", "side"
-        if self.is_text or self.is_enumeration or self.is_builded_text:
-            return self.display.get('use_decorations', None)
-        else:
-            return None
-    @property
-    def allow_half_stars(self):
-        if self.is_rating:
-            return self.display.get('allow_half_stars', None)
-        else:
-            return None
-    
-    
-    @property
-    def is_composite(self):
-        return self.datatype == 'composite'
-    @property
-    def is_builded_text(self):
-        return self.is_composite and self.is_multiple
-    @property
-    def is_builded_tag(self):
-        return self.is_composite and not self.is_multiple
-    
-    @property
-    def composite_sort(self):
-        if self.is_composite:
-            return self.display.get('composite_sort', None)
-        else:
-            return None
-    @property
-    def composite_make_category(self):
-        if self.is_composite:
-            return self.display.get('make_category', None)
-        else:
-            return None
-    @property
-    def composite_contains_html(self):
-        if self.is_composite:
-            return self.display.get('contains_html', None)
-        else:
-            return None
-    @property
-    def composite_template(self):
-        if self.is_composite:
-            return self.display.get('composite_template', None)
-        else:
-            return None
-    
-    
-    @property
-    def table(self):
-        return self._src_dict.get('table', None)
-    @property
-    def column(self):
-        return self._src_dict.get('column', None)
-    @property
-    def datatype(self):
-        return self._src_dict.get('datatype', None)
-    @property
-    def kind(self):
-        return self._src_dict.get('kind', None)
-    @property
-    def search_terms(self):
-        return self._src_dict.get('search_terms', None)
-    @property
-    def label(self):
-        return self._src_dict.get('label', None)
-    @property
-    def colnum(self):
-        return self._src_dict.get('colnum', None)
-    @property
-    def display(self):
-        return self._src_dict.get('display', None)
-    @property
-    def is_custom(self):
-        return self._src_dict.get('is_custom', None)
-    @property
-    def is_category(self):
-        return self._src_dict.get('is_category', None)
-    @property
-    def is_multiple(self):
-        return self._src_dict.get('is_multiple', None)
-    @property
-    def link_column(self):
-        return self._src_dict.get('link_column', None)
-    @property
-    def category_sort(self):
-        return self._src_dict.get('category_sort', None)
-    @property
-    def rec_index(self):
-        return self._src_dict.get('rec_index', None)
-    @property
-    def is_editable(self):
-        return self._src_dict.get('is_editable', None)
-    @property
-    def is_csp(self):
-        return self._src_dict.get('is_csp', None)

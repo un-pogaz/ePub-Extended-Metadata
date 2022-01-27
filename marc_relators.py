@@ -7,10 +7,6 @@ __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import os, time
-# calibre Python 3 compatibility.
-from six import text_type as unicode
-
 try:
     load_translations()
 except NameError:
