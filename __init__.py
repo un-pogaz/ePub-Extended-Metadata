@@ -33,9 +33,9 @@ class NAME:
     WRITER              = BASE + ' {Writer}'
 class DESCRIPTION:
     ACTION              = _('Read and write a wider range of metadata for ePub\'s files and associating them to columns in your libraries.')
-    METADATA            = '\n' +_('This is an companion and embeded plugin of "{:s}".').format(NAME.BASE)
-    READER              = _('Write the metadata of the contributors in the ePub file.') + METADATA
-    WRITER              = _('Read the metadata of the contributors from the ePub file.') + METADATA
+    COMPANION            = '\n' +_('This is an companion and embeded plugin of "{:s}".').format(NAME.BASE)
+    READER              = _('Write a wider range of metadata in the ePub file.') + COMPANION
+    WRITER              = _('Read a wider range of metadata from the ePub file.') + COMPANION
 SUPPORTED_PLATFORMS     = ['windows', 'osx', 'linux']
 AUTHOR                  = 'un_pogaz'
 VERSION                 = (-1,-1,-1)
@@ -182,30 +182,14 @@ class ePubExtendedMetadata(InterfaceActionBase):
             return True
         
         def config_widget(self):
-            '''
-            Implement this method and :meth:`save_settings` in your plugin to
-            use a custom configuration dialog.
-            
-            This method, if implemented, must return a QWidget. The widget can have
-            an optional method validate() that takes no arguments and is called
-            immediately after the user clicks OK. Changes are applied if and only
-            if the method returns True.
-            
-            If for some reason you cannot perform the configuration at this time,
-            return a tuple of two strings (message, details), these will be
-            displayed as a warning dialog to the user and the process will be
-            aborted.
-            
-            The base class implementation of this method raises NotImplementedError
-            so by default no user configuration is possible.
-            '''
-            # It is important to put this import statement here rather than at the
-            # top of the module as importing the config class will also cause the
-            # GUI libraries to be loaded, which we do not want when using calibre
-            # from the command line
-            if self.actual_plugin_:
-                from .config import ConfigWidget
-                return ConfigWidget(self.actual_plugin_)
+            from calibre.customize.ui import find_plugin
+            p = find_plugin(ePubExtendedMetadata.name)
+            if p and hasattr(p, 'actual_plugin_'):
+                from .config import ConfigReaderWidget
+                return ConfigReaderWidget(p.actual_plugin_)
+    
+        def save_settings(self, config_widget):
+            config_widget.save_settings()
     
     
     class MetadataWriter(MetadataWriterPlugin):

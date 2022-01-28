@@ -33,14 +33,8 @@ from calibre import prints
 from calibre.gui2.ui import get_gui
 from calibre.library.field_metadata import FieldMetadata
 
-from .common_utils import debug_print, regex
+from .common_utils import debug_print, regex, current_db
 regex = regex()
-
-def current_db():
-    '''
-    Safely provides the current_db or None
-    '''
-    return getattr(get_gui(),'current_db', None)
 
 
 typeproperty_registry = []
@@ -54,21 +48,27 @@ def names_split_regex_additional():
     from calibre.utils.config import tweaks
     return tweaks['authors_split_regex']
 
+def names_string_to_authors(raw_string):
+    from calibre.ebooks.metadata import string_to_authors
+    return string_to_authors(raw_string)
+
+
 
 # get generic
-def get_all_columns_where(predicate=None):
-    '''
-    predicate is a single argument function
-    '''
+def get_columns_from_dict(src_dict, predicate=None):
     def _predicate(column):
         return True
     predicate = predicate or _predicate
-    
-    stored = []
+    return {cm.name:cm for cm in [ColumnsMetadata(fm, k.startswith('#')) for k,fm in iteritems(src_dict)] if cm.name and predicate(cm)}
+
+def get_columns_where(predicate=None):
+    '''
+    predicate is a single argument function
+    '''
     if current_db():
-        stored = [ColumnsMetadata(cc, k.startswith('#')) for k,cc in iteritems(current_db().field_metadata)]
-    
-    return {cc.name:cc for cc in stored if cc.name and predicate(cc)}
+        return get_columns_from_dict(current_db().field_metadata, predicate)
+    else:
+        return {}
 
 def _test_is_custom(column, only_custom):
     if only_custom == True:
@@ -87,12 +87,12 @@ def get_all_columns(only_custom=None, include_composite=False):
         else:
             return _test_is_custom(column, only_custom)
     
-    return get_all_columns_where(predicate)
+    return get_columns_where(predicate)
 
 def get_column_from_name(name):
     def predicate(column):
         return column.name == name
-    for v in itervalues(get_all_columns_where(predicate)):
+    for v in itervalues(get_columns_where(predicate)):
         return v
     return None
 
@@ -108,7 +108,7 @@ def _get_columns_type(parent_func, only_custom):
         else:
             raise ValueError('The parent function has no assosiated property.')
     
-    return get_all_columns_where(predicate)
+    return get_columns_where(predicate)
 
 # get type
 def get_names(only_custom=None):
@@ -242,7 +242,7 @@ def get_possible_fields():
         else:
             return False
     
-    columns = get_all_columns_where(predicate)
+    columns = get_columns_where(predicate)
     
     all_fields = [cc.name for cc in itervalues(columns)]
     all_fields.sort()
@@ -259,7 +259,7 @@ def get_possible_columns():
         else:
             return False
     
-    return standard + sorted(get_all_columns_where(predicate).keys())
+    return standard + sorted(get_columns_where(predicate).keys())
 
 def get_possible_idents():
     return current_db().get_all_identifier_types()
@@ -349,8 +349,18 @@ class ColumnsMetadata():
     '''
     
     def __init__(self, metadata, is_custom=True):
-        self.metadata = metadata
+        self.metadata = copy.deepcopy(metadata)
         self._custom = is_custom
+        self._is_multiple = self.metadata['is_multiple']
+        
+        if self.is_csp:
+            self._is_multiple = MutipleValue({'ui_to_list': ',', 'list_to_ui': ', ', 'cache_to_list': ','})
+        if self._is_multiple:
+            self._is_multiple = MutipleValue(self._is_multiple)
+        else:
+            self._is_multiple = None
+        
+        
     
     def __repr__(self):
         #<calibre_plugins. __module__ .common_utils.ColumnsMetadata instance at 0x1148C4B8>
@@ -437,7 +447,7 @@ class ColumnsMetadata():
         return bool(self.label == 'authors' or self.datatype == 'text' and self.is_multiple and self.display.get('is_names', False))
     @typeproperty
     def is_tags(self):
-        return bool(self.label not in ['authors', 'identifiers'] and self.datatype == 'text' and self.is_multiple and not self.display.get('is_names', False))
+        return bool(self.label == 'tags' or self.datatype == 'text' and self.is_multiple and not (self.label == 'authors' or self.display.get('is_names', False) or self.is_csp))
     
     @typeproperty
     def is_title(self):
@@ -614,7 +624,7 @@ class ColumnsMetadata():
         return self.metadata.get('is_category', None)
     @property
     def is_multiple(self):
-        return self.is_csp or self.metadata.get('is_multiple', None)
+        return self._is_multiple
     @property
     def link_column(self):
         return self.metadata.get('link_column', None)
@@ -631,3 +641,21 @@ class ColumnsMetadata():
     def is_csp(self):
         '''Colon-Separated Pairs field "identifiers"'''
         return self.metadata.get('is_csp', None)
+
+
+class MutipleValue():
+    def __init__(self, data):
+        self._data = data
+    
+    def __repr__(self):
+        return self._data
+    
+    @property
+    def ui_to_list(self):
+        return self._data.get('ui_to_list', None)
+    @property
+    def list_to_ui(self):
+        return self._data.get('list_to_ui', None)
+    @property
+    def cache_to_list(self):
+        return self._data.get('cache_to_list', None)

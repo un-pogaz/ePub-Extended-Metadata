@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-01-25 10:23+0100\n"
+"POT-Creation-Date: 2022-01-28 16:27+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -15,160 +15,176 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 
 #: __init__.py:35
-msgid "Read and write the metadata of the contributors of ePub's files and associating them to columns in your libraries."
-msgstr "Lire et écrire les métadonnées des contributeurs dans le fichier ePub tout en les associant à des colonnes dans vos bibliothèques."
+msgid "Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries."
+msgstr ""
 
 #: __init__.py:36
 msgid "This is an companion and embeded plugin of \"{:s}\"."
 msgstr "Il s'agit d'un plugin compagnon et intégré de \"{:s}\"."
 
 #: __init__.py:37
-msgid "Write the metadata of the contributors in the ePub file."
-msgstr "Ecrivez les métadonnées des contributeurs dans le fichier ePub."
+msgid "Write a wider range of metadata in the ePub file."
+msgstr ""
 
 #: __init__.py:38
-msgid "Read the metadata of the contributors from the ePub file."
-msgstr "Lire les métadonnées des contributeurs à partir du fichier ePub."
+msgid "Read a wider range of metadata from the ePub file."
+msgstr ""
 
-#: action.py:51
-msgid "Edit Contributors Metadata"
-msgstr "Modifier les Contributeurs"
+#: action.py:52
+msgid "Edit the Extended Metadata of the ePub files"
+msgstr ""
 
-#: action.py:51
-msgid "Edit the Contributors Metadata of the ePub files"
-msgstr "Modifier les métadonnées des contributeurs des fichiers ePub"
+#: action.py:74
+msgid "&Embed Extended Metadata"
+msgstr ""
 
-#: action.py:84
-msgid "&Embed contributors"
-msgstr "&Intégrer les Contributeurs"
+#: action.py:79
+msgid "&Import Extended Metadata"
+msgstr ""
 
-#: action.py:89
-msgid "&Import contributors"
-msgstr "&Importer les Contributeurs"
-
-#: action.py:106
+#: action.py:96
 msgid "&Customize plugin..."
 msgstr "&Personnaliser l'extension..."
 
-#: action.py:201
+#: action.py:247
 msgid "Cancel"
 msgstr "Annuler"
 
-#: action.py:203
-msgid "ePub Contributors Metadata Progress"
-msgstr "Progression de ePub Contributors Metadata"
+#: action.py:249
+msgid "ePub Extended Metadata Progress"
+msgstr ""
 
-#: action.py:266
+#: action.py:315
 msgid "Book {:d} of {:d}."
 msgstr "Livre {:d} sur {:d}"
 
-#: common_utils.py:223
+#: common_utils.py:285
 msgid "No book selected"
 msgstr "Aucun livre sélectionné"
 
-#: common_utils.py:224
+#: common_utils.py:286
 msgid "Could not to launch {:s}"
 msgstr "Impossible de lancer {:s}"
 
-#: common_utils.py:312
+#: common_utils.py:374
 msgid "You cannot configure this plugin before calibre is restarted."
 msgstr "Vous ne pouvez pas configurer ce plugin avant le redémarrage de Calibre."
 
-#: common_utils.py:338
+#: common_utils.py:400
 msgid "Restart required"
 msgstr "Redémarrage nécessaire"
 
-#: common_utils.py:339
+#: common_utils.py:401
 msgid "Title image not found - you must restart Calibre before using this plugin!"
 msgstr "L'image d'icone n'a pas était trouvée - vous devriez mieux redémarrer Calibre avant d'utiliser ce plugin !"
 
-#: common_utils.py:684
+#: common_utils.py:745
 msgid "Keyboard shortcut dialog"
 msgstr "Raccourcis clavier"
 
-#: common_utils.py:685
+#: common_utils.py:746
 msgid "Keyboard shortcuts"
 msgstr "Raccourcis clavier"
 
-#: common_utils.py:820
+#: common_utils.py:875
 msgid "Unhandled exception"
 msgstr "Exception non gérée"
 
-#: common_utils.py:825
+#: common_utils.py:880
 msgid "The {:s} plugin has encounter a unhandled exception."
 msgstr "Le plugin {:s} a rencontré une exception non gérée."
 
-#: config.py:120
-msgid "ePub Contributor Metatadata option"
-msgstr "ePub Contributor Metatadata options"
+#: config.py:174
+msgid "ePub Extended Metadata options"
+msgstr ""
 
-#: config.py:135
+#: config.py:185 marc_relators.py:94
+msgid "Contributor"
+msgstr "Contributeur"
+
+#: config.py:195
 msgid "Add menu item"
 msgstr ""
 
-#: config.py:141
+#: config.py:201
 msgid "Delete menu item"
 msgstr ""
 
-#: config.py:153
-msgid "Keyboard shortcuts..."
-msgstr "Raccourcis clavier..."
-
-#: config.py:154
-msgid "Edit the keyboard shortcuts associated with this plugin"
+#: config.py:219
+msgid "ePub 3 metadata"
 msgstr ""
 
-#: config.py:160
+#: config.py:233
 msgid "Embed \"{:s}\" column"
 msgstr ""
 
-#: config.py:161
-msgid "Embed the \"{:s}\" column in the Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column."
+#: config.py:234
+msgid "Embed the \"{:s}\" column as a Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column."
 msgstr ""
 
-#: config.py:165
+#: config.py:240
 msgid "Automatic import"
 msgstr ""
 
-#: config.py:166
-msgid "Automatically import Contributors of new added books."
+#: config.py:241
+msgid "Allows to automatically import the extended metadata when adding a new book to the library"
 msgstr ""
 
-#: config.py:172
+#: config.py:244
+msgid "Automatic embed"
+msgstr ""
+
+#: config.py:245
+msgid "Allows to to automatically embed the extended metadata at the same time as the default Calibre action"
+msgstr ""
+
+#: config.py:253
+msgid "Keyboard shortcuts..."
+msgstr "Raccourcis clavier..."
+
+#: config.py:254
+msgid "Edit the keyboard shortcuts associated with this plugin"
+msgstr ""
+
+#: config.py:259
+msgid "Edit import options"
+msgstr ""
+
+#: config.py:270
 msgid "Duplicate values"
 msgstr ""
 
-#: config.py:173
+#: config.py:271
 msgid ""
 "The current parameters contain duplicate values.\n"
 "Your changes can't be saved and have been cancelled."
 msgstr ""
 
-#: config.py:196 config.py:365
+#: config.py:316
 msgid "Contributor type"
 msgstr "Type de Contributeur"
 
-#: config.py:196
+#: config.py:316
 msgid "Column"
 msgstr ""
 
-#: config.py:256 config.py:413
+#: config.py:374
 msgid "Are you sure you want to delete this menu item?"
 msgstr ""
 
-#: config.py:258 config.py:415
+#: config.py:376
 msgid "Are you sure you want to delete the selected {:d} menu items?"
 msgstr ""
 
-#: config.py:259 config.py:416
+#: config.py:377
 msgid "Are you sure?"
 msgstr ""
 
-#: config.py:308
+#: config.py:426
 msgid "Duplicate Contributors type"
 msgstr "Type de Contributeur en double"
 
-#: config.py:309
+#: config.py:427
 msgid ""
 "A Contributor was duplicated!\n"
 "Change the settings so that each contributor is present only once, otherwise the settings can not be saved.\n"
@@ -176,11 +192,11 @@ msgid ""
 "Duplicate type:"
 msgstr ""
 
-#: config.py:327
+#: config.py:444
 msgid "Duplicate Custom column"
 msgstr "Colonne personnalisée en double"
 
-#: config.py:328
+#: config.py:445
 msgid ""
 "A Custom column was duplicated!\n"
 "Change the settings so that each Custom column is present only once, otherwise the settings can not be saved.\n"
@@ -188,23 +204,40 @@ msgid ""
 "Duplicate column:"
 msgstr ""
 
-#: config.py:338
-msgid "_________________"
+#: config.py:452 config.py:457
+msgid "Keep calibre"
 msgstr ""
 
-#: config.py:351
-msgid "Invalid operation"
+#: config.py:453 config.py:458
+msgid "Erase calibre"
 msgstr ""
 
-#: config.py:352
-msgid ""
-"The registering of Find/Replace operation has failed.\n"
-"{:s}\n"
-"Do you want discard the changes?"
+#: config.py:464
+msgid "Set here the specific option to read and add automatically the metadata"
 msgstr ""
 
-#: config.py:365
-msgid "Names"
+#: config.py:465
+msgid "Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadataand the one already recorded by Calibre."
+msgstr ""
+
+#: config.py:476
+msgid "ePub Extended Metadata import options"
+msgstr ""
+
+#: config.py:488
+msgid "When importing manually:"
+msgstr ""
+
+#: config.py:489
+msgid "The manual import is executed by clicking on \"Import Extended Metadata\" in the menu of 'ePub Extended Metadata'"
+msgstr ""
+
+#: config.py:496
+msgid "During automatic import:"
+msgstr ""
+
+#: config.py:497
+msgid "The auto import is executed when Calibre add a book to the library"
 msgstr ""
 
 #: marc_relators.py:22
@@ -482,10 +515,6 @@ msgstr "Contesté-appelé"
 #: marc_relators.py:93
 msgid "Contractor"
 msgstr "Contractant"
-
-#: marc_relators.py:94
-msgid "Contributor"
-msgstr "Contributeur"
 
 #: marc_relators.py:95
 msgid "Copyright claimant"
@@ -2338,6 +2367,3 @@ msgstr "Une personne, une famille ou un organisme qui contribue à une ressource
 #: marc_relators.py:562
 msgid "A person, family, or organization contributing to a resource by providing supplementary textual content (e.g., an introduction, a preface) to the original work."
 msgstr "Une personne, une famille ou un organisme qui contribue à une ressource en fournissant un contenu textuel supplémentaire (p. ex. une introduction, une préface) à l'œuvre originale."
-
-#~ msgid "ePub Contributors Metadata encountered an unhandled exception."
-#~ msgstr "ePub Contributors Metadata a rencontré une exception non gérée."

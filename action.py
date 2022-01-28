@@ -33,7 +33,7 @@ from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dia
 from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 
-from .config import ICON, PREFS, FIELD, KEY, get_names, plugin_check_enable_library, plugin_realy_enable
+from .config import ICON, PREFS, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
 from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, get_selected_BookIds, load_plugin_resources,
                             create_menu_action_unique, has_restart_pending, CustomExceptionErrorDialog)
 from .container_extended_metadata import read_extended_metadata, write_extended_metadata
@@ -112,7 +112,6 @@ class ePubExtendedMetadataAction(InterfaceAction):
         completed. If your action needs to make changes to the layout, they
         should be done here, rather than in :meth:`initialization_complete`.
         '''
-        from .columns_metadata import get_bool
         plugin_check_enable_library()
     
     def shutting_down(self):
@@ -162,14 +161,57 @@ def set_new_size_DB(epub_path, book_id, dbAPI):
         max_size = dbAPI.fields['formats'].table.update_fmt(book_id, 'EPUB', fname, new_size, dbAPI.backend)
         dbAPI.fields['size'].table.update_sizes({book_id:max_size})
 
-def apply_extended_metadata(miA, prefs, extended_metadata):
+
+def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata=False):
     field_change = []
+    
+    if check_user_metadata:
+        #check if the Metadata object accepts those added
+        from .columns_metadata import get_columns_where, get_columns_from_dict, names_string_to_authors
+        treated_column = [c for c in itervalues(prefs) if isinstance(c, unicode)] + [c for c in itervalues(prefs[KEY.CONTRIBUTORS]) if isinstance(c, unicode)]
+        def predicate(column): # predicate of the columns to be treated
+            return column.is_custom and column.name in treated_column
+        
+        miA_columns = get_columns_from_dict(miA.get_all_user_metadata(True))
+        miA_init_len = len(miA_columns)
+        for k,cc in iteritems(get_columns_where(predicate=predicate)):
+            if not (cc.is_composite or cc.is_csp):
+                if k not in miA_columns:
+                    if cc.is_multiple:
+                        cc.metadata['#value#'] = []
+                    else:
+                        cc.metadata['#value#'] = None
+                    cc.metadata['#extra#'] = None
+                    miA.set_user_metadata(k, cc.metadata)
+                else:
+                    mc = miA_columns[k]
+                    if cc.is_multiple and not mc.is_multiple:
+                        values = []
+                        if cc.is_names:
+                            values = names_string_to_authors(mc.metadata['#value#'])
+                        elif mc.metadata['#value#']:
+                            values = mc.metadata['#value#'].split(cc.is_multiple.ui_to_list)
+                        
+                        cc.metadata['#value#'] = values
+                        cc.metadata['#extra#'] = None
+                        miA.set_user_metadata(k, cc.metadata)
+                    
+                    if not cc.is_multiple and mc.is_multiple:
+                        join = mc.is_multiple.list_to_ui or ', '
+                        values = join.joint(mc.metadata['#value#'])
+                        
+                        cc.metadata['#value#'] = value
+                        cc.metadata['#extra#'] = None
+                        miA.set_user_metadata(k, cc.metadata)
+    
+    
     for data, field in iteritems(prefs):
         if data == KEY.CONTRIBUTORS:
             for role, field in iteritems(prefs[KEY.CONTRIBUTORS]):
                 if field != FIELD.AUTHOR.NAME and role in extended_metadata[KEY.CONTRIBUTORS]:
                     new_value = extended_metadata[KEY.CONTRIBUTORS][role]
-                    if new_value != miA.get(field):
+                    old_value = miA.get(field)
+                    if not (old_value and keep_calibre):
                         miA.set(field, new_value)
                         field_change.append(field)
         else:
@@ -188,11 +230,9 @@ def create_extended_metadata(miA, prefs):
             for role, field in iteritems(prefs[KEY.CONTRIBUTORS]):
                 extended_metadata[KEY.CONTRIBUTORS][role] = miA.get(field, default=[])
         else:
-            if not miA.is_null(field):
-                extended_metadata[data] = miA.get(field, default=None)
+            extended_metadata[data] = miA.get(field, default=None)
     
     return extended_metadata
-
 
 
 class ePubExtendedMetadataProgressDialog(QProgressDialog):
@@ -203,7 +243,7 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
         self.dbAPI = self.db.new_api
         
         # prefs
-        self.prefs = KEY.get_current_prefs()
+        self.prefs = KEY.get_valide_prefs()
         
         # liste of book id
         self.book_ids = book_ids
@@ -317,7 +357,7 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
                     if extended_metadata == VALUE.IMPORT:
                         debug_print('Read ePub Extended Metadata for', book_info,'\n')
                         extended_metadata = read_extended_metadata(epub_path)
-                        import_id[book_id] = apply_extended_metadata(miA, self.prefs, extended_metadata)
+                        import_id[book_id] = apply_extended_metadata(miA, self.prefs, extended_metadata, keep_calibre=PREFS[KEY.KEEP_CALIBRE_MANUAL])
                         if import_id[book_id]:
                             import_mi[book_id] = miA
                         
@@ -365,7 +405,6 @@ import sys, traceback
 from calibre.customize.ui import find_plugin, quick_metadata, apply_null_metadata, force_identifiers, config
 from calibre.customize.builtins import EPUBMetadataReader, EPUBMetadataWriter, ActionEmbed
 
-
 # ePubExtendedMetadata.MetadataReader
 #   get_metadata(stream, type)
 def read_metadata(stream, ftype):
@@ -384,8 +423,7 @@ def read_metadata(stream, ftype):
         
         if hasattr(stream, 'seek'): stream.seek(0)
         extended_metadata = read_extended_metadata(stream)
-        apply_extended_metadata(miA, KEY.get_current_prefs(), extended_metadata)
-        print(miA.get('#trl'))
+        apply_extended_metadata(miA, KEY.get_valide_prefs(), extended_metadata, keep_calibre=PREFS[KEY.KEEP_CALIBRE_AUTO], check_user_metadata=True)
         return miA
 
 # ePubExtendedMetadata.MetadataWriter
@@ -416,6 +454,14 @@ def write_metadata(stream, miA, ftype):
     else:
         #---------------
         # Write Extended Metadata
-        if hasattr(stream, 'seek'): stream.seek(0)
-        extended_metadata = create_extended_metadata(miA, KEY.exclude_invalide(PREFS()))
-        #write_extended_metadata(stream, extended_metadata)
+        try:
+            if hasattr(stream, 'seek'): stream.seek(0)
+            extended_metadata = create_extended_metadata(miA, KEY.get_valide_prefs())
+            #write_extended_metadata(stream, extended_metadata)
+        except:
+            if report_error is None:
+                from calibre import prints
+                prints('Failed to set extended metadata for the', ftype.upper(), 'format of:', getattr(miA, 'title', ''), file=sys.stderr)
+                traceback.print_exc()
+            else:
+                report_error(miA, ftype.upper(), traceback.format_exc())

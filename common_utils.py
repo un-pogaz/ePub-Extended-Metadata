@@ -244,7 +244,24 @@ def current_db():
     '''
     Safely provides the current_db or None
     '''
-    return getattr(get_gui(),'current_db', None)
+    global LAST_DB
+    if hasattr(get_gui(),'current_db'):
+        if LAST_DB: LAST_DB.close()
+        LAST_DB = None
+        return get_gui().current_db
+    else:
+        from calibre.library import db
+        from calibre.utils.config import prefs
+        if LAST_DB and LAST_DB.library_path == prefs['library_path']:
+            return LAST_DB
+        else:
+            if LAST_DB: LAST_DB.close()
+            try:
+                LAST_DB = db(read_only=False)
+                return LAST_DB
+            except:
+                LAST_DB = None
+                return LAST_DB
 
 def get_library_uuid(db=None):
     db = db or current_db()
@@ -564,8 +581,7 @@ class KeyValueComboBox(QComboBox):
     def refresh_ToolTip(self):
         if self.values_ToolTip:
             self.setToolTip(self.values_ToolTip.get(self.selected_key(), ''))
-        else:
-            self.setToolTip('')
+
 
 class CustomColumnComboBox(QComboBox):
     def __init__(self, parent, custom_columns, selected_column='', initial_items=['']):
@@ -945,12 +961,16 @@ class PREFS_library(dict):
     
     def __str__(self):
         self.refresh()
-        return dict.__str__(self.deepcopy())
+        return dict.__str__(self.deepcopy_dict())
+    
+    def update(self, other, *arg, **kvargs):
+        dict.update(self, other, *arg, **kvargs)
+        self.commit()
     
     
     def refresh(self):
         new_db = current_db()
-        if new_db != None and self._db != new_db:
+        if new_db and self._db != new_db:
             self._db = new_db
             self.clear()
             self.update(self.get_from_library())
@@ -965,10 +985,10 @@ class PREFS_library(dict):
             self.clear()
             self.update(prefs)
         
-        self._db.prefs.set_namespaced(self.namespace, self.key, self.deepcopy())
+        self._db.prefs.set_namespaced(self.namespace, self.key, self.deepcopy_dict())
         self.refresh()
     
-    def copy(self):
+    def copy_dict(self):
         '''
         get a copy dict of this instance
         '''
@@ -978,7 +998,7 @@ class PREFS_library(dict):
                 rslt[k] = copy.copy(v)
         return rslt
     
-    def deepcopy(self):
+    def deepcopy_dict(self):
         '''
         get a deepcopy dict of this instance
         '''

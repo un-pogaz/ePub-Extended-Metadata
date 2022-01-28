@@ -51,9 +51,6 @@ from .marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION
 
 GUI = get_gui()
 
-def get_names():
-    from .columns_metadata import get_names
-    return get_names(True)
 
 class ICON:
     PLUGIN    = 'images/plugin.png'
@@ -81,17 +78,13 @@ class KEY:
     OPTION_CHAR = '_'
     AUTO_IMPORT = OPTION_CHAR + 'autoImport'
     AUTO_EMBED = OPTION_CHAR + 'autoEmbed'
-    FIRST = OPTION_CHAR + 'firstConfig'
+    FIRST_CONFIG = OPTION_CHAR + 'firstConfig'
     LINK_AUTHOR = OPTION_CHAR + 'linkAuthors'
     
-    FIRST_DEFAULT = True
+    KEEP_CALIBRE_MANUAL = OPTION_CHAR + 'keepCalibre_Manual'
+    KEEP_CALIBRE_AUTO = OPTION_CHAR + 'keepCalibre_Auto'
     
     CONTRIBUTORS = 'contributors'
-    
-    
-    @staticmethod
-    def exclude_option(prefs):
-        return {k:v for k, v in iteritems(prefs) if not k.startswith(KEY.OPTION_CHAR)}
     
     
     @staticmethod
@@ -112,44 +105,40 @@ class KEY:
         p = KEY.find_plugin(key)
         if p: disable_plugin(p.name)
     
-    
-    SHARED = PREFS_dynamic()
-    SHARED_COLUMNS = OPTION_CHAR +'threadSharedColumns'
+    @staticmethod
+    def get_names():
+        from .columns_metadata import get_names
+        return get_names(True)
     
     @staticmethod
-    def get_current_prefs():
-        prefs = KEY.SHARED.copy()
-        valide_columns = KEY.SHARED[KEY.SHARED_COLUMNS].keys()
-        
+    def get_valide_prefs():
+        prefs = PREFS.deepcopy_dict()
+        valide_names = KEY.get_names().keys()
         link = prefs[KEY.LINK_AUTHOR]
         
-        prefs = KEY.exclude_option(prefs)
-        if not prefs[KEY.CONTRIBUTORS]:
+        prefs = {k:v for k, v in iteritems(prefs) if not k.startswith(KEY.OPTION_CHAR)}
+        
+        
+        if KEY.CONTRIBUTORS not in prefs or not prefs[KEY.CONTRIBUTORS]:
             prefs[KEY.CONTRIBUTORS] = {}
         
         for k, v in iteritems(copy.copy(prefs[KEY.CONTRIBUTORS])):
-            if not k or k not in CONTRIBUTORS_ROLES or not v or v not in valide_columns:
+            if not k or k not in CONTRIBUTORS_ROLES or not v or v not in valide_names:
                 prefs[KEY.CONTRIBUTORS].pop(k, None)
         
         if link:
             prefs[KEY.CONTRIBUTORS][FIELD.AUTHOR.ROLE] = FIELD.AUTHOR.NAME
         return prefs
     
-    def get_columns_prefs():
-        return KEY.SHARED[KEY.SHARED_COLUMNS]
-    
-    @staticmethod
-    def set_current_prefs():
-        KEY.SHARED.update(PREFS.deepcopy())
-        KEY.SHARED[KEY.SHARED_COLUMNS] = { k:v.metadata for k,v in iteritems(get_names())}
-
 
 PREFS = PREFS_library()
 PREFS.defaults[KEY.AUTO_IMPORT] = False
 PREFS.defaults[KEY.AUTO_EMBED] = False
 PREFS.defaults[KEY.LINK_AUTHOR] = False
 PREFS.defaults[KEY.CONTRIBUTORS] = {}
-PREFS.defaults[KEY.FIRST] = KEY.FIRST_DEFAULT
+PREFS.defaults[KEY.FIRST_CONFIG] = True
+PREFS.defaults[KEY.KEEP_CALIBRE_MANUAL] = False
+PREFS.defaults[KEY.KEEP_CALIBRE_AUTO] = True
 
 
 def plugin_check_enable_library():
@@ -162,8 +151,6 @@ def plugin_check_enable_library():
         KEY.enable_plugin(KEY.AUTO_EMBED)
     else:
         KEY.disable_plugin(KEY.AUTO_EMBED)
-    
-    KEY.set_current_prefs()
 
 def plugin_realy_enable(key):
     from calibre.customize.ui import is_disabled
@@ -184,7 +171,7 @@ class ConfigWidget(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Extended Metadata option'))
+        title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Extended Metadata options'))
         layout.addLayout(title_layout)
         
         tabs = QTabWidget(self)
@@ -242,15 +229,21 @@ class ConfigWidget(QWidget):
         # Global options
         option_layout = QHBoxLayout()
         layout.addLayout(option_layout)
+        
+        self.linkAuthors = QCheckBox(_('Embed "{:s}" column').format(FIELD.AUTHOR.COLUMN), self)
+        self.linkAuthors.setToolTip(_('Embed the "{:s}" column as a Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column.').format(FIELD.AUTHOR.COLUMN, FIELD.AUTHOR.LOCAL))
+        self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
+        option_layout.addWidget(self.linkAuthors)
+        
         option_layout.insertStretch(-1)
         
         self.reader_button = QPushButton(_('Automatic import'))
         self.reader_button.setToolTip(_('Allows to automatically import the extended metadata when adding a new book to the library'))
-        plugin_initialized(self.reader_button, KEY.AUTO_IMPORT)
+        button_plugin_initialized(self.reader_button, KEY.AUTO_IMPORT)
         option_layout.addWidget(self.reader_button)
         self.writer_button = QPushButton(_('Automatic embed'))
         self.writer_button.setToolTip(_('Allows to to automatically embed the extended metadata at the same time as the default Calibre action'))
-        plugin_initialized(self.writer_button, KEY.AUTO_EMBED)
+        button_plugin_initialized(self.writer_button, KEY.AUTO_EMBED)
         option_layout.addWidget(self.writer_button)
         
         
@@ -263,10 +256,13 @@ class ConfigWidget(QWidget):
         keyboard_layout.addWidget(keyboard_shortcuts_button)
         keyboard_layout.insertStretch(-1)
         
-        self.linkAuthors = QCheckBox(_('Embed "{:s}" column').format(FIELD.AUTHOR.COLUMN), self)
-        self.linkAuthors.setToolTip(_('Embed the "{:s}" column as a Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column.').format(FIELD.AUTHOR.COLUMN, FIELD.AUTHOR.LOCAL))
-        self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
-        keyboard_layout.addWidget(self.linkAuthors)
+        import_option = QPushButton(_('Edit import options'))
+        if self.reader_button.isEnabled():
+            p = KEY.find_plugin(KEY.AUTO_IMPORT)
+            import_option.clicked.connect(partial(p.do_user_config, self))
+        else:
+            import_option.setEnabled(False)
+        keyboard_layout.addWidget(import_option)
         
     
     def validate(self):
@@ -283,14 +279,14 @@ class ConfigWidget(QWidget):
         prefs[KEY.LINK_AUTHOR] = self.linkAuthors.checkState() == Qt.Checked
         prefs[KEY.AUTO_IMPORT] = self.reader_button.pluginEnable
         prefs[KEY.AUTO_EMBED] = self.writer_button.pluginEnable
-        prefs[KEY.FIRST] = False
+        prefs[KEY.FIRST_CONFIG] = False
         
         if prefs[KEY.LINK_AUTHOR]:
             poped = prefs[KEY.CONTRIBUTORS].pop(FIELD.AUTHOR.ROLE, None)
             if poped:
                 prefs[str(len(prefs[KEY.CONTRIBUTORS])+1)] = poped
         
-        PREFS(prefs)
+        PREFS.update(prefs)
         debug_print('Save settings:\n{0}\n'.format(PREFS))
         plugin_check_enable_library()
     
@@ -298,7 +294,7 @@ class ConfigWidget(QWidget):
         KeyboardConfigDialog.edit_shortcuts(self.plugin_action)
 
 
-def plugin_initialized(button, key):
+def button_plugin_initialized(button, key):
     button.pluginEnable = plugin_realy_enable(key)
     if KEY.find_plugin(key):
         button.clicked.connect(partial(button_plugin_clicked, button, key))
@@ -337,10 +333,9 @@ class ContributorTableWidget(QTableWidget):
         self._columnSpace = 2
         
         contributors_pair_list = contributors_pair_list or {}
-        contributors_pair_list = KEY.exclude_option(contributors_pair_list)
         
-        if PREFS[KEY.FIRST] and not contributors_pair_list:
-            columns = get_names()
+        if PREFS[KEY.FIRST_CONFIG] and not contributors_pair_list:
+            columns = KEY.get_names()
             for role in CONTRIBUTORS_ROLES:
                 for column in columns:
                     if equals_no_case('#'+role, column):
@@ -435,7 +430,7 @@ class ContributorsComboBox(KeyValueComboBox):
 
 class DuplicColumnComboBox(CustomColumnComboBox):
     def __init__(self, table, selected_column):
-        CustomColumnComboBox.__init__(self, table, get_names(), selected_column, initial_items=[''])
+        CustomColumnComboBox.__init__(self, table, KEY.get_names(), selected_column, initial_items=[''])
         self.table = table
         self.currentIndexChanged.connect(self.test_column_changed)
     
@@ -453,7 +448,24 @@ class DuplicColumnComboBox(CustomColumnComboBox):
 
 
 
+OPTION_MANUAL = OrderedDict([
+    (True, _('Keep calibre')),
+    (False, _('Erase calibre'))
+])
+
+OPTION_AUTO = OrderedDict([
+    (True, _('Keep calibre')),
+    (False, _('Erase calibre'))
+])
+
+
 class ConfigReaderWidget(QWidget):
+    
+    head_text = _('Set here the specific option to read and add automatically the metadata')
+    head_conflict = _('Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata'
+                        'and the one already recorded by Calibre.'
+                        '')
+    
     def __init__(self, plugin_action):
         QWidget.__init__(self)
         
@@ -461,7 +473,42 @@ class ConfigReaderWidget(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Contributor Metadata option'))
+        title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Extended Metadata import options'))
         layout.addLayout(title_layout)
+        head = QLabel(self.head_text)
+        head.setWordWrap(True)
+        layout.addWidget(head)
         
+        layout.addWidget(QLabel(''))
         
+        conflict = QLabel(self.head_conflict)
+        conflict.setWordWrap(True)
+        layout.addWidget(conflict)
+        
+        importManual_Label = QLabel(_('When importing manually:'))
+        importManual_ToolTip = _('The manual import is executed by clicking on "Import Extended Metadata" in the menu of \'ePub Extended Metadata\'')
+        importManual_Label.setToolTip(importManual_ToolTip)
+        layout.addWidget(importManual_Label)
+        self.importManual = KeyValueComboBox(self, OPTION_MANUAL, PREFS[KEY.KEEP_CALIBRE_MANUAL])
+        self.importManual.setToolTip(importManual_ToolTip)
+        layout.addWidget(self.importManual)
+        
+        importAuto_Label = QLabel(_('During automatic import:'))
+        importAuto_ToolTip = _('The auto import is executed when Calibre add a book to the library')
+        importAuto_Label.setToolTip(importAuto_ToolTip)
+        layout.addWidget(importAuto_Label)
+        self.importAuto = KeyValueComboBox(self, OPTION_AUTO, PREFS[KEY.KEEP_CALIBRE_AUTO])
+        self.importAuto.setToolTip(importAuto_ToolTip)
+        layout.addWidget(self.importAuto)
+        
+        layout.insertStretch(-1)
+    
+    
+    def save_settings(self):
+        prefs = {}
+        prefs[KEY.KEEP_CALIBRE_AUTO] = self.importAuto.selected_key()
+        prefs[KEY.KEEP_CALIBRE_MANUAL] = self.importManual.selected_key()
+        
+        PREFS.update(prefs)
+        debug_print('Save settings of import:\n{0}\n'.format(prefs))
+    

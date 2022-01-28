@@ -75,12 +75,14 @@ class Container_ePub(object):
         import math
         d, i = math.modf(self.reader.opf.package_version)
         self._version = (int(i), int(d))
+        self._opf = self.reader.opf
         
-        self.reader.opf.metadata
         self._metadata = self.reader.opf.metadata
-        
     
     
+    @property
+    def opf(self):
+        return self._opf
     @property
     def metadata(self):
         return self._metadata
@@ -99,16 +101,11 @@ class Container_ePub(object):
             if equals_no_case(entry, name):
                 return entry
     
-    def _parse_xml(self, data):
-        data = xml_to_unicode(data, strip_encoding_pats=True, assume_utf8=True,
-                             resolve_entities=True)[0].strip()
-        return etree.fromstring(data, parser=RECOVER_PARSER)
-    
     
     def save_opf(self):
         debug_print('save()')
         if self.opf_name:
-            xml_opf = etree.tostring(self.opf, xml_declaration=True, encoding='UTF-8', pretty_print=True)
+            xml_opf = etree.tostring(self.opf.root, xml_declaration=True, encoding='UTF-8', pretty_print=True)
             safe_replace(self.ZIP.fp, self.opf_name, xml_opf.encode('utf-8'))
     
     def __exit__(self, type, value, traceback):
@@ -151,16 +148,18 @@ def write_extended_metadata(epub, extended_metadata):
 
 def _read_extended_metadata(container):
     extended_metadata = {}
+    extended_metadata[KEY.CONTRIBUTORS] = contributors = {}
     if not container.opf_name:
         return extended_metadata
     
     if container.version[0] == 2:
-        extended_metadata[KEY.CONTRIBUTORS] = contributors = {}
         for child in container.metadata.xpath('dc:contributor[@opf:role]', namespaces=NAMESPACES):
             role = child.xpath('@opf:role', namespaces=NAMESPACES)[0]
             if not role in contributors:
                 contributors[role] = []
             contributors[role].append(child.text)
+            
+            
         
         
         
