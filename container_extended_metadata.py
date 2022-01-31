@@ -99,7 +99,11 @@ class ContainerExtendedMetadata(object):
         return self
     
     def save_opf(self):
-        debug_print('save()')
+        if hasattr(etree, 'indent'):
+            etree.indent(self.opf.root, space="  ")
+        else:
+            indent(self.opf.root)
+        
         xml_opf = etree.tostring(self.opf.root, xml_declaration=True, encoding='UTF-8', pretty_print=True)
         
         if self.reader:
@@ -116,6 +120,21 @@ class ContainerExtendedMetadata(object):
     
     def close(self):
         self.ZIP.close()
+
+def indent(elem, level=0):
+    i = "\n" + level*"  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+        for elem in elem:
+            indent(elem, level+1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
 
 
 def read_extended_metadata(epub):
