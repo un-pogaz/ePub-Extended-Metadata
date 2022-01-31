@@ -7,7 +7,7 @@ __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import copy, time
+import copy, time, os
 # python3 compatibility
 from six.moves import range
 from six import text_type as unicode
@@ -33,7 +33,7 @@ from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dia
 from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 
-from .config import ICON, PREFS, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
+from .config import ICON, DYNAMIC, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
 from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, get_selected_BookIds, load_plugin_resources,
                             create_menu_action_unique, has_restart_pending, CustomExceptionErrorDialog)
 from .container_extended_metadata import read_extended_metadata, write_extended_metadata
@@ -153,28 +153,17 @@ class ePubExtendedMetadataAction(InterfaceAction):
         del srpg
 
 
-def set_new_size_DB(epub_path, book_id, dbAPI):
-    new_size = os.path.getsize(epub_path)
-    
-    if new_size is not None:
-        fname = dbAPI.fields['formats'].format_fname(book_id, 'EPUB')
-        max_size = dbAPI.fields['formats'].table.update_fmt(book_id, 'EPUB', fname, new_size, dbAPI.backend)
-        dbAPI.fields['size'].table.update_sizes({book_id:max_size})
-
-
-def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata=False):
+def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata={}):
     field_change = []
+    
+    print('len(check_user_metadata):'+str(len(check_user_metadata)))
     
     if check_user_metadata:
         #check if the Metadata object accepts those added
-        from .columns_metadata import get_columns_where, get_columns_from_dict, names_string_to_authors
-        treated_column = [c for c in itervalues(prefs) if isinstance(c, unicode)] + [c for c in itervalues(prefs[KEY.CONTRIBUTORS]) if isinstance(c, unicode)]
-        def predicate(column): # predicate of the columns to be treated
-            return column.is_custom and column.name in treated_column
-        
+        from .columns_metadata import get_columns_from_dict, string_to_authors
         miA_columns = get_columns_from_dict(miA.get_all_user_metadata(True))
         miA_init_len = len(miA_columns)
-        for k,cc in iteritems(get_columns_where(predicate=predicate)):
+        for k,cc in iteritems(check_user_metadata):
             if not (cc.is_composite or cc.is_csp):
                 if k not in miA_columns:
                     if cc.is_multiple:
@@ -188,7 +177,7 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
                     if cc.is_multiple and not mc.is_multiple:
                         values = []
                         if cc.is_names:
-                            values = names_string_to_authors(mc.metadata['#value#'])
+                            values = string_to_authors(mc.metadata['#value#'])
                         elif mc.metadata['#value#']:
                             values = mc.metadata['#value#'].split(cc.is_multiple.ui_to_list)
                         
@@ -243,7 +232,7 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
         self.dbAPI = self.db.new_api
         
         # prefs
-        self.prefs = KEY.get_valide_prefs()
+        self.prefs = KEY.get_current_prefs()
         
         # liste of book id
         self.book_ids = book_ids
@@ -260,13 +249,15 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
         # Exception
         self.exception = None
         self.exception_unhandled = False
+        self.exception_read = []
+        self.exception_write = []
         
         self.time_execut = 0
         
         
         QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, GUI)
         
-        self.setWindowTitle(_('ePub Extended Metadata Progress'))
+        self.setWindowTitle(_('{:s} progress').format(PLUGIN_NAME))
         self.setWindowIcon(get_icon(ICON.PLUGIN))
         
         self.setValue(0)
@@ -291,6 +282,23 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
         elif self.exception_unhandled:
             debug_print('ePub Extended Metadata Metadata was interupted. An exception has occurred:\n'+str(self.exception))
             CustomExceptionErrorDialog(self.exception)
+        
+        if self.exception_read:
+            
+            det_msg= '\n'.join('Book {:s} |> {:}'.format(book_info, e.__class__.__name__ +': '+ str(e)) for id, book_info, e in self.exception_read)
+            
+            warning_dialog(GUI, _('Exceptions during the reading of Extended Metadata'),
+                        _('{:d} exceptions have occurred during the reading of Extended Metadata.\nSome books may not have been updated.').format(len(self.exception_read)),
+                            det_msg='-- ePub Extended Metadata: reading exceptions --\n\n'+det_msg, show=True, show_copy_button=True)
+        
+        if self.exception_write:
+            
+            det_msg= '\n'.join('Book {:s} |> {:}'.format(book_info, e.__class__.__name__ +': '+ str(e)) for id, book_info, e in self.exception_write)
+            
+            warning_dialog(GUI, _('Exceptions during the writing of Extended Metadata'),
+                        _('{:d} exceptions have occurred during the writing of Extended Metadata.\nSome books may not have been updated.').format(len(self.exception_write)),
+                            det_msg='-- ePub Extended Metadata: writing exceptions --\n\n'+det_msg, show=True, show_copy_button=True)
+        
         
         if self.no_epub_count:
             debug_print('{:d} books didn\'t have an ePub format.'.format(self.no_epub_count))
@@ -344,43 +352,49 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
                 return
             
             ###
-            epub_path = self.dbAPI.format_abspath(book_id, 'epub')
             miA = self.dbAPI.get_metadata(book_id, get_cover=False, get_user_categories=False)
             book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') [book: '+str(num)+'/'+str(self.book_count)+']{id: '+str(book_id)+'}'
             
-            if not epub_path:
-                no_epub_id.append(book_id)
-                debug_print('No ePub for', book_info,'\n')
+            fmt = 'EPUB'
+            path = self.dbAPI.format_abspath(book_id, fmt)
             
-            if epub_path:
-                if self.prefs:
-                    if extended_metadata == VALUE.IMPORT:
+            if path:
+                if extended_metadata == VALUE.IMPORT:
+                    if book_id not in import_mi:
                         debug_print('Read ePub Extended Metadata for', book_info,'\n')
-                        extended_metadata = read_extended_metadata(epub_path)
-                        import_id[book_id] = apply_extended_metadata(miA, self.prefs, extended_metadata, keep_calibre=PREFS[KEY.KEEP_CALIBRE_MANUAL])
+                        extended_metadata = read_extended_metadata(path)
+                        #try:
+                        import_id[book_id] = apply_extended_metadata(miA, self.prefs, extended_metadata, keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_MANUAL])
                         if import_id[book_id]:
                             import_mi[book_id] = miA
-                        
-                    else:
-                        debug_print('Write ePub Extended Metadata for', book_info,'\n')
-                        if extended_metadata == VALUE.EMBED:
-                            extended_metadata = create_extended_metadata(miA, self.prefs)
-                        
-                        debug_print(extended_metadata)
-                        
-                        #if write_extended_metadata(epub_path, extended_metadata):
-                        #    set_new_size_DB(epub_path, book_id, self.dbAPI)
-                        #    export_id.append(book_id)
+                        #except Exception as err:
+                        #    #title (author & author)
+                        #    book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
+                        #    self.exception_read.append( (id, book_info, err) )
+                else:
+                    debug_print('Write ePub Extended Metadata for', book_info+'\n')
+                    if extended_metadata == VALUE.EMBED:
+                        extended_metadata = create_extended_metadata(miA, self.prefs)
                     
-            
-            #
+                    #try:
+                    write_extended_metadata(path, extended_metadata)
+                    export_id.append(book_id)
+                    new_size = os.path.getsize(path)
+                    if new_size is not None:
+                        fname = self.dbAPI.fields['formats'].format_fname(book_id, fmt.upper())
+                        max_size = self.dbAPI.fields['formats'].table.update_fmt(book_id, fmt.upper(), fname, new_size, self.dbAPI.backend)
+                        self.dbAPI.fields['size'].table.update_sizes({book_id:max_size})
+                    
+                    #except Exception as err:
+                    #    #title (author & author)
+                    #    book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
+                    #    self.exception_write.append( (id, book_info, err) )
         
         
         
         
         for id, miA in iteritems(import_mi):
             self.dbAPI.set_metadata(book_id, miA)
-        
         
         self.no_epub_count = len(no_epub_id)
         self.export_count = len(export_id)
@@ -402,35 +416,38 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
 # those of the integrated plugins that if you don't watch out, overide those of Calibre => no basic metadata.
 
 import sys, traceback
-from calibre.customize.ui import find_plugin, quick_metadata, apply_null_metadata, force_identifiers, config
-from calibre.customize.builtins import EPUBMetadataReader, EPUBMetadataWriter, ActionEmbed
+from calibre.customize.ui import find_plugin, quick_metadata, apply_null_metadata, force_identifiers, config, _metadata_readers
+from calibre.customize.builtins import EPUBMetadataReader, EPUBMetadataWriter, OPFMetadataReader, ActionEmbed
+from calibre.ebooks.metadata.opf import set_metadata as set_metadata_opf
 
 # ePubExtendedMetadata.MetadataReader
 #   get_metadata(stream, type)
-def read_metadata(stream, ftype):
+def read_metadata(stream, fmt):
     # Use the Calibre EPUBMetadataReader
-    ftype = ftype.lower().strip()
-    calibre_reader = find_plugin(EPUBMetadataReader.name)
+    fmt = fmt.lower().strip()
+    print('fmt='+fmt)
     try:
-        calibre_reader.quick = quick_metadata.quick
         if hasattr(stream, 'seek'): stream.seek(0)
-        miA = calibre_reader.get_metadata(stream, ftype)
+        calibre_reader = find_plugin(EPUBMetadataReader.name)
+        calibre_reader.quick = quick_metadata.quick
+        miA = calibre_reader.get_metadata(stream, fmt)
     except:
         traceback.print_exc()
     else:
         #---------------
         # Read Extended Metadata
-        
         if hasattr(stream, 'seek'): stream.seek(0)
         extended_metadata = read_extended_metadata(stream)
-        apply_extended_metadata(miA, KEY.get_valide_prefs(), extended_metadata, keep_calibre=PREFS[KEY.KEEP_CALIBRE_AUTO], check_user_metadata=True)
+        print('extended_metadata='+str(extended_metadata))
+        apply_extended_metadata(miA, KEY.get_current_prefs(), extended_metadata,
+                            keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_AUTO], check_user_metadata=KEY.get_current_columns())
         return miA
 
 # ePubExtendedMetadata.MetadataWriter
 #   set_metadata(stream, mi, type)
-def write_metadata(stream, miA, ftype):
+def write_metadata(stream, miA, fmt):
     # Use the Calibre EPUBMetadataWriter
-    ftype = ftype.lower().strip()
+    fmt = fmt.lower().strip()
     embed = find_plugin(ActionEmbed.name)
     i, book_ids, pd, only_fmts, errors = embed.actual_plugin_.job_data
     
@@ -438,30 +455,32 @@ def write_metadata(stream, miA, ftype):
         miA.book_id = book_ids[i]
         errors.append((miA, fmt, tb))
     
-    calibre_writer = find_plugin(EPUBMetadataWriter.name)
     try:
+        if hasattr(stream, 'seek'): stream.seek(0)
+        calibre_writer = find_plugin(EPUBMetadataWriter.name)
         calibre_writer.apply_null = apply_null_metadata.apply_null
         calibre_writer.force_identifiers = force_identifiers.force_identifiers
         calibre_writer.site_customization = config['plugin_customization'].get(calibre_writer.name, '')
-        calibre_writer.set_metadata(stream, miA, ftype)
+        calibre_writer.set_metadata(stream, miA, fmt)
+        
     except:
         if report_error is None:
             from calibre import prints
-            prints('Failed to set metadata for the', ftype.upper(), 'format of:', getattr(miA, 'title', ''), file=sys.stderr)
+            prints('Failed to set metadata for the \'{:s}\' format of: '.format(fmt.upper(), getattr(miA, 'title', '')), file=sys.stderr)
             traceback.print_exc()
         else:
-            report_error(miA, ftype.upper(), traceback.format_exc())
+            report_error(miA, fmt.upper(), traceback.format_exc())
     else:
         #---------------
         # Write Extended Metadata
         try:
             if hasattr(stream, 'seek'): stream.seek(0)
-            extended_metadata = create_extended_metadata(miA, KEY.get_valide_prefs())
-            #write_extended_metadata(stream, extended_metadata)
+            extended_metadata = create_extended_metadata(miA, KEY.get_current_prefs())
+            write_extended_metadata(stream, extended_metadata)
         except:
             if report_error is None:
                 from calibre import prints
-                prints('Failed to set extended metadata for the', ftype.upper(), 'format of:', getattr(miA, 'title', ''), file=sys.stderr)
+                prints('Failed to set extended metadata for the', fmt.upper(), 'format of:', getattr(miA, 'title', ''), file=sys.stderr)
                 traceback.print_exc()
             else:
-                report_error(miA, ftype.upper(), traceback.format_exc())
+                report_error(miA, fmt.upper(), traceback.format_exc())

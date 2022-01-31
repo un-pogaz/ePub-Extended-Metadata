@@ -244,24 +244,7 @@ def current_db():
     '''
     Safely provides the current_db or None
     '''
-    global LAST_DB
-    if hasattr(get_gui(),'current_db'):
-        if LAST_DB: LAST_DB.close()
-        LAST_DB = None
-        return get_gui().current_db
-    else:
-        from calibre.library import db
-        from calibre.utils.config import prefs
-        if LAST_DB and LAST_DB.library_path == prefs['library_path']:
-            return LAST_DB
-        else:
-            if LAST_DB: LAST_DB.close()
-            try:
-                LAST_DB = db(read_only=False)
-                return LAST_DB
-            except:
-                LAST_DB = None
-                return LAST_DB
+    return getattr(get_gui(),'current_db', None)
 
 def get_library_uuid(db=None):
     db = db or current_db()
@@ -889,12 +872,76 @@ class PREFS_json(JSONConfig):
     '''
     def __init__(self):
         JSONConfig.__init__(self, 'plugins/'+PLUGIN_NAME)
+    
+    def update(self, other, **kvargs):
+        JSONConfig.update(self, other, **kvargs)
+        self.commit()
+    
+    def __call__(self):
+        self.refresh()
+        return self
+    
+    def deepcopy_dict(self):
+        '''
+        get a deepcopy dict of this instance
+        '''
+        rslt = {}
+        for k,v in iteritems(self):
+            rslt[copy.deepcopy(k)] = copy.deepcopy(v)
+        
+        for k, v in iteritems(self.defaults):
+            if k not in rslt:
+                rslt[k] = copy.deepcopy(v)
+        return rslt
+
+class PREFS_dynamic(DynamicConfig):
+    '''
+    Use plugin name to create a DynamicConfig file
+    to store the preferences for plugin
+    '''
+    def __init__(self):
+        self.no_commit = False
+        DynamicConfig.__init__(self, 'plugins/'+PLUGIN_NAME)
+    
+    def commit(self):
+        if self.no_commit:
+            return
+        DynamicConfig.commit(self)
+    
+    def __enter__(self):
+        self.no_commit = True
+
+    def __exit__(self, *args):
+        self.no_commit = False
+        self.commit()
+    
+    def __call__(self):
+        self.refresh()
+        return self
+    
+    def update(self, other, **kvargs):
+        DynamicConfig.update(self, other, **kvargs)
+        self.commit()
+    
+    def deepcopy_dict(self):
+        '''
+        get a deepcopy dict of this instance
+        '''
+        rslt = {}
+        for k,v in iteritems(self):
+            rslt[copy.deepcopy(k)] = copy.deepcopy(v)
+        
+        for k, v in iteritems(self.defaults):
+            if k not in rslt:
+                rslt[k] = copy.deepcopy(v)
+        return rslt
 
 class PREFS_library(dict):
     '''
     Create a dictionary of preference stored in the library
     '''
     def __init__(self, key='settings', defaults={}):
+        self.no_commit = False
         self._db = None
         self.key = key if key else ''
         self.defaults = defaults if defaults else {}
@@ -908,6 +955,7 @@ class PREFS_library(dict):
         self._namespace = PREFS_NAMESPACE
         
         self.refresh()
+        dict.__init__(self)
     
     @property
     def namespace(self):
@@ -915,13 +963,6 @@ class PREFS_library(dict):
         Defined a custom namespaced at the root of __init__.py // __init__.PREFS_NAMESPACE
         '''
         return self._namespace
-    
-    def __call__(self, prefs=None):
-        if prefs != None:
-            self.commit(prefs)
-        else:
-            self.refresh()
-        return self
     
     def __getitem__(self, key):
         self.refresh()
@@ -953,50 +994,43 @@ class PREFS_library(dict):
             pass  # ignore missing keys
         self.commit()
     
-    def __enter__(self):
-        self.refresh()
-    
-    def __exit__(self):
-        self.commit()
-    
     def __str__(self):
         self.refresh()
         return dict.__str__(self.deepcopy_dict())
-    
-    def update(self, other, *arg, **kvargs):
-        dict.update(self, other, *arg, **kvargs)
-        self.commit()
-    
     
     def refresh(self):
         new_db = current_db()
         if new_db and self._db != new_db:
             self._db = new_db
             self.clear()
-            self.update(self.get_from_library())
+            rslt = self._db.prefs.get_namespaced(self.namespace, self.key, {})
+            self.no_commit = True
+            self.update(rslt)
+            self.no_commit = False
     
-    def get_from_library(self):
-        rslt = self._db.prefs.get_namespaced(self.namespace, self.key, {})
-        return rslt
-    
-    def commit(self, prefs=None):
+    def commit(self):
+        if self.no_commit:
+            return
         self.refresh()
-        if prefs is not None:
-            self.clear()
-            self.update(prefs)
         
         self._db.prefs.set_namespaced(self.namespace, self.key, self.deepcopy_dict())
         self.refresh()
     
-    def copy_dict(self):
-        '''
-        get a copy dict of this instance
-        '''
-        rslt = dict.copy(self)
-        for k, v in iteritems(self.defaults):
-            if k not in rslt:
-                rslt[k] = copy.copy(v)
-        return rslt
+    def __enter__(self):
+        self.no_commit = True
+        self.refresh()
+    
+    def __exit__(self, *args):
+        self.no_commit = False
+        self.commit()
+    
+    def __call__(self):
+        self.refresh()
+        return self
+    
+    def update(self, other, **kvargs):
+        dict.update(self, other, **kvargs)
+        self.commit()
     
     def deepcopy_dict(self):
         '''
@@ -1010,18 +1044,6 @@ class PREFS_library(dict):
             if k not in rslt:
                 rslt[k] = copy.deepcopy(v)
         return rslt
-
-class PREFS_dynamic(DynamicConfig):
-    '''
-    Use plugin name to create a DynamicConfig file
-    to store the preferences for plugin
-    '''
-    def __init__(self):
-        DynamicConfig.__init__(self, 'plugins/'+PLUGIN_NAME)
-    
-    def update(self, other, *arg, **kvargs):
-        DynamicConfig.update(self, other, *arg, **kvargs)
-        DynamicConfig.commit(self)
 
 
 def decorators(*args):

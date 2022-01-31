@@ -71,8 +71,6 @@ class FIELD:
         NAME = 'authors'
         LOCAL = FieldMetadata()._tb_cats['authors']['name']
         COLUMN = '{:s} ({:s})'.format(NAME, LOCAL)
-    
-    
 
 class KEY:
     OPTION_CHAR = '_'
@@ -83,6 +81,8 @@ class KEY:
     
     KEEP_CALIBRE_MANUAL = OPTION_CHAR + 'keepCalibre_Manual'
     KEEP_CALIBRE_AUTO = OPTION_CHAR + 'keepCalibre_Auto'
+    
+    SHARED_COLUMNS = OPTION_CHAR + 'sharedColumns'
     
     CONTRIBUTORS = 'contributors'
     
@@ -105,31 +105,54 @@ class KEY:
         p = KEY.find_plugin(key)
         if p: disable_plugin(p.name)
     
+    
+    @staticmethod
+    def get_current_columns():
+        from .columns_metadata import get_columns_from_dict
+        d = DYNAMIC[KEY.SHARED_COLUMNS]
+        d = get_columns_from_dict(DYNAMIC[KEY.SHARED_COLUMNS])
+        
+        return get_columns_from_dict(DYNAMIC[KEY.SHARED_COLUMNS])
+    
+    @staticmethod
+    def get_current_prefs():
+        from .columns_metadata import get_columns_from_dict
+        prefs = DYNAMIC.deepcopy_dict()
+        current_columns = KEY.get_current_columns().keys()
+        link = DYNAMIC[KEY.LINK_AUTHOR]
+        
+        prefs = {k:v for k, v in iteritems(prefs) if not k.startswith(KEY.OPTION_CHAR)}
+        
+        if KEY.CONTRIBUTORS not in prefs or not prefs[KEY.CONTRIBUTORS]:
+            prefs[KEY.CONTRIBUTORS] = {}
+        
+        for k,v in iteritems(copy.copy(prefs)):
+            if k == KEY.CONTRIBUTORS:
+                for k,v in iteritems(copy.copy(prefs[KEY.CONTRIBUTORS])):
+                    if not k or k not in CONTRIBUTORS_ROLES or not v or v not in current_columns:
+                        prefs[KEY.CONTRIBUTORS].pop(k, None)
+            elif not v or v not in current_columns:
+                prefs.pop(k, None)
+        
+        if link:
+            prefs[KEY.CONTRIBUTORS][FIELD.AUTHOR.ROLE] = FIELD.AUTHOR.NAME
+        return prefs
+    
+    
     @staticmethod
     def get_names():
         from .columns_metadata import get_names
         return get_names(True)
     
     @staticmethod
-    def get_valide_prefs():
-        prefs = PREFS.deepcopy_dict()
-        valide_names = KEY.get_names().keys()
-        link = prefs[KEY.LINK_AUTHOR]
+    def get_used_columns():
+        from .columns_metadata import get_columns_where, get_columns_from_dict
+        treated_column = [v for k,v in iteritems(PREFS) if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, unicode)] + [c for c in itervalues(PREFS[KEY.CONTRIBUTORS]) if isinstance(c, unicode)]
+        def predicate(column):
+            return column.is_custom and column.name in treated_column
         
-        prefs = {k:v for k, v in iteritems(prefs) if not k.startswith(KEY.OPTION_CHAR)}
-        
-        
-        if KEY.CONTRIBUTORS not in prefs or not prefs[KEY.CONTRIBUTORS]:
-            prefs[KEY.CONTRIBUTORS] = {}
-        
-        for k, v in iteritems(copy.copy(prefs[KEY.CONTRIBUTORS])):
-            if not k or k not in CONTRIBUTORS_ROLES or not v or v not in valide_names:
-                prefs[KEY.CONTRIBUTORS].pop(k, None)
-        
-        if link:
-            prefs[KEY.CONTRIBUTORS][FIELD.AUTHOR.ROLE] = FIELD.AUTHOR.NAME
-        return prefs
-    
+        return {v.name:v.metadata for v in itervalues(get_columns_where(predicate=predicate))}
+
 
 PREFS = PREFS_library()
 PREFS.defaults[KEY.AUTO_IMPORT] = False
@@ -140,6 +163,9 @@ PREFS.defaults[KEY.FIRST_CONFIG] = True
 PREFS.defaults[KEY.KEEP_CALIBRE_MANUAL] = False
 PREFS.defaults[KEY.KEEP_CALIBRE_AUTO] = True
 
+DYNAMIC = PREFS_dynamic()
+DYNAMIC.defaults = copy.deepcopy(PREFS.defaults)
+DYNAMIC.defaults[KEY.SHARED_COLUMNS] = {}
 
 def plugin_check_enable_library():
     if PREFS[KEY.AUTO_IMPORT]:
@@ -151,6 +177,10 @@ def plugin_check_enable_library():
         KEY.enable_plugin(KEY.AUTO_EMBED)
     else:
         KEY.disable_plugin(KEY.AUTO_EMBED)
+    
+    with DYNAMIC:
+        DYNAMIC.update(PREFS.deepcopy_dict())
+        DYNAMIC[KEY.SHARED_COLUMNS] = KEY.get_used_columns()
 
 def plugin_realy_enable(key):
     from calibre.customize.ui import is_disabled
@@ -179,18 +209,21 @@ class ConfigWidget(QWidget):
         
         
         # Add a horizontal layout containing the table and the buttons next to it
-        contributor_layout = QHBoxLayout()
+        contributor_layout = QVBoxLayout()
         tab_contributor = QWidget()
         tab_contributor.setLayout(contributor_layout)
+        
+        contributor_table_layout = QHBoxLayout()
+        contributor_layout.addLayout(contributor_table_layout)
         tabs.addTab(tab_contributor, _('Contributor'))
         
         # Create a table the user can edit the menu list
         self.table = ContributorTableWidget(PREFS[KEY.CONTRIBUTORS], self)
-        contributor_layout.addWidget(self.table)
+        contributor_table_layout.addWidget(self.table)
         
         # Add a vertical layout containing the the buttons to move ad/del etc.
         button_layout = QVBoxLayout()
-        contributor_layout.addLayout(button_layout)
+        contributor_table_layout.addLayout(button_layout)
         add_button = QToolButton(self)
         add_button.setToolTip(_('Add menu item'))
         add_button.setIcon(get_icon('plus.png'))
@@ -206,6 +239,17 @@ class ConfigWidget(QWidget):
         add_button.clicked.connect(self.table.add_row)
         delete_button.clicked.connect(self.table.delete_rows)
         
+        
+        contributor_option = QHBoxLayout()
+        contributor_layout.addLayout(contributor_option)
+        
+        self.linkAuthors = QCheckBox(_('Embed "{:s}" column').format(FIELD.AUTHOR.COLUMN), self)
+        self.linkAuthors.setToolTip(_('Embed the "{:s}" column as a Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column.').format(FIELD.AUTHOR.COLUMN, FIELD.AUTHOR.LOCAL))
+        self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
+        contributor_option.addWidget(self.linkAuthors)
+        
+        
+        contributor_option.addStretch(1)
         
         
         # ePub 3 tab
@@ -229,11 +273,6 @@ class ConfigWidget(QWidget):
         # Global options
         option_layout = QHBoxLayout()
         layout.addLayout(option_layout)
-        
-        self.linkAuthors = QCheckBox(_('Embed "{:s}" column').format(FIELD.AUTHOR.COLUMN), self)
-        self.linkAuthors.setToolTip(_('Embed the "{:s}" column as a Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column.').format(FIELD.AUTHOR.COLUMN, FIELD.AUTHOR.LOCAL))
-        self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
-        option_layout.addWidget(self.linkAuthors)
         
         option_layout.insertStretch(-1)
         
@@ -274,19 +313,18 @@ class ConfigWidget(QWidget):
         return valide
     
     def save_settings(self):
-        prefs = {}
-        prefs[KEY.CONTRIBUTORS] = self.table.get_contributors_columns()
-        prefs[KEY.LINK_AUTHOR] = self.linkAuthors.checkState() == Qt.Checked
-        prefs[KEY.AUTO_IMPORT] = self.reader_button.pluginEnable
-        prefs[KEY.AUTO_EMBED] = self.writer_button.pluginEnable
-        prefs[KEY.FIRST_CONFIG] = False
+        with PREFS:
+            PREFS[KEY.CONTRIBUTORS] = self.table.get_contributors_columns()
+            PREFS[KEY.LINK_AUTHOR] = self.linkAuthors.checkState() == Qt.Checked
+            PREFS[KEY.AUTO_IMPORT] = self.reader_button.pluginEnable
+            PREFS[KEY.AUTO_EMBED] = self.writer_button.pluginEnable
+            PREFS[KEY.FIRST_CONFIG] = False
+            
+            if PREFS[KEY.LINK_AUTHOR]:
+                poped = PREFS[KEY.CONTRIBUTORS].pop(FIELD.AUTHOR.ROLE, None)
+                if poped:
+                    PREFS[str(len(PREFS[KEY.CONTRIBUTORS])+1)] = poped
         
-        if prefs[KEY.LINK_AUTHOR]:
-            poped = prefs[KEY.CONTRIBUTORS].pop(FIELD.AUTHOR.ROLE, None)
-            if poped:
-                prefs[str(len(prefs[KEY.CONTRIBUTORS])+1)] = poped
-        
-        PREFS.update(prefs)
         debug_print('Save settings:\n{0}\n'.format(PREFS))
         plugin_check_enable_library()
     
@@ -313,8 +351,13 @@ def button_plugin_icon(button, key):
     else:
         button.setIcon(get_icon('dot_red.png'))
 
+
 COL_COLUMNS = [_('Contributor type'), _('Column'), '']
 class ContributorTableWidget(QTableWidget):
+    _columnContrib = 0
+    _columnColumn = 1
+    _columnSpace = 2
+    
     def __init__(self, contributors_pair_list=None, *args):
         QTableWidget.__init__(self, *args)
         self.setAlternatingRowColors(True)
@@ -328,9 +371,6 @@ class ContributorTableWidget(QTableWidget):
         self.setColumnCount(len(COL_COLUMNS))
         self.setHorizontalHeaderLabels(COL_COLUMNS)
         self.verticalHeader().setDefaultSectionSize(24)
-        self._columnContrib = 0
-        self._columnColumn = 1
-        self._columnSpace = 2
         
         contributors_pair_list = contributors_pair_list or {}
         
@@ -429,6 +469,7 @@ class ContributorsComboBox(KeyValueComboBox):
                 show=True, show_copy_button=False)
 
 class DuplicColumnComboBox(CustomColumnComboBox):
+    
     def __init__(self, table, selected_column):
         CustomColumnComboBox.__init__(self, table, KEY.get_names(), selected_column, initial_items=[''])
         self.table = table
@@ -511,4 +552,5 @@ class ConfigReaderWidget(QWidget):
         
         PREFS.update(prefs)
         debug_print('Save settings of import:\n{0}\n'.format(prefs))
+        plugin_check_enable_library()
     

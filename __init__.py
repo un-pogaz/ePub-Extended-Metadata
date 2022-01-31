@@ -26,7 +26,7 @@ def import_attribute(module_name, attribute):
 DEBUG_PRE = 'ePubExtendedMetadata'
 PREFS_NAMESPACE = 'ePubExtendedMetadata'
 
-FILES_TYPES             = {'epub'}
+FILES_TYPES             = {'epub'} #opf
 class NAME:
     BASE                = 'ePub Extended Metadata'
     READER              = BASE + ' {Reader}'
@@ -34,8 +34,8 @@ class NAME:
 class DESCRIPTION:
     ACTION              = _('Read and write a wider range of metadata for ePub\'s files and associating them to columns in your libraries.')
     COMPANION            = '\n' +_('This is an companion and embeded plugin of "{:s}".').format(NAME.BASE)
-    READER              = _('Write a wider range of metadata in the ePub file.') + COMPANION
-    WRITER              = _('Read a wider range of metadata from the ePub file.') + COMPANION
+    READER              = _('Read a wider range of metadata from the ePub file.') + COMPANION
+    WRITER              = _('Write a wider range of metadata in the ePub file.') + COMPANION
 SUPPORTED_PLATFORMS     = ['windows', 'osx', 'linux']
 AUTHOR                  = 'un_pogaz'
 VERSION                 = (-1,-1,-1)

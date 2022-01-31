@@ -44,14 +44,13 @@ class typeproperty(property):
         typeproperty_registry.append(func)
 
 
-def names_split_regex_additional():
+def authors_split_regex():
     from calibre.utils.config import tweaks
     return tweaks['authors_split_regex']
 
-def names_string_to_authors(raw_string):
+def string_to_authors(raw_string):
     from calibre.ebooks.metadata import string_to_authors
     return string_to_authors(raw_string)
-
 
 
 # get generic
@@ -341,7 +340,7 @@ class ColumnsMetadata():
         kind = > one of then ['field', 'category', 'user', 'search']
         label = string()
         link_column = string()
-        names_split_regex_additional = string()
+        authors_split_regex = string()
         rec_index = int()
         search_terms = string[]
         table = string()
