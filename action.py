@@ -152,7 +152,6 @@ class ePubExtendedMetadataAction(InterfaceAction):
         srpg.close()
         del srpg
 
-
 def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata={}):
     field_change = []
     

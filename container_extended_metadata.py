@@ -29,7 +29,7 @@ from six.moves.urllib.parse import unquote as urlunquote
 
 from calibre import prints
 from calibre.ebooks.chardet import xml_to_unicode
-from calibre.ebooks.metadata import string_to_authors
+from calibre.ebooks.metadata import string_to_authors, author_to_author_sort, title_sort
 from calibre.ebooks.metadata.opf2 import OPF
 import calibre.ebooks.metadata.opf3 as opf3
 from calibre.ebooks.metadata.utils import parse_opf
@@ -100,7 +100,7 @@ class ContainerExtendedMetadata(object):
     
     def save_opf(self):
         if hasattr(etree, 'indent'):
-            etree.indent(self.opf.root, space="  ")
+            etree.indent(self.opf.root, space='  ')
         else:
             indent(self.opf.root)
         
@@ -122,10 +122,10 @@ class ContainerExtendedMetadata(object):
         self.ZIP.close()
 
 def indent(elem, level=0):
-    i = "\n" + level*"  "
+    i = '\n' + level*'  '
     if len(elem):
         if not elem.text or not elem.text.strip():
-            elem.text = i + "  "
+            elem.text = i + '  '
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
         for elem in elem:
@@ -186,23 +186,38 @@ def _read_extended_metadata(container):
             
     
     if container.version[0] == 3:
-        print('version 3')
+        for contrib in container.metadata.xpath('dc:contributor[@id]', namespaces=NAMESPACES):
+            id = contrib.attrib['id']
+            roles = container.metadata.xpath('opf:meta[@refines="#{:s}" and @property="role" and @scheme="marc:relators"]'.format(id), namespaces=NAMESPACES)
+            
+            role = 'oth'
+            if roles:
+                role = roles[-1].text
+            
+            if role not in contributors:
+                contributors[role] = []
+            
+            for author in string_to_authors(contrib.text):
+                contributors[role].append(author)
+        
+        role = 'oth'
+        for contrib in container.metadata.xpath('dc:contributor[not(@id)]', namespaces=NAMESPACES):
+            if role not in contributors:
+                contributors[role] = []
+            
+            for author in string_to_authors(contrib.text):
+                contributors[role].append(author)
+        
+        # extended_metadata
+        
+        
     
     return extended_metadata
+
 
 def _write_extended_metadata(container, extended_metadata):
     if not container.opf:
         return False
-    to_remove = []
-    
-    ################
-    #You need to create sub-elements:
-    ################
-    root = etree.Element("p")
-    root.text = 'some'
-    
-    bold = etree.SubElement(root, 'bold')
-    bold.text = 'text'
     
     # merge old extended metadata and the new
     epub_extended_metadata = _read_extended_metadata(container)
@@ -216,24 +231,62 @@ def _write_extended_metadata(container, extended_metadata):
     
     
     if container.version[0] == 2:
-        ## name="calibre:user_metadata
-        
         creator = container.metadata.xpath('dc:creator', namespaces=NAMESPACES)
-        idx_last_creator = container.metadata.index(creator[-1])
+        idx = container.metadata.index(creator[-1])+1
         
-        for contrib in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
-            container.metadata.remove(contrib)
-        
-        idx = 1
         for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):
             for contrib in epub_extended_metadata[KEY.CONTRIBUTORS][role]:
-                element = etree.Element(etree.QName(NS_DC, "contributor"))
+                element = etree.Element(etree.QName(NS_DC, 'contributor'))
                 element.text = contrib
-                element.attrib[etree.QName(NS_OPF, "role")] = role
-                container.metadata.insert(idx_last_creator +idx, element)
+                element.attrib[etree.QName(NS_OPF, 'role')] = role
+                element.attrib[etree.QName(NS_OPF, 'file-as')] = author_to_author_sort(contrib)
+                container.metadata.insert(idx, element)
                 idx = idx+1
     
     if container.version[0] == 3:
-        debug_print('version 3')
-    
-    
+        creator = container.metadata.xpath('dc:creator', namespaces=NAMESPACES)
+        idx = container.metadata.index(creator[-1])+1
+        
+        for contrib in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
+            container.metadata.remove(contrib)
+            id_s = contrib.attrib.get('id', None)
+            if id_s:
+                for meta in container.metadata.xpath('opf:meta[@refines="#{:s}" and (@property="role" and @scheme="marc:relators") or (@property="file-as")]'.format(id_s), namespaces=NAMESPACES):
+                    container.metadata.remove(meta)
+        
+        role_id = {}
+        for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):
+            id_n = 1
+            for contrib in epub_extended_metadata[KEY.CONTRIBUTORS][role]:
+                element = etree.Element(etree.QName(NS_DC, 'contributor'))
+                element.text = contrib
+                id_s = role+'{:02d}'.format(id_n)
+                element.attrib['id'] = id_s
+                container.metadata.insert(idx, element)
+                idx = idx+1
+                
+                if role not in role_id:
+                    role_id[role] = []
+                role_id[role].append(id_s)
+                
+                file = etree.Element('meta')
+                file.text = author_to_author_sort(contrib)
+                file.attrib['refines'] = '#'+id_s
+                file.attrib['property'] = 'file-as'
+                container.metadata.insert(idx, file)
+                idx = idx+1
+                
+                id_n = id_n+1
+        
+        for role in sorted(role_id.keys()):
+            for id_s in role_id[role]:
+                meta = etree.Element('meta')
+                meta.text = role
+                meta.attrib['refines'] = '#'+id_s
+                meta.attrib['property'] = 'role'
+                meta.attrib['scheme'] = 'marc:relators'
+                container.metadata.insert(idx, meta)
+                idx = idx+1
+        
+        
+        
