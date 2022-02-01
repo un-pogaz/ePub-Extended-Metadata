@@ -1,3 +1,3 @@
-### version 0.8
+### version 0.5
 First release
 Beta public test

@@ -26,7 +26,7 @@ def import_attribute(module_name, attribute):
 DEBUG_PRE = 'ePubExtendedMetadata'
 PREFS_NAMESPACE = 'ePubExtendedMetadata'
 
-FILES_TYPES             = {'epub'} #opf
+FILES_TYPES             = {'epub'}
 class NAME:
     BASE                = 'ePub Extended Metadata'
     READER              = BASE + ' {Reader}'
@@ -38,7 +38,7 @@ class DESCRIPTION:
     WRITER              = _('Write a wider range of metadata in the ePub file.') + COMPANION
 SUPPORTED_PLATFORMS     = ['windows', 'osx', 'linux']
 AUTHOR                  = 'un_pogaz'
-VERSION                 = (0, 8, 0)
+VERSION                 = (0, 5, 0)
 MINIMUM_CALIBRE_VERSION = (4, 0, 0)
 
 
