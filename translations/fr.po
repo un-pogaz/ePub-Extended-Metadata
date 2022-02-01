@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-02-01 13:16+0100\n"
+"POT-Creation-Date: 2022-02-01 13:30+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -244,15 +244,15 @@ msgstr "Conserver les métadonnées Calibre, ne remplir que les champs vides"
 
 #: config.py:497
 msgid "Overwrites Calibre metadata, considers that the book always reason"
-msgstr "Écrase les métadonnées de Calibre, considère que le livre a toujours raison."
+msgstr "Écrase les métadonnées Calibre, considère que le livre a toujours raison"
 
 #: config.py:501
 msgid "Keep Calibre embed metadata that could exist in the book"
-msgstr "Conservez les métadonnées intégrées à Calibre qui pourraient exister dans le livre."
+msgstr "Conservez les métadonnées intégrées par Calibre qui pourraient exister dans le livre"
 
 #: config.py:502
 msgid "Overwrites Calibre embed metadata, considers that the book always reason"
-msgstr "Écrase les métadonnées intégrées de Calibre, considère que le livre a toujours raison."
+msgstr "Écrase les métadonnées intégrées par Calibre, considère que le livre a toujours raison"
 
 #: config.py:508
 msgid "Set here the specific option to read and add automatically the metadata."
