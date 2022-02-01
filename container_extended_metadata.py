@@ -166,6 +166,8 @@ def write_extended_metadata(epub, extended_metadata):
 def _read_extended_metadata(container):
     extended_metadata = {}
     extended_metadata[KEY.CONTRIBUTORS] = contributors = {}
+    extended_metadata[KEY.SERIES] = series = {}
+    extended_metadata[KEY.COLLECTIONS] = collections = {}
     if not container.opf:
         return extended_metadata
     
@@ -183,7 +185,6 @@ def _read_extended_metadata(container):
                 contributors[role] = []
             for author in string_to_authors(child.text):
                 contributors[role].append(author)
-            
     
     if container.version[0] == 3:
         for contrib in container.metadata.xpath('dc:contributor[@id]', namespaces=NAMESPACES):
@@ -209,7 +210,6 @@ def _read_extended_metadata(container):
                 contributors[role].append(author)
         
         # extended_metadata
-        
         
     
     return extended_metadata
@@ -248,11 +248,21 @@ def _write_extended_metadata(container, extended_metadata):
         idx = container.metadata.index(creator[-1])+1
         
         for contrib in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
-            container.metadata.remove(contrib)
             id_s = contrib.attrib.get('id', None)
             if id_s:
-                for meta in container.metadata.xpath('opf:meta[@refines="#{:s}" and (@property="role" and @scheme="marc:relators") or (@property="file-as")]'.format(id_s), namespaces=NAMESPACES):
+                #remove all marc code
+                for meta in container.metadata.xpath('opf:meta[@refines="#{:s}" and @property="role" and @scheme="marc:relators"]'.format(id_s), namespaces=NAMESPACES):
                     container.metadata.remove(meta)
+                # if the contributor has others meta linked (except "file-as")
+                if not container.metadata.xpath('opf:meta[@refines="#{:s}" and not(@property="file-as")]'.format(id_s), namespaces=NAMESPACES):
+                    # coutain if the contributor has no others meta linked (or only "file-as"), del the contributor
+                    container.metadata.remove(contrib)
+                    #and del the "file-as"
+                    for meta in container.metadata.xpath('opf:meta[@refines="#{:s}"]'.format(id_s), namespaces=NAMESPACES):
+                        container.metadata.remove(meta)
+            else:
+                #remove contributor without id
+                container.metadata.remove(contrib)
         
         role_id = {}
         for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):

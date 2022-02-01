@@ -38,7 +38,7 @@ class DESCRIPTION:
     WRITER              = _('Write a wider range of metadata in the ePub file.') + COMPANION
 SUPPORTED_PLATFORMS     = ['windows', 'osx', 'linux']
 AUTHOR                  = 'un_pogaz'
-VERSION                 = (-1,-1,-1)
+VERSION                 = (0, 8, 0)
 MINIMUM_CALIBRE_VERSION = (4, 0, 0)
 
 

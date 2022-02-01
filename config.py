@@ -86,6 +86,9 @@ class KEY:
     
     CONTRIBUTORS = 'contributors'
     
+    SERIES = 'series'
+    COLLECTIONS = 'collections'
+    
     
     @staticmethod
     def find_plugin(key):
@@ -225,13 +228,13 @@ class ConfigWidget(QWidget):
         button_layout = QVBoxLayout()
         contributor_table_layout.addLayout(button_layout)
         add_button = QToolButton(self)
-        add_button.setToolTip(_('Add menu item'))
+        add_button.setToolTip(_('Add a Column/Contributor pair'))
         add_button.setIcon(get_icon('plus.png'))
         button_layout.addWidget(add_button)
         button_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
         
         delete_button = QToolButton(self)
-        delete_button.setToolTip(_('Delete menu item'))
+        delete_button.setToolTip(_('Delete Column/Contributor pair'))
         delete_button.setIcon(get_icon('minus.png'))
         button_layout.addWidget(delete_button)
         button_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
@@ -260,7 +263,7 @@ class ConfigWidget(QWidget):
         scrollable = QScrollArea()
         scrollable.setWidget(tab_epub3)
         scrollable.setWidgetResizable(True)
-        tabs.addTab(scrollable, _('ePub 3 metadata'))
+        tabs.addTab(scrollable, _('ePub3 metadata'))
         
         epub3_layout = QGridLayout()
         scroll_layout.addLayout(epub3_layout)
@@ -411,9 +414,9 @@ class ContributorTableWidget(QTableWidget):
         rows = self.selectionModel().selectedRows()
         if len(rows) == 0:
             return
-        message = _('Are you sure you want to delete this menu item?')
+        message = _('Are you sure you want to delete this Column/Contributor pair?')
         if len(rows) > 1:
-            message = _('Are you sure you want to delete the selected {:d} menu items?').format(len(rows))
+            message = _('Are you sure you want to delete the selected {:d} Column/Contributor pairs?').format(len(rows))
         if not question_dialog(self, _('Are you sure?'), message, show_copy_button=False):
             return
         first_sel_row = self.currentRow()
@@ -490,19 +493,19 @@ class DuplicColumnComboBox(CustomColumnComboBox):
 
 
 OPTION_MANUAL = OrderedDict([
-    (True, _('Keep calibre')),
-    (False, _('Erase calibre'))
+    (True, _('Keep Calibre metadata, fill only the empty fields')),
+    (False, _('Overwrites Calibre metadata, considers that the book always reason'))
 ])
 
 OPTION_AUTO = OrderedDict([
-    (True, _('Keep calibre')),
-    (False, _('Erase calibre'))
+    (True, _('Keep Calibre embed metadata that could exist in the book')),
+    (False, _('Overwrites Calibre embed metadata, considers that the book always reason'))
 ])
 
 
 class ConfigReaderWidget(QWidget):
     
-    head_text = _('Set here the specific option to read and add automatically the metadata')
+    head_text = _('Set here the specific option to read and add automatically the metadata.')
     head_conflict = _('Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata'
                         'and the one already recorded by Calibre.'
                         '')

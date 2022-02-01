@@ -256,7 +256,7 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
         
         QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, GUI)
         
-        self.setWindowTitle(_('{:s} progress').format(PLUGIN_NAME))
+        self.setWindowTitle(_('ePub Extended Metadata progress').format(PLUGIN_NAME))
         self.setWindowIcon(get_icon(ICON.PLUGIN))
         
         self.setValue(0)
@@ -437,7 +437,6 @@ def read_metadata(stream, fmt):
         # Read Extended Metadata
         if hasattr(stream, 'seek'): stream.seek(0)
         extended_metadata = read_extended_metadata(stream)
-        print('extended_metadata='+str(extended_metadata))
         apply_extended_metadata(miA, KEY.get_current_prefs(), extended_metadata,
                             keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_AUTO], check_user_metadata=KEY.get_current_columns())
         return miA
