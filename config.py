@@ -78,23 +78,33 @@ class KEY:
     AUTO_EMBED = OPTION_CHAR + 'autoEmbed'
     FIRST_CONFIG = OPTION_CHAR + 'firstConfig'
     LINK_AUTHOR = OPTION_CHAR + 'linkAuthors'
+    CREATORS_AS_AUTHOR = OPTION_CHAR + 'creatorAsAuthors'
     
     KEEP_CALIBRE_MANUAL = OPTION_CHAR + 'keepCalibre_Manual'
     KEEP_CALIBRE_AUTO = OPTION_CHAR + 'keepCalibre_Auto'
     
     SHARED_COLUMNS = OPTION_CHAR + 'sharedColumns'
     
+    CREATORS = 'creators'
     CONTRIBUTORS = 'contributors'
     
+    # legacy ePub2
+    COVERAGES = 'coverages'
+    RELATIONS = 'relations'
+    RIGHTS = 'rights'
+    SOURCES = 'sources'
+    TYPES = 'types'
+    
+    # ePub3
     SERIES = 'series'
     COLLECTIONS = 'collections'
     
     
     @staticmethod
     def find_plugin(key):
-        from . import ePubExtendedMetadata as _base
+        from .common import NAME
         from calibre.customize.ui import find_plugin
-        return find_plugin(_base.MetadataWriter.name if key == KEY.AUTO_EMBED else _base.MetadataReader.name) 
+        return find_plugin(NAME.WRITER if key == KEY.AUTO_EMBED else NAME.READER) 
     
     @staticmethod
     def enable_plugin(key):
@@ -161,6 +171,7 @@ PREFS = PREFS_library()
 PREFS.defaults[KEY.AUTO_IMPORT] = False
 PREFS.defaults[KEY.AUTO_EMBED] = False
 PREFS.defaults[KEY.LINK_AUTHOR] = False
+PREFS.defaults[KEY.CREATORS_AS_AUTHOR] = False
 PREFS.defaults[KEY.CONTRIBUTORS] = {}
 PREFS.defaults[KEY.FIRST_CONFIG] = True
 PREFS.defaults[KEY.KEEP_CALIBRE_MANUAL] = False
@@ -251,6 +262,10 @@ class ConfigWidget(QWidget):
         self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
         contributor_option.addWidget(self.linkAuthors)
         
+        #self.creatorsAsAuthors = QCheckBox(_('Import all Creators as authors'), self)
+        #self.creatorsAsAuthors.setToolTip(_('Import all Creators as {:s} in "{:s}" column.').format(FIELD.AUTHOR.LOCAL, FIELD.AUTHOR.COLUMN))
+        #self.creatorsAsAuthors.setChecked(PREFS[KEY.CREATORS_AS_AUTHOR])
+        #contributor_option.addWidget(self.creatorsAsAuthors)
         
         contributor_option.addStretch(1)
         
@@ -319,6 +334,7 @@ class ConfigWidget(QWidget):
         with PREFS:
             PREFS[KEY.CONTRIBUTORS] = self.table.get_contributors_columns()
             PREFS[KEY.LINK_AUTHOR] = self.linkAuthors.checkState() == Qt.Checked
+            PREFS[KEY.CREATORS_AS_AUTHOR] = self.creatorsAsAuthors.checkState() == Qt.Checked
             PREFS[KEY.AUTO_IMPORT] = self.reader_button.pluginEnable
             PREFS[KEY.AUTO_EMBED] = self.writer_button.pluginEnable
             PREFS[KEY.FIRST_CONFIG] = False
@@ -343,6 +359,7 @@ def button_plugin_initialized(button, key):
     else:
         button.setIcon(get_icon(ICON.WARNING))
         button.setEnabled(False)
+        button.setToolTip(_('This feature has been incorrectly initialized. Restart Calibre to fix this.'))
 
 def button_plugin_clicked(button, key):
     button.pluginEnable = not button.pluginEnable
@@ -499,17 +516,11 @@ OPTION_MANUAL = OrderedDict([
 
 OPTION_AUTO = OrderedDict([
     (True, _('Keep Calibre embed metadata that could exist in the book')),
-    (False, _('Overwrites Calibre embed metadata, considers that the book always reason'))
+    (False, _('Overwrites Calibre embed metadata, give priority to original metadata'))
 ])
 
 
 class ConfigReaderWidget(QWidget):
-    
-    head_text = _('Set here the specific option to read and add automatically the metadata.')
-    head_conflict = _('Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata'
-                        'and the one already recorded by Calibre.'
-                        '')
-    
     def __init__(self, plugin_action):
         QWidget.__init__(self)
         
@@ -519,15 +530,15 @@ class ConfigReaderWidget(QWidget):
         
         title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Extended Metadata import options'))
         layout.addLayout(title_layout)
-        head = QLabel(self.head_text)
+        head = QLabel(_('Set here the specifics options to read and automatic addition of metadata.'))
         head.setWordWrap(True)
         layout.addWidget(head)
         
-        layout.addWidget(QLabel(''))
-        
-        conflict = QLabel(self.head_conflict)
+        conflict = QLabel(_('Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata and the one already recorded by Calibre.'))
         conflict.setWordWrap(True)
         layout.addWidget(conflict)
+        
+        layout.addWidget(QLabel(''))
         
         importManual_Label = QLabel(_('When importing manually:'))
         importManual_ToolTip = _('The manual import is executed by clicking on "Import Extended Metadata" in the menu of \'ePub Extended Metadata\'')

@@ -15,32 +15,13 @@ except NameError:
     pass # load_translations() added in calibre 1.9
 
 # The class that all Interface Action plugin wrappers must inherit from
-from calibre.customize import InterfaceActionBase, MetadataReaderPlugin, MetadataWriterPlugin
-
-
-def import_attribute(module_name, attribute):
-    import importlib
-    return getattr(importlib.import_module('.'+module_name, __name__), attribute, None )
+from calibre.customize import InterfaceActionBase
 
 
 DEBUG_PRE = 'ePubExtendedMetadata'
 PREFS_NAMESPACE = 'ePubExtendedMetadata'
 
-FILES_TYPES             = {'epub'}
-class NAME:
-    BASE                = 'ePub Extended Metadata'
-    READER              = BASE + ' {Reader}'
-    WRITER              = BASE + ' {Writer}'
-class DESCRIPTION:
-    ACTION              = _('Read and write a wider range of metadata for ePub\'s files and associating them to columns in your libraries.')
-    COMPANION            = '\n' +_('This is an companion and embeded plugin of "{:s}".').format(NAME.BASE)
-    READER              = _('Read a wider range of metadata from the ePub file.') + COMPANION
-    WRITER              = _('Write a wider range of metadata in the ePub file.') + COMPANION
-SUPPORTED_PLATFORMS     = ['windows', 'osx', 'linux']
-AUTHOR                  = 'un_pogaz'
-VERSION                 = (0, 5, 0)
-MINIMUM_CALIBRE_VERSION = (4, 0, 0)
-
+from .common import *
 
 class ePubExtendedMetadata(InterfaceActionBase):
     '''
@@ -80,26 +61,66 @@ class ePubExtendedMetadata(InterfaceActionBase):
         Note that ``self.site_customization`` is **not** available at this point.
         '''
         
-        from calibre.customize.ui import initialize_plugin, _initialized_plugins
+        import os
+        from calibre.utils.config import plugin_dir
+        from calibre.utils.zipfile import ZipFile
+        
+        from calibre.customize.ui import initialize_plugin, _initialized_plugins, config, find_plugin, load_plugin
+        
         installation_type = getattr(self, 'installation_type', None)
-        
-        def initializor(plugin):
-            if installation_type != None:
-                return initialize_plugin(plugin, self.plugin_path, installation_type)
-            else:
-                return initialize_plugin(plugin, self.plugin_path)
-        
-        def append_plugin(plugin):
+        def append_plugin(plugin, plugin_path):
             try:
-                p = initializor(plugin)
+                if installation_type != None:
+                    p = initialize_plugin(plugin, plugin_path, installation_type)
+                else:
+                    p = initialize_plugin(plugin, plugin_path)
                 _initialized_plugins.append(p)
+                return p
             except Exception as err:
-                print('An error has occurred')
-                print(err)
-                return err
+                print('An error has occurred: '+ str(err))
+                return None
         
-        append_plugin(self.MetadataWriter)
-        append_plugin(self.MetadataReader)
+        def extract_plugin(zf, name, zfp):
+            if os.path.exists(zfp):
+                os.remove(zfp)
+            zf.extract(name, plugin_dir)
+            os.rename(os.path.join(plugin_dir, name), zfp)
+        
+        plugins = config['plugins']
+        edited = False
+        
+        with ZipFile(self.plugin_path, 'r') as zf:
+            for plugin in [('Writer.zip', NAME.WRITER), ('Reader.zip', NAME.READER)]:
+                zip = plugin[0]
+                name = plugin[1]
+                
+                p = find_plugin(name)
+                instaled = False
+                if not p:
+                    if name in plugins:
+                        zfp = plugins[name]
+                        instaled = True
+                    else:
+                        zfp = os.path.join(plugin_dir, name+'.zip')
+                        plugins[name] = zfp
+                        edited = True
+                    
+                    if not os.path.exists(zfp):
+                        extract_plugin(zf, zip, zfp)
+                    
+                    p = append_plugin(load_plugin(zfp), zfp)
+                
+                if p.version != self.version:
+                    _initialized_plugins.remove(p)
+                    zfp = p.plugin_path
+                    extract_plugin(zf, zip, zfp)
+                    p = append_plugin(load_plugin(zfp), zfp)
+                
+                if instaled:
+                    _initialized_plugins.remove(p)
+        
+        if edited:
+            config['plugins'] = plugins
     
     
     def is_customizable(self):
@@ -143,82 +164,6 @@ class ePubExtendedMetadata(InterfaceActionBase):
         :param config_widget: The widget returned by :meth:`config_widget`.
         '''
         config_widget.save_settings()
-    
-    
-    class MetadataReader(MetadataReaderPlugin):
-        '''
-        A plugin that implements reading metadata from a set of file types.
-        '''
-        #: Set of file types for which this plugin should be run.
-        #: For example: ``{'lit', 'mobi', 'prc'}``
-        file_types = FILES_TYPES
-        
-        name                    = NAME.READER
-        description             = DESCRIPTION.READER
-        supported_platforms     = SUPPORTED_PLATFORMS
-        author                  = AUTHOR
-        version                 = VERSION
-        minimum_calibre_version = MINIMUM_CALIBRE_VERSION
-        
-        
-        def get_metadata(self, stream, type):
-            '''
-            Return metadata for the file represented by stream (a file like object
-            that supports reading). Raise an exception when there is an error
-            with the input data.
-            
-            :param type: The type of file. Guaranteed to be one of the entries
-                in :attr:`file_types`.
-            :return: A :class:`calibre.ebooks.metadata.book.Metadata` object
-            '''
-            from .action import read_metadata
-            return read_metadata(stream, type)
-        
-        def is_customizable(self):
-            '''
-            This method must return True to enable customization via
-            Preferences->Plugins
-            '''
-            return True
-        
-        def config_widget(self):
-            from calibre.customize.ui import find_plugin
-            p = find_plugin(ePubExtendedMetadata.name)
-            if p and hasattr(p, 'actual_plugin_'):
-                from .config import ConfigReaderWidget
-                return ConfigReaderWidget(p.actual_plugin_)
-    
-        def save_settings(self, config_widget):
-            config_widget.save_settings()
-    
-    
-    class MetadataWriter(MetadataWriterPlugin):
-        '''
-        A plugin that implements reading metadata from a set of file types.
-        '''
-        #: Set of file types for which this plugin should be run.
-        #: For example: ``{'lit', 'mobi', 'prc'}``
-        file_types = FILES_TYPES
-        
-        name                    = NAME.WRITER
-        description             = DESCRIPTION.WRITER
-        supported_platforms     = SUPPORTED_PLATFORMS
-        author                  = AUTHOR
-        version                 = VERSION
-        minimum_calibre_version = MINIMUM_CALIBRE_VERSION
-        
-        def set_metadata(self, stream, mi, type):
-            '''
-            Set metadata for the file represented by stream (a file like object
-            that supports reading). Raise an exception when there is an error
-            with the input data.
-            
-            :param type: The type of file. Guaranteed to be one of the entries
-                in :attr:`file_types`.
-            :param mi: A :class:`calibre.ebooks.metadata.book.Metadata` object
-            '''
-            from .action import write_metadata
-            write_metadata(stream, mi, type)
 
 
 

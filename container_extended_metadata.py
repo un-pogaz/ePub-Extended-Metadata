@@ -165,26 +165,40 @@ def write_extended_metadata(epub, extended_metadata):
 
 def _read_extended_metadata(container):
     extended_metadata = {}
+    extended_metadata[KEY.CREATORS] = creators = []
     extended_metadata[KEY.CONTRIBUTORS] = contributors = {}
+    
     extended_metadata[KEY.SERIES] = series = {}
+    
+    extended_metadata[KEY.SERIES] = series = {}
+    
     extended_metadata[KEY.COLLECTIONS] = collections = {}
     if not container.opf:
         return extended_metadata
     
     if container.version[0] == 2:
-        for child in container.metadata.xpath('dc:contributor[@opf:role]', namespaces=NAMESPACES):
-            role = child.xpath('@opf:role', namespaces=NAMESPACES)[0]
-            if not role in contributors:
-                contributors[role] = []
-            for author in string_to_authors(child.text):
-                contributors[role].append(author)
+        for child in container.metadata.xpath('dc:creator', namespaces=NAMESPACES):
+            tbl = child.xpath('@opf:role', namespaces=NAMESPACES)
+            role = tbl[0] if tbl else 'aut'
+            
+            authors = string_to_authors(child.text)
+            
+            if len(authors) == 1:
+                tbl = child.xpath('@opf:file-as', namespaces=NAMESPACES)
+                author_sort = tbl[0] if tbl else author_to_author_sort(authors[0])
+                creators.append((authors[0], role, author_sort))
+            else:
+                for author in authors:
+                    creators.append((author, role, author_to_author_sort(author)))
         
-        role = 'oth'
-        for child in container.metadata.xpath('dc:contributor[not(@opf:role)]', namespaces=NAMESPACES):
+        for child in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
+            tbl = child.xpath('@opf:role', namespaces=NAMESPACES)
+            role = tbl[0] if tbl else 'oth'
             if not role in contributors:
                 contributors[role] = []
             for author in string_to_authors(child.text):
                 contributors[role].append(author)
+    
     
     if container.version[0] == 3:
         for contrib in container.metadata.xpath('dc:contributor[@id]', namespaces=NAMESPACES):
@@ -211,6 +225,8 @@ def _read_extended_metadata(container):
         
         # extended_metadata
         
+    
+    debug_print('extended_metadata\n',extended_metadata)
     
     return extended_metadata
 
@@ -265,8 +281,10 @@ def _write_extended_metadata(container, extended_metadata):
                 container.metadata.remove(contrib)
         
         role_id = {}
+        
         for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):
-            id_n = 1
+            id_n = (len(role_id[role]) if role in role_id else 0) + 1
+            
             for contrib in epub_extended_metadata[KEY.CONTRIBUTORS][role]:
                 element = etree.Element(etree.QName(NS_DC, 'contributor'))
                 element.text = contrib

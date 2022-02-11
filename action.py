@@ -202,11 +202,8 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
                     if not (old_value and keep_calibre):
                         miA.set(field, new_value)
                         field_change.append(field)
-        else:
-            new_value = extended_metadata[data]
-            if new_value != miA.get(field):
-                miA.set(field, new_value)
-                field_change.append(field)
+        if data == KEY.CREATORS:
+            debug_print('KEY.CREATORS',KEY.CREATORS)
     
     return field_change
 
@@ -217,8 +214,8 @@ def create_extended_metadata(miA, prefs):
             extended_metadata[KEY.CONTRIBUTORS] = {}
             for role, field in iteritems(prefs[KEY.CONTRIBUTORS]):
                 extended_metadata[KEY.CONTRIBUTORS][role] = miA.get(field, default=[])
-        else:
-            extended_metadata[data] = miA.get(field, default=None)
+        if data == KEY.CREATORS:
+            debug_print('KEY.CREATORS',KEY.CREATORS)
     
     return extended_metadata
 
@@ -414,71 +411,36 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
 # Enter the exotic zone
 # those of the integrated plugins that if you don't watch out, overide those of Calibre => no basic metadata.
 
-import sys, traceback
-from calibre.customize.ui import find_plugin, quick_metadata, apply_null_metadata, force_identifiers, config, _metadata_readers
-from calibre.customize.builtins import EPUBMetadataReader, EPUBMetadataWriter, OPFMetadataReader, ActionEmbed
-from calibre.ebooks.metadata.opf import set_metadata as set_metadata_opf
-
-# ePubExtendedMetadata.MetadataReader
 #   get_metadata(stream, type)
-def read_metadata(stream, fmt):
-    # Use the Calibre EPUBMetadataReader
-    fmt = fmt.lower().strip()
-    print('fmt='+fmt)
-    try:
-        if hasattr(stream, 'seek'): stream.seek(0)
-        calibre_reader = find_plugin(EPUBMetadataReader.name)
-        calibre_reader.quick = quick_metadata.quick
-        miA = calibre_reader.get_metadata(stream, fmt)
-    except:
-        traceback.print_exc()
-    else:
-        #---------------
-        # Read Extended Metadata
-        if hasattr(stream, 'seek'): stream.seek(0)
-        extended_metadata = read_extended_metadata(stream)
-        apply_extended_metadata(miA, KEY.get_current_prefs(), extended_metadata,
-                            keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_AUTO], check_user_metadata=KEY.get_current_columns())
-        return miA
+def read_metadata(stream, fmt, miA):
+    #---------------
+    # Read Extended Metadata
+    extended_metadata = read_extended_metadata(stream)
+    apply_extended_metadata(miA, KEY.get_current_prefs(), extended_metadata,
+                        keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_AUTO], check_user_metadata=KEY.get_current_columns())
+    return miA
 
 # ePubExtendedMetadata.MetadataWriter
 #   set_metadata(stream, mi, type)
-def write_metadata(stream, miA, fmt):
-    # Use the Calibre EPUBMetadataWriter
-    fmt = fmt.lower().strip()
-    embed = find_plugin(ActionEmbed.name)
-    i, book_ids, pd, only_fmts, errors = embed.actual_plugin_.job_data
+def write_metadata(stream, fmt, miA):
+    import sys, traceback
+    #---------------
+    # Write Extended Metadata
+    from calibre.customize.ui import find_plugin
+    from calibre.customize.builtins import ActionEmbed
+    i, book_ids, pd, only_fmts, errors = find_plugin(ActionEmbed.name).actual_plugin_.job_data
     
     def report_error(mi, fmt, tb):
         miA.book_id = book_ids[i]
         errors.append((miA, fmt, tb))
     
     try:
-        if hasattr(stream, 'seek'): stream.seek(0)
-        calibre_writer = find_plugin(EPUBMetadataWriter.name)
-        calibre_writer.apply_null = apply_null_metadata.apply_null
-        calibre_writer.force_identifiers = force_identifiers.force_identifiers
-        calibre_writer.site_customization = config['plugin_customization'].get(calibre_writer.name, '')
-        calibre_writer.set_metadata(stream, miA, fmt)
-        
+        extended_metadata = create_extended_metadata(miA, KEY.get_current_prefs())
+        write_extended_metadata(stream, extended_metadata)
     except:
         if report_error is None:
             from calibre import prints
-            prints('Failed to set metadata for the \'{:s}\' format of: '.format(fmt.upper(), getattr(miA, 'title', '')), file=sys.stderr)
+            prints('Failed to set extended metadata for the', fmt.upper(), 'format of:', getattr(miA, 'title', ''), file=sys.stderr)
             traceback.print_exc()
         else:
             report_error(miA, fmt.upper(), traceback.format_exc())
-    else:
-        #---------------
-        # Write Extended Metadata
-        try:
-            if hasattr(stream, 'seek'): stream.seek(0)
-            extended_metadata = create_extended_metadata(miA, KEY.get_current_prefs())
-            write_extended_metadata(stream, extended_metadata)
-        except:
-            if report_error is None:
-                from calibre import prints
-                prints('Failed to set extended metadata for the', fmt.upper(), 'format of:', getattr(miA, 'title', ''), file=sys.stderr)
-                traceback.print_exc()
-            else:
-                report_error(miA, fmt.upper(), traceback.format_exc())
