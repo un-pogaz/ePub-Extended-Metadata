@@ -822,7 +822,7 @@ def CSS_CleanRules(css):
     r = regex()
     css = r.loop(r'[.*!()?+<>\\]', r'', css.lower())
     css = r.loop(r'(,|;|:|\n|\r|\s{2,})', r' ', css)
-    css = r.simple(r'^\s*(.*?)\s*$', r'\1', css); 
+    css = r.simple(r'^\s*(.*?)\s*$', r'\1', css)
     # split to table and remove duplicate
     css = list(dict.fromkeys(css.split(' ')))
     # sort
