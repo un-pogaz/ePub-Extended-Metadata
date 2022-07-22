@@ -68,59 +68,25 @@ class ePubExtendedMetadata(InterfaceActionBase):
         from calibre.customize.ui import initialize_plugin, _initialized_plugins, config, find_plugin, load_plugin
         
         installation_type = getattr(self, 'installation_type', None)
-        def append_plugin(plugin, plugin_path):
+        
+        def append_plugin(plugin):
             try:
                 if installation_type != None:
-                    p = initialize_plugin(plugin, plugin_path, installation_type)
+                    p = initialize_plugin(plugin, self.plugin_path, installation_type)
                 else:
-                    p = initialize_plugin(plugin, plugin_path)
+                    p = initialize_plugin(plugin, self.plugin_path)
                 _initialized_plugins.append(p)
                 return p
             except Exception as err:
                 print('An error has occurred: '+ str(err))
                 return None
         
-        def extract_plugin(zf, name, zfp):
-            if os.path.exists(zfp):
-                os.remove(zfp)
-            zf.extract(name, plugin_dir)
-            os.rename(os.path.join(plugin_dir, name), zfp)
+        from .writer import MetadataWriter
+        from .reader import MetadataReader
         
-        plugins = config['plugins']
-        edited = False
+        append_plugin(MetadataWriter)
+        append_plugin(MetadataReader)
         
-        with ZipFile(self.plugin_path, 'r') as zf:
-            for plugin in [('Writer.zip', NAME.WRITER), ('Reader.zip', NAME.READER)]:
-                zip = plugin[0]
-                name = plugin[1]
-                
-                p = find_plugin(name)
-                instaled = False
-                if not p:
-                    if name in plugins:
-                        zfp = plugins[name]
-                        instaled = True
-                    else:
-                        zfp = os.path.join(plugin_dir, name+'.zip')
-                        plugins[name] = zfp
-                        edited = True
-                    
-                    if not os.path.exists(zfp):
-                        extract_plugin(zf, zip, zfp)
-                    
-                    p = append_plugin(load_plugin(zfp), zfp)
-                
-                if p.version != self.version:
-                    _initialized_plugins.remove(p)
-                    zfp = p.plugin_path
-                    extract_plugin(zf, zip, zfp)
-                    p = append_plugin(load_plugin(zfp), zfp)
-                
-                if instaled:
-                    _initialized_plugins.remove(p)
-        
-        if edited:
-            config['plugins'] = plugins
     
     
     def is_customizable(self):

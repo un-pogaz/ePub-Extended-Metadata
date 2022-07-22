@@ -19,10 +19,10 @@ class NAME:
     WRITER              = BASE + ' {Writer}'
 class DESCRIPTION:
     ACTION              = _('Read and write a wider range of metadata for ePub\'s files and associating them to columns in your libraries.')
-    COMPANION           = '\n' +_('This is an companion (and auto instaled) plugin of "{:s}".').format(NAME.BASE)
+    COMPANION           = '\n' +_('This is an companion (and embeded) plugin of "{:s}".').format(NAME.BASE)
     READER              = _('Read a wider range of metadata from the ePub file.') + COMPANION
     WRITER              = _('Write a wider range of metadata in the ePub file.') + COMPANION
 SUPPORTED_PLATFORMS     = ['windows', 'osx', 'linux']
 AUTHOR                  = 'un_pogaz'
-VERSION                 = (0, 6, 0)
+VERSION                 = (0, 7, 0)
 MINIMUM_CALIBRE_VERSION = (4, 0, 0)

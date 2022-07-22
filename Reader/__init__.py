@@ -11,7 +11,7 @@ __docformat__ = 'restructuredtext en'
 # The class that all Interface Action plugin wrappers must inherit from
 from calibre.customize import MetadataReaderPlugin, MetadataWriterPlugin
 
-from .common import *
+from ..common import *
 
 class MetadataReader(MetadataReaderPlugin):
     '''
@@ -63,10 +63,8 @@ class MetadataReader(MetadataReaderPlugin):
     
     def config_widget(self):
         from calibre.customize.ui import find_plugin
-        p = find_plugin(NAME.BASE)
-        if p and hasattr(p, 'actual_plugin_'):
-            from calibre_plugins.epub_extended_metadata.config import ConfigReaderWidget
-            return ConfigReaderWidget(p.actual_plugin_)
+        from ..config import ConfigReaderWidget
+        return ConfigReaderWidget(find_plugin(NAME.BASE).actual_plugin_)
     
     def save_settings(self, config_widget):
         config_widget.save_settings()

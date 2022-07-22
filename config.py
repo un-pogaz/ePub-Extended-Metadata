@@ -334,7 +334,7 @@ class ConfigWidget(QWidget):
         with PREFS:
             PREFS[KEY.CONTRIBUTORS] = self.table.get_contributors_columns()
             PREFS[KEY.LINK_AUTHOR] = self.linkAuthors.checkState() == Qt.Checked
-            PREFS[KEY.CREATORS_AS_AUTHOR] = self.creatorsAsAuthors.checkState() == Qt.Checked
+            #PREFS[KEY.CREATORS_AS_AUTHOR] = self.creatorsAsAuthors.checkState() == Qt.Checked
             PREFS[KEY.AUTO_IMPORT] = self.reader_button.pluginEnable
             PREFS[KEY.AUTO_EMBED] = self.writer_button.pluginEnable
             PREFS[KEY.FIRST_CONFIG] = False

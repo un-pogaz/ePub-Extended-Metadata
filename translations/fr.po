@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-02-11 11:16+0100\n"
+"POT-Creation-Date: 2022-07-22 19:31+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -10,25 +10,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural -Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.1.1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
-
-#: Reader/common.py:21 Writer/common.py:21 common.py:21
-msgid "Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries."
-msgstr "Lisez et écrivez un plus large éventail de métadonnées pour les fichiers ePub et associez-les à des colonnes dans vos bibliothèques."
-
-#: Reader/common.py:22 Writer/common.py:22 common.py:22
-msgid "This is an companion (and auto instaled) plugin of \"{:s}\"."
-msgstr "Il s'agit d'un plugin compagnon (et auto-instaler) de \"{:s}\"."
-
-#: Reader/common.py:23 Writer/common.py:23 common.py:23
-msgid "Read a wider range of metadata from the ePub file."
-msgstr "Lire un plus large éventail de métadonnées à partir du fichier ePub."
-
-#: Reader/common.py:24 Writer/common.py:24 common.py:24
-msgid "Write a wider range of metadata in the ePub file."
-msgstr "Ecrit un plus large éventail de métadonnées à partir du fichier ePub."
 
 #: action.py:52
 msgid "Edit the Extended Metadata of the ePub files"
@@ -81,6 +65,22 @@ msgstr ""
 #: action.py:339
 msgid "Book {:d} of {:d}."
 msgstr "Livre {:d} sur {:d}"
+
+#: common.py:21
+msgid "Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries."
+msgstr "Lisez et écrivez un plus large éventail de métadonnées pour les fichiers ePub et associez-les à des colonnes dans vos bibliothèques."
+
+#: common.py:22
+msgid "This is an companion (and embeded) plugin of \"{:s}\"."
+msgstr "Il s'agit d'un plugin compagnon (et intégré) de \"{:s}\"."
+
+#: common.py:23
+msgid "Read a wider range of metadata from the ePub file."
+msgstr "Lire un plus large éventail de métadonnées à partir du fichier ePub."
+
+#: common.py:24
+msgid "Write a wider range of metadata in the ePub file."
+msgstr "Ecrit un plus large éventail de métadonnées à partir du fichier ePub."
 
 #: common_utils.py:266
 msgid "No book selected"
@@ -258,33 +258,31 @@ msgstr "Conservez les métadonnées intégrées par Calibre qui pourraient exist
 msgid "Overwrites Calibre embed metadata, give priority to original metadata"
 msgstr "Écrase les métadonnées intégrées par Calibre, donne la priorité aux métadonnées originales"
 
-#: config.py:525
-#, fuzzy
-#| msgid "Set here the specifics options to read and add automatically the metadata."
-msgid "Set here the specifics options to read and automatic addition of metadata."
-msgstr "Définissez ici les options spécifiques pour la lecture et l'ajout automatique des métadonnées."
-
-#: config.py:526
-msgid "Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadataand the one already recorded by Calibre."
-msgstr "Choisissez le comportement à adopter en cas de conflit entre les métadonnées lues par ePub Extended Metadata et celles déjà enregistrées par Calibre."
-
-#: config.py:537
+#: config.py:531
 msgid "ePub Extended Metadata import options"
 msgstr "ePub Extended Metadata options d'importation"
 
-#: config.py:547
+#: config.py:533
+msgid "Set here the specifics options to read and automatic addition of metadata."
+msgstr "Définissez ici les options spécifiques pour la lecture et l'ajout automatique des métadonnées."
+
+#: config.py:537
+msgid "Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata and the one already recorded by Calibre."
+msgstr "Choisissez le comportement à adopter en cas de conflit entre les métadonnées lues par ePub Extended Metadata et celles déjà enregistrées par Calibre."
+
+#: config.py:543
 msgid "When importing manually:"
 msgstr "Lors d'une importation manuelle :"
 
-#: config.py:548
+#: config.py:544
 msgid "The manual import is executed by clicking on \"Import Extended Metadata\" in the menu of 'ePub Extended Metadata'"
 msgstr "L'importation manuelle est exécutée en cliquant sur \"Importer les métadonnées étendues\" dans le menu de « ePub Extended Metadata »."
 
-#: config.py:555
+#: config.py:551
 msgid "During automatic import:"
 msgstr "Pendant l'importation automatique :"
 
-#: config.py:556
+#: config.py:552
 msgid "The auto import is executed when Calibre add a book to the library"
 msgstr "L'importation automatique est exécutée lorsque Calibre ajoute un livre à la bibliothèque"
 

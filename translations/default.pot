@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-02-11 10:23+0100\n"
+"POT-Creation-Date: 2022-07-22 19:31+0200\n"
 "PO-Revision-Date: 2020-10-12 14:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -11,25 +11,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.1.1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
-
-#: Reader/common.py:21 Writer/common.py:21 common.py:21
-msgid "Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries."
-msgstr ""
-
-#: Reader/common.py:22 Writer/common.py:22 common.py:22
-msgid "This is an companion (and auto instaled) plugin of \"{:s}\"."
-msgstr ""
-
-#: Reader/common.py:23 Writer/common.py:23 common.py:23
-msgid "Read a wider range of metadata from the ePub file."
-msgstr ""
-
-#: Reader/common.py:24 Writer/common.py:24 common.py:24
-msgid "Write a wider range of metadata in the ePub file."
-msgstr ""
 
 #: action.py:52
 msgid "Edit the Extended Metadata of the ePub files"
@@ -77,6 +61,22 @@ msgstr ""
 
 #: action.py:339
 msgid "Book {:d} of {:d}."
+msgstr ""
+
+#: common.py:21
+msgid "Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries."
+msgstr ""
+
+#: common.py:22
+msgid "This is an companion (and embeded) plugin of \"{:s}\"."
+msgstr ""
+
+#: common.py:23
+msgid "Read a wider range of metadata from the ePub file."
+msgstr ""
+
+#: common.py:24
+msgid "Write a wider range of metadata in the ePub file."
 msgstr ""
 
 #: common_utils.py:266
@@ -181,6 +181,10 @@ msgid ""
 "Your changes can't be saved and have been cancelled."
 msgstr ""
 
+#: config.py:362
+msgid "This feature has been incorrectly initialized. Restart Calibre to fix this."
+msgstr ""
+
 #: config.py:375
 msgid "Contributor type"
 msgstr ""
@@ -238,34 +242,34 @@ msgid "Keep Calibre embed metadata that could exist in the book"
 msgstr ""
 
 #: config.py:519
-msgid "Overwrites Calibre embed metadata, considers that the book always reason"
+msgid "Overwrites Calibre embed metadata, give priority to original metadata"
 msgstr ""
 
-#: config.py:525
-msgid "Set here the specific option to read and add automatically the metadata."
-msgstr ""
-
-#: config.py:526
-msgid "Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadataand the one already recorded by Calibre."
-msgstr ""
-
-#: config.py:537
+#: config.py:531
 msgid "ePub Extended Metadata import options"
 msgstr ""
 
-#: config.py:549
+#: config.py:533
+msgid "Set here the specifics options to read and automatic addition of metadata."
+msgstr ""
+
+#: config.py:537
+msgid "Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata and the one already recorded by Calibre."
+msgstr ""
+
+#: config.py:543
 msgid "When importing manually:"
 msgstr ""
 
-#: config.py:550
+#: config.py:544
 msgid "The manual import is executed by clicking on \"Import Extended Metadata\" in the menu of 'ePub Extended Metadata'"
 msgstr ""
 
-#: config.py:557
+#: config.py:551
 msgid "During automatic import:"
 msgstr ""
 
-#: config.py:558
+#: config.py:552
 msgid "The auto import is executed when Calibre add a book to the library"
 msgstr ""
 

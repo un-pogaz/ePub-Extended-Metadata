@@ -11,7 +11,7 @@ __docformat__ = 'restructuredtext en'
 # The class that all Interface Action plugin wrappers must inherit from
 from calibre.customize import MetadataReaderPlugin, MetadataWriterPlugin
 
-from .common import *
+from ..common import *
 
 class MetadataWriter(MetadataWriterPlugin):
     '''
@@ -53,4 +53,14 @@ class MetadataWriter(MetadataWriterPlugin):
             if hasattr(stream, 'seek'): stream.seek(0)
             from calibre_plugins.epub_extended_metadata.action import write_metadata
             write_metadata(stream, type, mi)
-
+    
+    def is_customizable(self):
+        '''
+        This method must return True to enable customization via
+        Preferences->Plugins
+        '''
+        return True
+    
+    def config_widget(self):
+        from calibre.customize.ui import find_plugin
+        return find_plugin(NAME.BASE).config_widget()
