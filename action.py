@@ -34,7 +34,7 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 
 from .config import ICON, DYNAMIC, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
-from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, get_selected_BookIds, load_plugin_resources,
+from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, get_BookIds_selected, load_plugin_resources,
                             create_menu_action_unique, has_restart_pending, CustomExceptionErrorDialog)
 from .container_extended_metadata import read_extended_metadata, write_extended_metadata
 
@@ -133,10 +133,10 @@ class ePubExtendedMetadataAction(InterfaceAction):
         self.embedExtendedMetadata()
     
     def embedExtendedMetadata(self):
-        self.runExtendedMetadataProgressDialog({id:VALUE.EMBED for id in get_selected_BookIds()}) 
+        self.runExtendedMetadataProgressDialog({id:VALUE.EMBED for id in get_BookIds_selected()}) 
         
     def importExtendedMetadata(self):
-        self.runExtendedMetadataProgressDialog({id:VALUE.IMPORT for id in get_selected_BookIds()}) 
+        self.runExtendedMetadataProgressDialog({id:VALUE.IMPORT for id in get_BookIds_selected()}) 
     
     def editBulkExtendedMetadata(self):
         debug_print('editBulkExtendedMetadata')

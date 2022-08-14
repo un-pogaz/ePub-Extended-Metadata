@@ -37,7 +37,7 @@ try:
     
 except ImportError:
     from PyQt5.Qt import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
-                            QTableWidgetItem, QFont, QLineEdit, QComboBox,
+                            QTableWidgetItem, QFont, QLineEdit, QComboBox, QModelIndex,
                             QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
                             QTextEdit, QListWidget, QAbstractItemView, QApplication)
 
@@ -255,7 +255,7 @@ def get_library_uuid(db=None):
     return library_uuid
 
 
-def get_selected_BookIds(show_error=True, msg=None):
+def get_BookIds_selected(show_error=True, msg=None):
     ids = []
     try:
         rows = GUI.library_view.selectionModel().selectedRows()
@@ -274,6 +274,52 @@ def get_selected_BookIds(show_error=True, msg=None):
         ids = []
     
     return ids
+
+def get_BookIds_all():
+    """"""
+    return current_db().all_ids()
+
+def get_BookIds_virtual():
+    """return the books id of the virtual library (without search restriction)"""
+    data = current_db().data
+    return data.search_getting_ids('', '',
+                                    set_restriction_count=False, use_virtual_library=True, sort_results=True)
+
+def get_BookIds_filtered():
+    """return the books id of the virtual library AND search restriction applied.
+    This is the strictest result"""
+    data = current_db().data
+    return data.search_getting_ids('', data.search_restriction,
+                                    set_restriction_count=False, use_virtual_library=True, sort_results=True)
+
+def get_BookIds_search():
+    """return the books id of the current search"""
+    data = current_db().data
+    return data.search_getting_ids(get_curent_search(), data.search_restriction,
+                                    set_restriction_count=False, use_virtual_library=True, sort_results=True)
+
+
+def get_curent_search():
+    return GUI.library_view.model().last_search
+
+def get_curent_virtual():
+    """The virtual library, can't be a temporary VL"""
+    data = current_db().data
+    return data.get_base_restriction_name(), data.get_base_restriction()
+
+def get_curent_restriction_search():
+    """The search restriction is a top level filtre, based on the saved searches"""
+    name = current_db().data.get_search_restriction_name()
+    return name, get_saved_searches().get(name, '')
+
+def get_virtual_libraries():
+    """Get all virtual library set in the database"""
+    return current_db().prefs.get('virtual_libraries', {})
+
+def get_saved_searches():
+    """Get all saved searches set in the database"""
+    return current_db().prefs.get('saved_searches', {})
+
 
 def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
                      shortcut=(), triggered=None, is_checked=None):
