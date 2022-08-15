@@ -254,18 +254,20 @@ def get_library_uuid(db=None):
         library_uuid = ''
     return library_uuid
 
+def no_launch_error(title, name=None):
+    error_dialog(GUI, title, (title +'.\n'+ _('Could not to launch {:s}').format(PLUGIN_NAME or name)), show=True, show_copy_button=False)
 
-def get_BookIds_selected(show_error=True, msg=None):
+def no_BookIds_error(book_ids, show_error, title, name=None):
+    if not book_ids and show_error:
+        no_launch_error(title, name=name)
+    return book_ids
+
+def get_BookIds_selected(show_error=False):
     ids = []
     try:
         rows = GUI.library_view.selectionModel().selectedRows()
         if not rows or len(rows) == 0:
             ids = []
-            
-            if show_error:
-                title = _('No book selected')
-                error_dialog(GUI, title, title +'\n'+ _('Could not to launch {:s}').format(PLUGIN_NAME), show=True, show_copy_button=False)
-            
         else:
             ids = GUI.library_view.get_selected_ids()
     except Exception as err:
@@ -273,30 +275,41 @@ def get_BookIds_selected(show_error=True, msg=None):
         CustomExceptionErrorDialog(err)
         ids = []
     
-    return ids
+    return no_BookIds_error(ids, show_error, _('No book selected'))
 
-def get_BookIds_all():
-    """"""
-    return current_db().all_ids()
+def get_BookIds_all(show_error=False):
+    """All in the library"""
+    ids = current_db().all_ids()
+    return no_BookIds_error(ids, show_error, _('No book in the library'))
 
-def get_BookIds_virtual():
+def get_BookIds_virtual(show_error=False):
     """return the books id of the virtual library (without search restriction)"""
     data = current_db().data
-    return data.search_getting_ids('', '',
+    ids = data.search_getting_ids('', '',
                                     set_restriction_count=False, use_virtual_library=True, sort_results=True)
+    return no_BookIds_error(ids, show_error, _('No book in the virtual library'))
 
-def get_BookIds_filtered():
+def get_BookIds_filtered(show_error=False):
     """return the books id of the virtual library AND search restriction applied.
     This is the strictest result"""
     data = current_db().data
-    return data.search_getting_ids('', data.search_restriction,
+    ids = data.search_getting_ids('', data.search_restriction,
                                     set_restriction_count=False, use_virtual_library=True, sort_results=True)
+    return no_BookIds_error(ids, show_error, _('No book in the virtual library'))
 
-def get_BookIds_search():
+def get_BookIds_search(show_error=False):
     """return the books id of the current search"""
     data = current_db().data
-    return data.search_getting_ids(get_curent_search(), data.search_restriction,
+    ids = data.search_getting_ids(get_curent_search(), data.search_restriction,
                                     set_restriction_count=False, use_virtual_library=True, sort_results=True)
+    return no_BookIds_error(ids, show_error, _('No book in the current search'))
+
+def get_BookIds(query, use_search_restriction=True, use_virtual_library=True):
+    """return the books id corresponding to the query"""
+    data = current_db().data
+    search_restriction = data.search_restriction if use_search_restriction else ''
+    return data.search_getting_ids(query, search_restriction,
+                                    set_restriction_count=False, use_virtual_library=use_virtual_library, sort_results=True)
 
 
 def get_curent_search():
@@ -319,6 +332,27 @@ def get_virtual_libraries():
 def get_saved_searches():
     """Get all saved searches set in the database"""
     return current_db().prefs.get('saved_searches', {})
+
+
+def get_marked(label=None):
+    if label == None:
+        return current_db().db.data.marked_ids.copy()
+    else:
+        return { k:v for k,v in iteritems(marked) if v==label }
+
+def set_marked(label, book_ids, append=False, reset=False):
+    marked = {} if reset else get_marked()
+    
+    if not append:
+        del_id = []
+        for k,v in iteritems(marked):
+            if v == label: del_id.append(k)
+        
+        for k in del_id:
+            del marked[k]
+    
+    marked.update( {idx:label for idx in book_ids} )
+    current_db().data.set_marked_ids(marked)
 
 
 def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,

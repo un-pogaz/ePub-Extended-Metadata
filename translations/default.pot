@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-07-22 19:31+0200\n"
+"POT-Creation-Date: 2022-08-15 16:59+0200\n"
 "PO-Revision-Date: 2020-10-12 14:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -79,39 +79,51 @@ msgstr ""
 msgid "Write a wider range of metadata in the ePub file."
 msgstr ""
 
-#: common_utils.py:266
-msgid "No book selected"
-msgstr ""
-
-#: common_utils.py:267
+#: common_utils.py:258
 msgid "Could not to launch {:s}"
 msgstr ""
 
-#: common_utils.py:355
+#: common_utils.py:278
+msgid "No book selected"
+msgstr ""
+
+#: common_utils.py:283
+msgid "No book in the library"
+msgstr ""
+
+#: common_utils.py:290 common_utils.py:298
+msgid "No book in the virtual library"
+msgstr ""
+
+#: common_utils.py:305
+msgid "No book in the current search"
+msgstr ""
+
+#: common_utils.py:435
 msgid "You cannot configure this plugin before calibre is restarted."
 msgstr ""
 
-#: common_utils.py:381
+#: common_utils.py:461
 msgid "Restart required"
 msgstr ""
 
-#: common_utils.py:382
+#: common_utils.py:462
 msgid "Title image not found - you must restart Calibre before using this plugin!"
 msgstr ""
 
-#: common_utils.py:726
+#: common_utils.py:806
 msgid "Keyboard shortcut dialog"
 msgstr ""
 
-#: common_utils.py:727
+#: common_utils.py:807
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: common_utils.py:856
+#: common_utils.py:936
 msgid "Unhandled exception"
 msgstr ""
 
-#: common_utils.py:861
+#: common_utils.py:941
 msgid "The {:s} plugin has encounter a unhandled exception."
 msgstr ""
 

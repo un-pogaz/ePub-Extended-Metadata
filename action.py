@@ -133,10 +133,10 @@ class ePubExtendedMetadataAction(InterfaceAction):
         self.embedExtendedMetadata()
     
     def embedExtendedMetadata(self):
-        self.runExtendedMetadataProgressDialog({id:VALUE.EMBED for id in get_BookIds_selected()}) 
+        self.runExtendedMetadataProgressDialog({id:VALUE.EMBED for id in get_BookIds_selected(show_error=True)}) 
         
     def importExtendedMetadata(self):
-        self.runExtendedMetadataProgressDialog({id:VALUE.IMPORT for id in get_BookIds_selected()}) 
+        self.runExtendedMetadataProgressDialog({id:VALUE.IMPORT for id in get_BookIds_selected(show_error=True)}) 
     
     def editBulkExtendedMetadata(self):
         debug_print('editBulkExtendedMetadata')
