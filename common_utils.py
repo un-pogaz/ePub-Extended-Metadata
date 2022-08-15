@@ -101,7 +101,7 @@ def debug_print(*args):
 
 
 def equals_no_case(left, right):
-    if PYTHON >= (3, 3):
+    if hasattr(left, 'casefold'):
         return left.casefold() == right.casefold()
     else:
         return left.upper().lower() == right.upper().lower()
@@ -336,9 +336,9 @@ def get_saved_searches():
 
 def get_marked(label=None):
     if label == None:
-        return current_db().db.data.marked_ids.copy()
+        return current_db().data.marked_ids.copy()
     else:
-        return { k:v for k,v in iteritems(marked) if v==label }
+        return { k:v for k,v in iteritems(marked) if equals_no_case(v, label) }
 
 def set_marked(label, book_ids, append=False, reset=False):
     marked = {} if reset else get_marked()
