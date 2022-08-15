@@ -1,4 +1,4 @@
-### version 0.6.0
+### version 0.7.0
 back to the embeded companion plugin , more stable
 
 ### version 0.6.0

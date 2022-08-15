@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-08-15 16:59+0200\n"
+"POT-Creation-Date: 2022-08-15 23:19+0200\n"
 "PO-Revision-Date: 2020-10-12 14:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -14,6 +14,22 @@ msgstr ""
 "X-Generator: Poedit 3.1.1\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
+
+#: __init__.py:35
+msgid "Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries."
+msgstr ""
+
+#: __init__.py:36
+msgid "This is an companion (and embeded) plugin of \"{:s}\"."
+msgstr ""
+
+#: __init__.py:37
+msgid "Read a wider range of metadata from the ePub file."
+msgstr ""
+
+#: __init__.py:38
+msgid "Write a wider range of metadata in the ePub file."
+msgstr ""
 
 #: action.py:52
 msgid "Edit the Extended Metadata of the ePub files"
@@ -61,22 +77,6 @@ msgstr ""
 
 #: action.py:339
 msgid "Book {:d} of {:d}."
-msgstr ""
-
-#: common.py:21
-msgid "Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries."
-msgstr ""
-
-#: common.py:22
-msgid "This is an companion (and embeded) plugin of \"{:s}\"."
-msgstr ""
-
-#: common.py:23
-msgid "Read a wider range of metadata from the ePub file."
-msgstr ""
-
-#: common.py:24
-msgid "Write a wider range of metadata in the ePub file."
 msgstr ""
 
 #: common_utils.py:258

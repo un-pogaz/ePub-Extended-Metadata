@@ -21,7 +21,22 @@ from calibre.customize import InterfaceActionBase
 DEBUG_PRE = 'ePubExtendedMetadata'
 PREFS_NAMESPACE = 'ePubExtendedMetadata'
 
-from .common import *
+class INFO:
+    VERSION                 = (0, 7, 0)
+    MINIMUM_CALIBRE_VERSION = (4, 0, 0)
+    SUPPORTED_PLATFORMS     = ['windows', 'osx', 'linux']
+    AUTHOR                  = 'un_pogaz'
+    FILES_TYPES             = {'epub'}
+    
+    NAME                = 'ePub Extended Metadata'
+    READER              = NAME + ' {Reader}'
+    WRITER              = NAME + ' {Writer}'
+    
+    DESCRIPTION_ACTION              = _('Read and write a wider range of metadata for ePub\'s files and associating them to columns in your libraries.')
+    DESCRIPTION_COMPANION           = '\n' +_('This is an companion (and embeded) plugin of "{:s}".').format(NAME)
+    DESCRIPTION_READER              = _('Read a wider range of metadata from the ePub file.') + DESCRIPTION_COMPANION
+    DESCRIPTION_WRITER              = _('Write a wider range of metadata in the ePub file.') + DESCRIPTION_COMPANION
+
 
 class ePubExtendedMetadata(InterfaceActionBase):
     '''
@@ -33,12 +48,12 @@ class ePubExtendedMetadata(InterfaceActionBase):
     The reason for having two classes is that it allows the command line
     calibre utilities to run without needing to load the GUI libraries.
     '''
-    name                    = NAME.BASE
-    description             = DESCRIPTION.ACTION
-    supported_platforms     = SUPPORTED_PLATFORMS
-    author                  = AUTHOR
-    version                 = VERSION
-    minimum_calibre_version = MINIMUM_CALIBRE_VERSION
+    name                    = INFO.NAME
+    description             = INFO.DESCRIPTION_ACTION
+    supported_platforms     = INFO.SUPPORTED_PLATFORMS
+    author                  = INFO.AUTHOR
+    version                 = INFO.VERSION
+    minimum_calibre_version = INFO.MINIMUM_CALIBRE_VERSION
     
     
     #: This field defines the GUI plugin class that contains all the code

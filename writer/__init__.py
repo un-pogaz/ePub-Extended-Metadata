@@ -11,7 +11,17 @@ __docformat__ = 'restructuredtext en'
 # The class that all Interface Action plugin wrappers must inherit from
 from calibre.customize import MetadataReaderPlugin, MetadataWriterPlugin
 
-from ..common import *
+def get__init__attribut(name, default=None, use_root_has_default=False):
+    ns = __name__.split('.')
+    ns.pop(-1)
+    
+    if use_root_has_default:
+        default = ns[-1]
+    
+    import importlib
+    return getattr(importlib.import_module('.'.join(ns)), name, default)
+
+INFO = get__init__attribut('INFO')
 
 class MetadataWriter(MetadataWriterPlugin):
     '''
@@ -19,14 +29,14 @@ class MetadataWriter(MetadataWriterPlugin):
     '''
     #: Set of file types for which this plugin should be run.
     #: For example: ``{'lit', 'mobi', 'prc'}``
-    file_types = FILES_TYPES
+    file_types = INFO.FILES_TYPES
     
-    name                    = NAME.WRITER
-    description             = DESCRIPTION.WRITER
-    supported_platforms     = SUPPORTED_PLATFORMS
-    author                  = AUTHOR
-    version                 = VERSION
-    minimum_calibre_version = MINIMUM_CALIBRE_VERSION
+    name                    = INFO.WRITER
+    description             = INFO.DESCRIPTION_WRITER
+    supported_platforms     = INFO.SUPPORTED_PLATFORMS
+    author                  = INFO.AUTHOR
+    version                 = INFO.VERSION
+    minimum_calibre_version = INFO.MINIMUM_CALIBRE_VERSION
     
     def set_metadata(self, stream, mi, type):
         '''
@@ -49,7 +59,7 @@ class MetadataWriter(MetadataWriterPlugin):
         calibre_writer.site_customization = config['plugin_customization'].get(calibre_writer.name, '')
         calibre_writer.set_metadata(stream, mi, type)
         
-        if find_plugin(NAME.BASE):
+        if find_plugin(INFO.NAME):
             if hasattr(stream, 'seek'): stream.seek(0)
             from calibre_plugins.epub_extended_metadata.action import write_metadata
             write_metadata(stream, type, mi)
@@ -63,4 +73,4 @@ class MetadataWriter(MetadataWriterPlugin):
     
     def config_widget(self):
         from calibre.customize.ui import find_plugin
-        return find_plugin(NAME.BASE).config_widget()
+        return find_plugin(INFO.NAME).config_widget()
