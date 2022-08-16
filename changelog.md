@@ -1,5 +1,5 @@
 ### version 0.7.1
-[fix] use literal in ePubExtendedMetadata
+[fix] use literal in ePubExtendedMetadata class
 
 ### version 0.7.0
 back to the embeded companion plugin, more stable
