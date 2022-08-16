@@ -11,17 +11,15 @@ __docformat__ = 'restructuredtext en'
 # The class that all Interface Action plugin wrappers must inherit from
 from calibre.customize import MetadataReaderPlugin, MetadataWriterPlugin
 
-def get__init__attribut(name, default=None, use_root_has_default=False):
-    ns = __name__.split('.')
-    ns.pop(-1)
-    
-    if use_root_has_default:
-        default = ns[-1]
-    
-    import importlib
-    return getattr(importlib.import_module('.'.join(ns)), name, default)
 
-INFO = get__init__attribut('INFO')
+def get_plugin_attribut(name, default=None):
+        ns = __name__.split('.')
+        ns.pop(-1)
+        ns = '.'.join(ns)
+        import importlib
+        m = importlib.import_module(ns)
+        
+        return getattr(getattr(m, 'ePubExtendedMetadata', None), name, default)
 
 class MetadataWriter(MetadataWriterPlugin):
     '''
@@ -29,14 +27,14 @@ class MetadataWriter(MetadataWriterPlugin):
     '''
     #: Set of file types for which this plugin should be run.
     #: For example: ``{'lit', 'mobi', 'prc'}``
-    file_types = INFO.FILES_TYPES
+    file_types = get_plugin_attribut('file_types')
     
-    name                    = INFO.WRITER
-    description             = INFO.DESCRIPTION_WRITER
-    supported_platforms     = INFO.SUPPORTED_PLATFORMS
-    author                  = INFO.AUTHOR
-    version                 = INFO.VERSION
-    minimum_calibre_version = INFO.MINIMUM_CALIBRE_VERSION
+    name                    = get_plugin_attribut('name_writer')
+    description             = get_plugin_attribut('description_writer')
+    supported_platforms     = get_plugin_attribut('supported_platforms')
+    author                  = get_plugin_attribut('author')
+    version                 = get_plugin_attribut('version')
+    minimum_calibre_version = get_plugin_attribut('minimum_calibre_version')
     
     def set_metadata(self, stream, mi, type):
         '''
@@ -59,7 +57,7 @@ class MetadataWriter(MetadataWriterPlugin):
         calibre_writer.site_customization = config['plugin_customization'].get(calibre_writer.name, '')
         calibre_writer.set_metadata(stream, mi, type)
         
-        if find_plugin(INFO.NAME):
+        if find_plugin(get_plugin_attribut('name')):
             if hasattr(stream, 'seek'): stream.seek(0)
             from calibre_plugins.epub_extended_metadata.action import write_metadata
             write_metadata(stream, type, mi)
@@ -73,4 +71,4 @@ class MetadataWriter(MetadataWriterPlugin):
     
     def config_widget(self):
         from calibre.customize.ui import find_plugin
-        return find_plugin(INFO.NAME).config_widget()
+        return find_plugin(get_plugin_attribut('name')).config_widget()
