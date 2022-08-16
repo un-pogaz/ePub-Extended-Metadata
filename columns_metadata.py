@@ -33,8 +33,7 @@ from calibre import prints
 from calibre.gui2.ui import get_gui
 from calibre.library.field_metadata import FieldMetadata
 
-from .common_utils import debug_print, regex, current_db
-regex = regex()
+from .common_utils import debug_print, current_db, regex
 
 
 typeproperty_registry = []

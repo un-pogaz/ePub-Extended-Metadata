@@ -43,8 +43,9 @@ from calibre.ebooks.metadata import string_to_authors
 from calibre.library.field_metadata import FieldMetadata
 from polyglot.builtins import iteritems, itervalues
 
-from .common_utils import (debug_print, get_icon, PREFS_library, PREFS_dynamic, KeyboardConfigDialog, ImageTitleLayout,
-                            equals_no_case, duplicate_entry, get__init__attribut, KeyValueComboBox, CustomColumnComboBox, ReadOnlyTableWidgetItem)
+from .common_utils import (debug_print, get_icon, PREFS_library, PREFS_dynamic, ImageTitleLayout, KeyboardConfigDialog,
+                            equals_no_case, duplicate_entry, get__init__attribut,
+                            KeyValueComboBox, CustomColumnComboBox, ReadOnlyTableWidgetItem)
 
 
 from .marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION

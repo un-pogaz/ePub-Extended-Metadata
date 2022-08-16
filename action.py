@@ -28,13 +28,13 @@ except ImportError:
     from PyQt5.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
 
 from calibre import prints
-from calibre.constants import numeric_version as calibre_version
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 
 from .config import ICON, DYNAMIC, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
-from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, get_BookIds_selected, load_plugin_resources,
+from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version,
+                            get_BookIds_selected,
                             create_menu_action_unique, has_restart_pending, CustomExceptionErrorDialog)
 from .container_extended_metadata import read_extended_metadata, write_extended_metadata
 

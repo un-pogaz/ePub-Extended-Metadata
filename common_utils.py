@@ -263,18 +263,13 @@ def no_BookIds_error(book_ids, show_error, title, name=None):
     return book_ids
 
 def get_BookIds_selected(show_error=False):
-    ids = []
-    try:
-        rows = GUI.library_view.selectionModel().selectedRows()
-        if not rows or len(rows) == 0:
-            ids = []
-        else:
-            ids = GUI.library_view.get_selected_ids()
-    except Exception as err:
-        debug_print(err)
-        CustomExceptionErrorDialog(err)
+    """Selected book in the gui"""
+    rows = GUI.library_view.selectionModel().selectedRows()
+    if not rows or len(rows) == 0:
         ids = []
-    
+    else:
+        ids = GUI.library_view.get_selected_ids()
+   
     return no_BookIds_error(ids, show_error, _('No book selected'))
 
 def get_BookIds_all(show_error=False):
@@ -284,35 +279,35 @@ def get_BookIds_all(show_error=False):
 
 def get_BookIds_virtual(show_error=False):
     """return the books id of the virtual library (without search restriction)"""
-    data = current_db().data
-    ids = data.search_getting_ids('', '',
-                                    set_restriction_count=False, use_virtual_library=True, sort_results=True)
+    ids = get_BookIds('', search_restriction='', use_virtual_library=True)
     return no_BookIds_error(ids, show_error, _('No book in the virtual library'))
 
 def get_BookIds_filtered(show_error=False):
     """return the books id of the virtual library AND search restriction applied.
     This is the strictest result"""
-    data = current_db().data
-    ids = data.search_getting_ids('', data.search_restriction,
-                                    set_restriction_count=False, use_virtual_library=True, sort_results=True)
+    ids = get_BookIds('', search_restriction=True, use_virtual_library=True)
     return no_BookIds_error(ids, show_error, _('No book in the virtual library'))
 
 def get_BookIds_search(show_error=False):
     """return the books id of the current search"""
-    data = current_db().data
-    ids = data.search_getting_ids(get_curent_search(), data.search_restriction,
-                                    set_restriction_count=False, use_virtual_library=True, sort_results=True)
+    ids = get_BookIds(get_last_search(), search_restriction=True, use_virtual_library=True)
     return no_BookIds_error(ids, show_error, _('No book in the current search'))
 
-def get_BookIds(query, use_search_restriction=True, use_virtual_library=True):
+def get_BookIds(query, search_restriction=True, use_virtual_library=True):
     """return the books id corresponding to the query"""
     data = current_db().data
-    search_restriction = data.search_restriction if use_search_restriction else ''
+    query = query or ''
+    search_restriction = data.search_restriction if search_restriction == True else (search_restriction or '')
     return data.search_getting_ids(query, search_restriction,
                                     set_restriction_count=False, use_virtual_library=use_virtual_library, sort_results=True)
 
 
 def get_curent_search():
+    """Get the current search string. Can be invalid"""
+    return GUI.search.current_text
+
+def get_last_search():
+    """Get last search string performed with succes"""
     return GUI.library_view.model().last_search
 
 def get_curent_virtual():
@@ -322,8 +317,9 @@ def get_curent_virtual():
 
 def get_curent_restriction_search():
     """The search restriction is a top level filtre, based on the saved searches"""
-    name = current_db().data.get_search_restriction_name()
-    return name, get_saved_searches().get(name, '')
+    data = current_db().data
+    name = data.get_search_restriction_name()
+    return name, get_saved_searches().get(name, data.search_restriction)
 
 def get_virtual_libraries():
     """Get all virtual library set in the database"""
@@ -436,6 +432,7 @@ def has_restart_pending(show_warning=True, msg_warning=None):
         if show_restart_warning(msg):
             GUI.quit(restart=True)
     return restart_pending
+
 
 
 class ImageTitleLayout(QHBoxLayout):
@@ -837,79 +834,76 @@ class KeyboardConfigDialog(SizePersistedDialog):
             GUI.keyboard.finalize()
 
 
-import re
+
 # Simple Regex
 class regex():
-    
+    import re as _re
     def __init__(self, flag=None):
         
         #set the default flag
+        import re
         self.flag = flag
         if not self.flag:
             if PYTHON[0] == 2:
-                self.flag = re.MULTILINE + re.DOTALL
+                self.flag = regex._re.MULTILINE + regex._re.DOTALL
             else:
-                self.flag = re.ASCII + re.MULTILINE + re.DOTALL
+                self.flag = regex._re.ASCII + regex._re.MULTILINE + regex._re.DOTALL
                 # calibre 5 // re.ASCII for Python3 only
             
     
+    def __call__(self, flag=None):
+        return self.__class__(flag)
+    
     def match(self, pattern, string, flag=None):
+        
         flag = flag or self.flag
-        return re.fullmatch(pattern, string, flag)
+        return regex._re.fullmatch(pattern, string, flag)
     
     def search(self, pattern, string, flag=None):
+        import re
         flag = flag or self.flag
-        return re.search(pattern, string, flag)
+        return regex._re.search(pattern, string, flag)
     
     def searchall(self, pattern, string, flag=None):
+        import re
         flag = flag or self.flag
         if self.search(pattern, string, flag):
-            return re.finditer(pattern, string, flag)
+            return regex._re.finditer(pattern, string, flag)
         else:
             return None
     
     def split(self, pattern, string, maxsplit=0, flag=None):
+        import re
         flag = flag or self.flag
-        return re.split(pattern, string, maxsplit, flag)
+        return regex._re.split(pattern, string, maxsplit, flag)
     
     def simple(self, pattern, repl, string, flag=None):
+        import re
         flag = flag or self.flag
-        return re.sub(pattern, repl, string, 0, flag)
+        return regex._re.sub(pattern, repl, string, 0, flag)
     
     def loop(self, pattern, repl, string, flag=None):
+        import re
         flag = flag or self.flag
         i = 0
         while self.search(pattern, string, flag):
             if i > 1000:
-                raise regexException('the pattern and substitution string caused an infinite loop', pattern, repl)
+                raise regex.Exception('the pattern and substitution string caused an infinite loop', pattern, repl)
             string = self.simple(pattern, repl, string, flag)
             i+=1
             
         return string
-
-class regexException(BaseException):
-    def __init__(self, msg, pattern=None, repl=None):
-        self.pattern = pattern
-        self.repl = repl
-        self.msg = msg
     
-    def __str__(self):
-        return self.msg
+    class Exception(BaseException):
+        def __init__(self, msg, pattern=None, repl=None):
+            self.pattern = pattern
+            self.repl = repl
+            self.msg = msg
+        
+        def __str__(self):
+            return self.msg
+regex = regex()
 
-
-def CSS_CleanRules(css):
-    #remove space and invalid character
-    r = regex()
-    css = r.loop(r'[.*!()?+<>\\]', r'', css.lower())
-    css = r.loop(r'(,|;|:|\n|\r|\s{2,})', r' ', css)
-    css = r.simple(r'^\s*(.*?)\s*$', r'\1', css)
-    # split to table and remove duplicate
-    css = list(dict.fromkeys(css.split(' ')))
-    # sort
-    css = sorted(css)
-    # join in a string
-    css = ' '.join(css)
-    return css
 
 def CustomExceptionErrorDialog(exception, custome_title=None, custome_msg=None, show=True):
     
@@ -1124,58 +1118,3 @@ class PREFS_library(dict):
             if k not in rslt:
                 rslt[k] = copy.deepcopy(v)
         return rslt
-
-
-def decorators(*args):
-    def wrapper(func):
-        for deco in args[::-1]:
-            func=deco(func)
-        func._decorators=args
-        return func
-    return wrapper
-
-#class Foo(object):
-#    @many
-#    @decos
-#    @here
-#    def bar(self):
-#        pass
-
-#class Foo(object):
-#    @decorators(many,decos,here)
-#    def bar(self):
-#        pass
-
-#print(foo.bar._decorators)
-# (<function many at 0xb76d9d14>, <function decos at 0xb76d9d4c>, <function here at 0xb76d9d84>)
-
-
-def get_decorators_names(func):
-    """Returns list of decorators names
-
-    Args:
-        func (Callable): decorated method/function
-
-    Return:
-        List of decorators as strings
-
-    Example:
-        Given:
-
-        @my_decorator
-        @another_decorator
-        def decorated_function():
-            pass
-
-        >>> get_decorators(decorated_function)
-        ['@my_decorator', '@another_decorator']
-
-    """
-    import inspect
-    source = inspect.getsource(func)
-    index = source.find("def ")
-    return [
-        line.strip().split()[0]
-        for line in source[:index].strip().splitlines()
-        if line.strip()[0] == "@"
-    ]
