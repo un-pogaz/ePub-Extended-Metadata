@@ -60,9 +60,9 @@ GUI = get_gui()
 
 
 def get__init__attribut(name, default=None, use_root_has_default=False):
-    '''
+    """
     Retrieve a attribut at the root plugin (in __init__.py)
-    '''
+    """
     ns = __name__.split('.')
     ns.pop(-1)
     
@@ -123,20 +123,22 @@ PLUGIN_RESOURCES = {}
 THEME_COLOR = ['', 'dark', 'light']
 
 def get_theme_color():
+    """Get the theme color of Calibre"""
     if calibre_version > (5, 90) and 'user-any' in QIcon.themeName():
         return THEME_COLOR[1] if QApplication.instance().is_dark_theme else THEME_COLOR[2]
     return THEME_COLOR[0]
 
 def get_icon_themed(icon_name, theme_color=None):
-    theme_color = theme_color if theme_color != None else get_theme_color()
+    """Apply the theme color to a path"""
+    theme_color = theme_color or get_theme_color()
     return icon_name.replace('/', '/'+theme_color+'/', 1).replace('//', '/')
 
 def load_plugin_resources(plugin_path, names=[]):
-    '''
+    """
     Set our global store of plugin name and icon resources for sharing between
     the InterfaceAction class which reads them and the ConfigWidget
     if needed for use on the customization dialog for this plugin.
-    '''
+    """
     names = names or []
     
     if plugin_path is None:
@@ -154,11 +156,11 @@ def load_plugin_resources(plugin_path, names=[]):
     global PLUGIN_RESOURCES
     PLUGIN_RESOURCES.update(ans)
 
-def get_icon(icon_name=None):
-    '''
+def get_icon(icon_name):
+    """
     Retrieve a QIcon for the named image from the zip file if it exists,
     or if not then from Calibre's image cache.
-    '''
+    """
     def themed_icon(icon_name):
         if calibre_version < (5, 90):
             return QIcon(I(icon_name))
@@ -175,10 +177,10 @@ def get_icon(icon_name=None):
     return QIcon()
 
 def get_pixmap(icon_name):
-    '''
+    """
     Retrieve a QPixmap for the named image
     Any icons belonging to the plugin must be prefixed with 'images/'
-    '''
+    """
     
     if not icon_name.startswith('images/'):
         # We know this is definitely not an icon belonging to this plugin
@@ -189,19 +191,19 @@ def get_pixmap(icon_name):
     # Build the icon_name according to the theme of the OS or Qt
     icon_themed = get_icon_themed(icon_name)
     
-    # Check to see whether the icon exists as a Calibre resource
-    # This will enable skinning if the user stores icons within a folder like:
-    # ...\AppData\Roaming\calibre\resources\images\Plugin Name\
-    def get_from_local(name):
-        local_images_dir = get_local_images_dir(PLUGIN_NAME)
-        local_image_path = os.path.join(local_images_dir, name.replace('images/', ''))
-        if os.path.exists(local_image_path):
-            pxm = QPixmap()
-            pxm.load(local_image_path)
-            return pxm
-        return None
-    
     if PLUGIN_NAME:
+        # Check to see whether the icon exists as a Calibre resource
+        # This will enable skinning if the user stores icons within a folder like:
+        # ...\AppData\Roaming\calibre\resources\images\Plugin Name\
+        def get_from_local(name):
+            local_images_dir = get_local_resource('images', PLUGIN_NAME)
+            local_image_path = os.path.join(local_images_dir, name.replace('images/', ''))
+            if os.path.exists(local_image_path):
+                pxm = QPixmap()
+                pxm.load(local_image_path)
+                return pxm
+            return None
+            
         pixmap = get_from_local(icon_themed)
         if not pixmap:
             pixmap = get_from_local(icon_name)
@@ -226,78 +228,95 @@ def get_pixmap(icon_name):
     
     return None
 
-def get_local_images_dir(subfolder=None):
-    '''
-    Returns a path to the user's local resources/images folder
+def get_local_resource(*subfolder):
+    """
+    Returns a path to the user's local resources folder
     If a subfolder name parameter is specified, appends this to the path
-    '''
-    images_dir = os.path.join(config_dir, 'resources/images')
-    if subfolder:
-        images_dir = os.path.join(images_dir, subfolder.replace('/','-'))
+    """
+    rslt = os.path.join(config_dir, 'resources', *[f.replace('/','-').replace('\\','-') for f in subfolder])
     
     if iswindows:
-        images_dir = os.path.normpath(images_dir)
-    return images_dir
+        rslt = os.path.normpath(rslt)
+    return rslt
 
 
 def current_db():
-    '''
-    Safely provides the current_db or None
-    '''
+    """Safely provides the current_db or None"""
     return getattr(get_gui(),'current_db', None)
+    # db.library_id
 
-def get_library_uuid(db=None):
-    db = db or current_db()
-    try:
-        library_uuid = db.library_id
-    except:
-        library_uuid = ''
-    return library_uuid
 
-def no_launch_error(title, name=None):
-    error_dialog(GUI, title, (title +'.\n'+ _('Could not to launch {:s}').format(PLUGIN_NAME or name)), show=True, show_copy_button=False)
+def has_restart_pending(show_warning=True, msg_warning=None):
+    restart_pending = GUI.must_restart_before_config
+    if restart_pending and show_warning:
+        msg = msg_warning if msg_warning else _('You cannot configure this plugin before calibre is restarted.')
+        if show_restart_warning(msg):
+            GUI.quit(restart=True)
+    return restart_pending
 
-def no_BookIds_error(book_ids, show_error, title, name=None):
+def no_launch_error(title, name=None, msg=None):
+    """Show a error dialog  for an operation that cannot be launched"""
+    
+    if msg and len(msg) > 0:
+        msg = '\n'+msg
+    else:
+        msg = ''
+    
+    error_dialog(GUI, title, (title +'.\n'+ _('Could not to launch {:s}').format(PLUGIN_NAME or name) + msg), show=True, show_copy_button=False)
+
+
+def _BookIds_error(book_ids, show_error, title, name=None):
     if not book_ids and show_error:
         no_launch_error(title, name=name)
     return book_ids
 
 def get_BookIds_selected(show_error=False):
-    """Selected book in the gui"""
+    """return the books id selected in the gui"""
     rows = GUI.library_view.selectionModel().selectedRows()
     if not rows or len(rows) == 0:
         ids = []
     else:
         ids = GUI.library_view.get_selected_ids()
    
-    return no_BookIds_error(ids, show_error, _('No book selected'))
+    return _BookIds_error(ids, show_error, _('No book selected'))
 
 def get_BookIds_all(show_error=False):
-    """All in the library"""
+    """return all books id in the library"""
     ids = current_db().all_ids()
-    return no_BookIds_error(ids, show_error, _('No book in the library'))
+    return _BookIds_error(ids, show_error, _('No book in the library'))
 
 def get_BookIds_virtual(show_error=False):
     """return the books id of the virtual library (without search restriction)"""
     ids = get_BookIds('', search_restriction='', use_virtual_library=True)
-    return no_BookIds_error(ids, show_error, _('No book in the virtual library'))
+    return _BookIds_error(ids, show_error, _('No book in the virtual library'))
 
 def get_BookIds_filtered(show_error=False):
     """return the books id of the virtual library AND search restriction applied.
     This is the strictest result"""
     ids = get_BookIds('', search_restriction=True, use_virtual_library=True)
-    return no_BookIds_error(ids, show_error, _('No book in the virtual library'))
+    return _BookIds_error(ids, show_error, _('No book in the virtual library'))
 
 def get_BookIds_search(show_error=False):
     """return the books id of the current search"""
     ids = get_BookIds(get_last_search(), search_restriction=True, use_virtual_library=True)
-    return no_BookIds_error(ids, show_error, _('No book in the current search'))
+    return _BookIds_error(ids, show_error, _('No book in the current search'))
 
-def get_BookIds(query, search_restriction=True, use_virtual_library=True):
-    """return the books id corresponding to the query"""
+def get_BookIds(query, use_search_restriction=True, use_virtual_library=True):
+    """
+    return the books id corresponding to the query
+    
+    query:
+        Search query of wanted books
+    
+    use_search_restriction:
+        Limit the search to the actual search restriction
+    
+    use_virtual_library:
+        Limit the search to the actual virtual library
+    """
     data = current_db().data
     query = query or ''
-    search_restriction = data.search_restriction if search_restriction == True else (search_restriction or '')
+    search_restriction = data.search_restriction if use_search_restriction else ''
     return data.search_getting_ids(query, search_restriction,
                                     set_restriction_count=False, use_virtual_library=use_virtual_library, sort_results=True)
 
@@ -331,13 +350,48 @@ def get_saved_searches():
 
 
 def get_marked(label=None):
+    """
+    Get the marked books
+    
+    label:
+        Filtre to only label. No case sensitive
+    
+    return: { label : [id,] }
+    """
+    
+    rslt = {}
+    for k,v in iteritems(current_db().data.marked_ids):
+        v = str(v).lower()
+        if v not in rslt:
+            rslt[v] = [k]
+        else:
+            rslt[v].append(k)
+    
     if label == None:
-        return current_db().data.marked_ids.copy()
+        return rslt
     else:
-        return { k:v for k,v in iteritems(marked) if equals_no_case(v, label) }
+        label = str(label).lower()
+        return { label:rslt[label] }
 
 def set_marked(label, book_ids, append=False, reset=False):
-    marked = {} if reset else get_marked()
+    """
+    Set the marked books
+    
+    label:
+        String label. No case sensitive
+    
+    book_ids:
+        Book id to affect the label
+    
+    append:
+        Append the book id to the books that already this label.
+        By default clear the previous book with this lable.
+    
+    book_ids:
+        Book id to affect the label
+    """
+    label = str(label).lower()
+    marked = {} if reset else current_db().data.marked_ids.copy()
     
     if not append:
         del_id = []
@@ -353,12 +407,12 @@ def set_marked(label, book_ids, append=False, reset=False):
 
 def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
                      shortcut=(), triggered=None, is_checked=None):
-    '''
+    """
     Create a menu action with the specified criteria and action
     Note that if no shortcut is specified, will not appear in Preferences->Keyboard
     This method should only be used for actions which either have no shortcuts,
     or register their menus only once. Use create_menu_action_unique for all else.
-    '''
+    """
     if shortcut is not None:
         if len(shortcut) == 0:
             shortcut = ()
@@ -381,11 +435,11 @@ def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
 def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=None,
                               shortcut=None, shortcut_name=None, triggered=None, is_checked=None,
                               unique_name=None, favourites_menu_unique_name=None,submenu=None, enabled=True):
-    '''
+    """
     Create a menu action with the specified criteria and action, using the new
     InterfaceAction.create_menu_action() function which ensures that regardless of
     whether a shortcut is specified it will appear in Preferences->Keyboard
-    '''
+    """
     orig_shortcut = shortcut
     kb = GUI.keyboard
     unique_name = unique_name or menu_text
@@ -425,20 +479,10 @@ def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=No
     return ac
 
 
-def has_restart_pending(show_warning=True, msg_warning=None):
-    restart_pending = GUI.must_restart_before_config
-    if restart_pending and show_warning:
-        msg = msg_warning if msg_warning else _('You cannot configure this plugin before calibre is restarted.')
-        if show_restart_warning(msg):
-            GUI.quit(restart=True)
-    return restart_pending
-
-
-
 class ImageTitleLayout(QHBoxLayout):
-    '''
+    """
     A reusable layout widget displaying an image followed by a title
-    '''
+    """
     def __init__(self, parent, icon_name, title):
         QHBoxLayout.__init__(self)
         self.title_image_label = QLabel(parent)
@@ -463,10 +507,10 @@ class ImageTitleLayout(QHBoxLayout):
         self.title_image_label.setScaledContents(True)
 
 class SizePersistedDialog(QDialog):
-    '''
+    """
     This dialog is a base class for any dialogs that want their size/position
     restored when they are next opened.
-    '''
+    """
     def __init__(self, parent, unique_pref_name):
         QDialog.__init__(self, parent)
         self.unique_pref_name = unique_pref_name
@@ -485,11 +529,11 @@ class SizePersistedDialog(QDialog):
         self.persist_custom_prefs()
     
     def persist_custom_prefs(self):
-        '''
+        """
         Invoked when the dialog is closing. Override this function to call
         save_custom_pref() if you have a setting you want persisted that you can
         retrieve in your __init__() using load_custom_pref() when next opened
-        '''
+        """
         pass
     
     def load_custom_pref(self, name, default=None):
@@ -539,10 +583,10 @@ class CheckableTableWidgetItem(QTableWidgetItem):
                 self.setCheckState(Qt.Unchecked)
     
     def get_boolean_value(self):
-        '''
+        """
         Return a boolean value indicating whether checkbox is checked
         If this is a tristate checkbox, a partially checked value is returned as None
-        '''
+        """
         if self.checkState() == Qt.PartiallyChecked:
             return None
         else:
@@ -725,12 +769,12 @@ class ReorderedComboBox(QComboBox):
             return [unicode(self.itemText(i)) for i in range(0, self.count())]
 
 class DragDropLineEdit(QLineEdit):
-    '''
+    """
     Unfortunately there is a flaw in the Qt implementation which means that
     when the QComboBox is in editable mode that dropEvent is not fired
     if you drag into the editable text area. Working around this by having
     a custom LineEdit() set for the parent combobox.
-    '''
+    """
     def __init__(self, parent, drop_mode):
         QLineEdit.__init__(self, parent)
         self.drop_mode = drop_mode
@@ -770,12 +814,12 @@ class DragDropLineEdit(QLineEdit):
             return urls
 
 class DragDropComboBox(ReorderedComboBox):
-    '''
+    """
     Unfortunately there is a flaw in the Qt implementation which means that
     when the QComboBox is in editable mode that dropEvent is not fired
     if you drag into the editable text area. Working around this by having
     a custom LineEdit() set for the parent combobox.
-    '''
+    """
     def __init__(self, parent, drop_mode='url'):
         ReorderedComboBox.__init__(self, parent)
         self.drop_line_edit = DragDropLineEdit(parent, drop_mode)
@@ -796,9 +840,9 @@ class DragDropComboBox(ReorderedComboBox):
 
 
 class KeyboardConfigDialog(SizePersistedDialog):
-    '''
+    """
     This dialog is used to allow editing of keyboard shortcuts.
-    '''
+    """
     def __init__(self, group_name):
         SizePersistedDialog.__init__(self, GUI, _('Keyboard shortcut dialog'))
         self.setWindowTitle(_('Keyboard shortcuts'))
@@ -837,11 +881,11 @@ class KeyboardConfigDialog(SizePersistedDialog):
 
 # Simple Regex
 class regex():
+    
     import re as _re
     def __init__(self, flag=None):
         
         #set the default flag
-        import re
         self.flag = flag
         if not self.flag:
             if PYTHON[0] == 2:
@@ -855,17 +899,14 @@ class regex():
         return self.__class__(flag)
     
     def match(self, pattern, string, flag=None):
-        
         flag = flag or self.flag
         return regex._re.fullmatch(pattern, string, flag)
     
     def search(self, pattern, string, flag=None):
-        import re
         flag = flag or self.flag
         return regex._re.search(pattern, string, flag)
     
     def searchall(self, pattern, string, flag=None):
-        import re
         flag = flag or self.flag
         if self.search(pattern, string, flag):
             return regex._re.finditer(pattern, string, flag)
@@ -873,17 +914,14 @@ class regex():
             return None
     
     def split(self, pattern, string, maxsplit=0, flag=None):
-        import re
         flag = flag or self.flag
         return regex._re.split(pattern, string, maxsplit, flag)
     
     def simple(self, pattern, repl, string, flag=None):
-        import re
         flag = flag or self.flag
         return regex._re.sub(pattern, repl, string, 0, flag)
     
     def loop(self, pattern, repl, string, flag=None):
-        import re
         flag = flag or self.flag
         i = 0
         while self.search(pattern, string, flag):
@@ -903,7 +941,7 @@ class regex():
         def __str__(self):
             return self.msg
 regex = regex()
-
+"""Easy Regex"""
 
 def CustomExceptionErrorDialog(exception, custome_title=None, custome_msg=None, show=True):
     
@@ -940,10 +978,10 @@ def CustomExceptionErrorDialog(exception, custome_title=None, custome_msg=None, 
 
 
 class PREFS_json(JSONConfig):
-    '''
+    """
     Use plugin name to create a JSONConfig file
     to store the preferences for plugin
-    '''
+    """
     def __init__(self):
         JSONConfig.__init__(self, 'plugins/'+PLUGIN_NAME)
     
@@ -956,9 +994,9 @@ class PREFS_json(JSONConfig):
         return self
     
     def deepcopy_dict(self):
-        '''
+        """
         get a deepcopy dict of this instance
-        '''
+        """
         rslt = {}
         for k,v in iteritems(self):
             rslt[copy.deepcopy(k)] = copy.deepcopy(v)
@@ -969,10 +1007,10 @@ class PREFS_json(JSONConfig):
         return rslt
 
 class PREFS_dynamic(DynamicConfig):
-    '''
+    """
     Use plugin name to create a DynamicConfig file
     to store the preferences for plugin
-    '''
+    """
     def __init__(self):
         self.no_commit = False
         DynamicConfig.__init__(self, 'plugins/'+PLUGIN_NAME)
@@ -998,9 +1036,9 @@ class PREFS_dynamic(DynamicConfig):
         self.commit()
     
     def deepcopy_dict(self):
-        '''
+        """
         get a deepcopy dict of this instance
-        '''
+        """
         rslt = {}
         for k,v in iteritems(self):
             rslt[copy.deepcopy(k)] = copy.deepcopy(v)
@@ -1011,9 +1049,11 @@ class PREFS_dynamic(DynamicConfig):
         return rslt
 
 class PREFS_library(dict):
-    '''
+    """
     Create a dictionary of preference stored in the library
-    '''
+    
+    Defined a custom namespaced at the root of __init__.py // __init__.PREFS_NAMESPACE
+    """
     def __init__(self, key='settings', defaults={}):
         self.no_commit = False
         self._db = None
@@ -1033,9 +1073,6 @@ class PREFS_library(dict):
     
     @property
     def namespace(self):
-        '''
-        Defined a custom namespaced at the root of __init__.py // __init__.PREFS_NAMESPACE
-        '''
         return self._namespace
     
     def __getitem__(self, key):
@@ -1107,9 +1144,9 @@ class PREFS_library(dict):
         self.commit()
     
     def deepcopy_dict(self):
-        '''
+        """
         get a deepcopy dict of this instance
-        '''
+        """
         rslt = {}
         for k,v in iteritems(self):
             rslt[copy.deepcopy(k)] = copy.deepcopy(v)
