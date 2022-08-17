@@ -59,35 +59,30 @@ PYTHON = sys.version_info
 GUI = get_gui()
 
 
-def get__init__attribut(name, default=None, use_root_has_default=False):
-    """
-    Retrieve a attribut at the root plugin (in __init__.py)
-    """
-    ns = __name__.split('.')
-    ns.pop(-1)
-    
-    if use_root_has_default:
-        default = ns[-1]
-    
-    import importlib
-    return getattr(importlib.import_module('.'.join(ns)), name, default)
-
+_PLUGIN = None
 def get_plugin_attribut(name, default=None):
-        ns = __name__.split('.')
-        ns.pop(-1)
-        ns = '.'.join(ns)
+    """Retrieve a attribut on the main plugin class"""
+    global _PLUGIN
+    if not _PLUGIN:
         import importlib
-        m = importlib.import_module(ns)
-        from calibre.customize.ui import _initialized_plugins
-        for p in _initialized_plugins:
-            if ns == p.__module__:
-                if hasattr(m, p.__class__.__name__):
-                    return getattr(p, name, default)
+        from calibre.customize import Plugin
+        #Yes, it's very long for a one line. It's seems crazy, but it's fun and it works
+        plugin_classes = [ obj for obj in itervalues(importlib.import_module('.'.join(__name__.split('.')[:-1])).__dict__) if isinstance(obj, type) and issubclass(obj, Plugin) and obj.name != 'Trivial Plugin' ]
         
-        raise EnvironmentError('The plugin could not be found.')
+        plugin_classes.sort(key=lambda c:(getattr(c, '__module__', None) or '').count('.'))
+        _PLUGIN = plugin_classes[0]
+    
+    return getattr(_PLUGIN, name, default)
 
 
-DEBUG_PRE = get__init__attribut('DEBUG_PRE', use_root_has_default=True)
+ROOT = __name__.split('.')[-2]
+
+# Global definition of our plugin name. Used for common functions that require this.
+PLUGIN_NAME = get_plugin_attribut('name', ROOT)
+PREFS_NAMESPACE = get_plugin_attribut('PREFS_NAMESPACE', ROOT)
+DEBUG_PRE = get_plugin_attribut('DEBUG_PRE', PLUGIN_NAME)
+
+
 BASE_TIME = None
 def debug_print(*args):
     
@@ -109,12 +104,6 @@ def equals_no_case(left, right):
 def duplicate_entry(lst):
     return list( set([x for x in lst if lst.count(x) > 1]) )
 
-
-PREFS_NAMESPACE = get__init__attribut('PREFS_NAMESPACE', use_root_has_default=True)
-
-
-# Global definition of our plugin name. Used for common functions that require this.
-PLUGIN_NAME = get_plugin_attribut('name')
 
 # Global definition of our plugin resources. Used to share between the xxxAction and xxxBase
 # classes if you need any zip images to be displayed on the configuration dialog.

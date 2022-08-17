@@ -18,10 +18,6 @@ except NameError:
 from calibre.customize import InterfaceActionBase
 
 
-DEBUG_PRE = 'ePubExtendedMetadata'
-PREFS_NAMESPACE = 'ePubExtendedMetadata'
-
-
 class ePubExtendedMetadata(InterfaceActionBase):
     '''
     This class is a simple wrapper that provides information about the actual
@@ -50,6 +46,14 @@ class ePubExtendedMetadata(InterfaceActionBase):
     #: that actually does something. Its format is module_path:class_name
     #: The specified class must be defined in the specified module.
     actual_plugin           = __name__+'.action:ePubExtendedMetadataAction'
+    
+    DEBUG_PRE = 'ePubExtendedMetadata'
+    PREFS_NAMESPACE = 'ePubExtendedMetadata'
+    
+    
+    def get_curent():
+        from calibre.customize.ui import find_plugin
+        return find_plugin(ePubExtendedMetadata.name)
     
     
     def initialize(self):

@@ -12,14 +12,23 @@ __docformat__ = 'restructuredtext en'
 from calibre.customize import MetadataReaderPlugin, MetadataWriterPlugin
 
 
+_PLUGIN = None
 def get_plugin_attribut(name, default=None):
-        ns = __name__.split('.')
-        ns.pop(-1)
-        ns = '.'.join(ns)
+    """Retrieve a attribut on the main plugin class"""
+    
+    global _PLUGIN
+    if not _PLUGIN:
         import importlib
-        m = importlib.import_module(ns)
+        from polyglot.builtins import iteritems, itervalues
+        from calibre.customize import Plugin
+        #Yes, it's very long for a one line. It's seems crazy, but it's fun and it works
+        plugin_classes = [ obj for obj in itervalues(importlib.import_module('.'.join(__name__.split('.')[:-1])).__dict__) if isinstance(obj, type) and issubclass(obj, Plugin) and obj.name != 'Trivial Plugin' ]
         
-        return getattr(getattr(m, 'ePubExtendedMetadata', None), name, default)
+        plugin_classes.sort(key=lambda c:(getattr(c, '__module__', None) or '').count('.'))
+        _PLUGIN = plugin_classes[0]
+    
+    return getattr(_PLUGIN, name, default)
+
 
 class MetadataReader(MetadataReaderPlugin):
     '''
