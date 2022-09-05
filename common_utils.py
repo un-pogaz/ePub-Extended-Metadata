@@ -114,7 +114,7 @@ def get_theme_color():
 
 def get_icon_themed(icon_name, theme_color=None):
     """Apply the theme color to a path"""
-    theme_color = theme_color or get_theme_color()
+    theme_color = get_theme_color() if theme_color is None else theme_color
     return icon_name.replace('/', '/'+theme_color+'/', 1).replace('//', '/')
 
 def load_plugin_resources(plugin_path, names=[]):
@@ -139,6 +139,7 @@ def load_plugin_resources(plugin_path, names=[]):
     
     global PLUGIN_RESOURCES
     PLUGIN_RESOURCES.update(ans)
+    
 
 def get_icon(icon_name):
     """
@@ -174,6 +175,7 @@ def get_pixmap(icon_name):
     
     # Build the icon_name according to the theme of the OS or Qt
     icon_themed = get_icon_themed(icon_name)
+    
     
     if PLUGIN_NAME:
         # Check to see whether the icon exists as a Calibre resource
