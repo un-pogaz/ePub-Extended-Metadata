@@ -83,16 +83,11 @@ PREFS_NAMESPACE = get_plugin_attribut('PREFS_NAMESPACE', ROOT)
 DEBUG_PRE = get_plugin_attribut('DEBUG_PRE', PLUGIN_NAME)
 
 
-BASE_TIME = None
+BASE_TIME = time.time()
 def debug_print(*args):
-    
-    global BASE_TIME
-    if BASE_TIME is None:
-        BASE_TIME = time.time()
-    
     if DEBUG:
         prints('DEBUG', DEBUG_PRE+':', *args)
-        #prints('DEBUG', DEBUG_PRE+': %6.1f'%(time.time()-BASE_TIME), *args)
+        #prints('DEBUG', DEBUG_PRE,'({:.3f})'.format(time.time()-BASE_TIME),':', *args)
 
 
 def equals_no_case(left, right):
@@ -113,7 +108,7 @@ THEME_COLOR = ['', 'dark', 'light']
 
 def get_theme_color():
     """Get the theme color of Calibre"""
-    if calibre_version > (5, 90) and 'user-any' in QIcon.themeName():
+    if calibre_version > (5, 90):
         return THEME_COLOR[1] if QApplication.instance().is_dark_theme else THEME_COLOR[2]
     return THEME_COLOR[0]
 
@@ -192,7 +187,7 @@ def get_pixmap(icon_name):
                 pxm.load(local_image_path)
                 return pxm
             return None
-            
+        
         pixmap = get_from_local(icon_themed)
         if not pixmap:
             pixmap = get_from_local(icon_name)
