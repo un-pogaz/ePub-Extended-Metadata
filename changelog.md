@@ -1,5 +1,5 @@
 ### version 0.7.2
-[fix] theme color not correctly appli to the icons
+[fix] icon not display when a theme colors is used
 
 ### version 0.7.1
 [fix] use literal in ePubExtendedMetadata class
