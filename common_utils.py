@@ -90,12 +90,6 @@ def debug_print(*args):
         #prints('DEBUG', DEBUG_PRE,'({:.3f})'.format(time.time()-BASE_TIME),':', *args)
 
 
-def equals_no_case(left, right):
-    if hasattr(left, 'casefold'):
-        return left.casefold() == right.casefold()
-    else:
-        return left.upper().lower() == right.upper().lower()
-
 def duplicate_entry(lst):
     return list( set([x for x in lst if lst.count(x) > 1]) )
 

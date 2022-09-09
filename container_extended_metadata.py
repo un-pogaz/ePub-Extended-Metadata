@@ -38,7 +38,7 @@ from calibre.ebooks.oeb.parse_utils import RECOVER_PARSER
 from calibre.utils.zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED, safe_replace
 from polyglot.builtins import iteritems, itervalues
 
-from .common_utils import debug_print, equals_no_case
+from .common_utils import debug_print
 from .config import KEY, FIELD
 
 

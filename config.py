@@ -42,9 +42,10 @@ from calibre.gui2.widgets2 import Dialog
 from calibre.ebooks.metadata import string_to_authors
 from calibre.library.field_metadata import FieldMetadata
 from polyglot.builtins import iteritems, itervalues
+from calibre.utils.icu import strcmp
 
 from .common_utils import (debug_print, get_icon, PREFS_library, PREFS_dynamic, ImageTitleLayout, KeyboardConfigDialog,
-                            equals_no_case, duplicate_entry,
+                            duplicate_entry,
                             KeyValueComboBox, CustomColumnComboBox, ReadOnlyTableWidgetItem)
 
 
@@ -399,7 +400,7 @@ class ContributorTableWidget(QTableWidget):
             columns = KEY.get_names()
             for role in CONTRIBUTORS_ROLES:
                 for column in columns:
-                    if equals_no_case('#'+role, column):
+                    if strcmp('#'+role, column):
                         contributors_pair_list[role] = column
         
         self.setRowCount(len(contributors_pair_list))
