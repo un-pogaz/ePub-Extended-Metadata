@@ -49,7 +49,7 @@ from calibre.gui2.complete2 import EditWithComplete
 from calibre.gui2.ui import get_gui
 from calibre.gui2.keyboard import ShortcutConfig
 from calibre.gui2.widgets import EnLineEdit
-from calibre.utils.config import config_dir, JSONConfig, tweaks, DynamicConfig
+from calibre.utils.config import JSONConfig, tweaks, DynamicConfig
 from calibre.utils.date import now, format_date, qt_to_dt, UNDEFINED_DATE
 from calibre.utils.icu import sort_key
 
@@ -146,7 +146,7 @@ def get_icon(icon_name):
     or if not then from Calibre's image cache.
     """
     def themed_icon(icon_name):
-        if calibre_version < (5, 90):
+        if calibre_version < (6,0,0):
             return QIcon(I(icon_name))
         else:
             return QIcon.ic(icon_name)
@@ -178,7 +178,7 @@ def get_pixmap(icon_name):
     if PLUGIN_NAME:
         # Check to see whether the icon exists as a Calibre resource
         # This will enable skinning if the user stores icons within a folder like:
-        # ...\AppData\Roaming\calibre\resources\images\Plugin Name\
+        # ...\AppData\Roaming\calibre\resources\images\Plugin_Name\
         def get_from_local(name):
             local_images_dir = get_local_resource('images', PLUGIN_NAME)
             local_image_path = os.path.join(local_images_dir, name.replace('images/', ''))
@@ -217,6 +217,7 @@ def get_local_resource(*subfolder):
     Returns a path to the user's local resources folder
     If a subfolder name parameter is specified, appends this to the path
     """
+    from calibre.utils.config import config_dir
     rslt = os.path.join(config_dir, 'resources', *[f.replace('/','-').replace('\\','-') for f in subfolder])
     
     if iswindows:
