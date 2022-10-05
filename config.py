@@ -44,7 +44,7 @@ from calibre.library.field_metadata import FieldMetadata
 from polyglot.builtins import iteritems, itervalues
 from calibre.utils.icu import strcmp
 
-from .common_utils import (debug_print, get_icon, PREFS_library, PREFS_dynamic, ImageTitleLayout, KeyboardConfigDialog,
+from .common_utils import (debug_print, get_icon, PREFS_library, PREFS_dynamic, ImageTitleLayout, edit_keyboard_shortcuts,
                             duplicate_entry,
                             KeyValueComboBox, CustomColumnComboBox, ReadOnlyTableWidgetItem)
 
@@ -350,7 +350,7 @@ class ConfigWidget(QWidget):
         plugin_check_enable_library()
     
     def edit_shortcuts(self):
-        KeyboardConfigDialog.edit_shortcuts(self.plugin_action)
+        edit_keyboard_shortcuts(self.plugin_action)
 
 
 def button_plugin_initialized(button, key):
@@ -465,7 +465,7 @@ class ContributorTableWidget(QTableWidget):
         contributors_columns = {}
         for row in range(self.rowCount()):
             k = self.cellWidget(row, self._columnContrib).selected_key()
-            v = self.cellWidget(row, self._columnColumn).selected_column()
+            v = self.cellWidget(row, self._columnColumn).get_selected_column()
             
             if k or v:
                 contributors_columns[k if k else str(row)] = v if v else ''

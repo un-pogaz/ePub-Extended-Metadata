@@ -29,35 +29,13 @@ except ImportError:
     def itervalues(d):
         return d.itervalues()
 
-try:
-    from qt.core import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
-                            QTableWidgetItem, QFont, QLineEdit, QComboBox,
-                            QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
-                            QTextEdit, QListWidget, QAbstractItemView, QApplication)
-    
-except ImportError:
-    from PyQt5.Qt import (Qt, QIcon, QPixmap, QLabel, QDialog, QHBoxLayout,
-                            QTableWidgetItem, QFont, QLineEdit, QComboBox, QModelIndex,
-                            QVBoxLayout, QDialogButtonBox, QStyledItemDelegate, QDateTime,
-                            QTextEdit, QListWidget, QAbstractItemView, QApplication)
-
 from calibre import prints
-from calibre.constants import iswindows, DEBUG, numeric_version as calibre_version
-from calibre.gui2 import gprefs, error_dialog, info_dialog, show_restart_warning, UNDEFINED_QDATETIME
-from calibre.gui2.actions import menu_action_unique_name
-from calibre.gui2.complete2 import EditWithComplete
+from calibre.constants import DEBUG, numeric_version as calibre_version
 from calibre.gui2.ui import get_gui
-from calibre.gui2.keyboard import ShortcutConfig
-from calibre.gui2.widgets import EnLineEdit
-from calibre.utils.config import JSONConfig, tweaks, DynamicConfig
-from calibre.utils.date import now, format_date, qt_to_dt, UNDEFINED_DATE
-from calibre.utils.icu import sort_key
-
 
 PYTHON = sys.version_info
 
-GUI = get_gui()
-
+gui = get_gui()
 
 _PLUGIN = None
 def get_plugin_attribut(name, default=None):
@@ -74,14 +52,12 @@ def get_plugin_attribut(name, default=None):
     
     return getattr(_PLUGIN, name, default)
 
-
 ROOT = __name__.split('.')[-2]
 
 # Global definition of our plugin name. Used for common functions that require this.
 PLUGIN_NAME = get_plugin_attribut('name', ROOT)
 PREFS_NAMESPACE = get_plugin_attribut('PREFS_NAMESPACE', ROOT)
 DEBUG_PRE = get_plugin_attribut('DEBUG_PRE', PLUGIN_NAME)
-
 
 BASE_TIME = time.time()
 def debug_print(*args):
@@ -90,9 +66,18 @@ def debug_print(*args):
         #prints('DEBUG', DEBUG_PRE,'({:.3f})'.format(time.time()-BASE_TIME),':', *args)
 
 
-def duplicate_entry(lst):
-    return list( set([x for x in lst if lst.count(x) > 1]) )
+# ----------------------------------------------
+#          Icon Management functions
+# ----------------------------------------------
 
+try:
+    from qt.core import QIcon, QPixmap, QApplication
+except ImportError:
+    from PyQt5.Qt import QIcon, QPixmap, QApplication
+
+from calibre.constants import iswindows
+from calibre.constants import numeric_version as calibre_version
+from calibre.utils.config import config_dir
 
 # Global definition of our plugin resources. Used to share between the xxxAction and xxxBase
 # classes if you need any zip images to be displayed on the configuration dialog.
@@ -211,7 +196,6 @@ def get_local_resource(*subfolder):
     Returns a path to the user's local resources folder
     If a subfolder name parameter is specified, appends this to the path
     """
-    from calibre.utils.config import config_dir
     rslt = os.path.join(config_dir, 'resources', *[f.replace('/','-').replace('\\','-') for f in subfolder])
     
     if iswindows:
@@ -219,19 +203,25 @@ def get_local_resource(*subfolder):
     return rslt
 
 
+# ----------------------------------------------
+#                Library functions
+# ----------------------------------------------
+
+from calibre.gui2 import error_dialog, show_restart_warning
+
 def current_db():
     """Safely provides the current_db or None"""
     return getattr(get_gui(),'current_db', None)
     # db.library_id
 
-
 def has_restart_pending(show_warning=True, msg_warning=None):
-    restart_pending = GUI.must_restart_before_config
+    restart_pending = gui.must_restart_before_config
     if restart_pending and show_warning:
         msg = msg_warning if msg_warning else _('You cannot configure this plugin before calibre is restarted.')
         if show_restart_warning(msg):
-            GUI.quit(restart=True)
+            gui.quit(restart=True)
     return restart_pending
+
 
 def no_launch_error(title, name=None, msg=None):
     """Show a error dialog  for an operation that cannot be launched"""
@@ -241,8 +231,7 @@ def no_launch_error(title, name=None, msg=None):
     else:
         msg = ''
     
-    error_dialog(GUI, title, (title +'.\n'+ _('Could not to launch {:s}').format(PLUGIN_NAME or name) + msg), show=True, show_copy_button=False)
-
+    error_dialog(gui, title, (title +'.\n'+ _('Could not to launch {:s}').format(PLUGIN_NAME or name) + msg), show=True, show_copy_button=False)
 
 def _BookIds_error(book_ids, show_error, title, name=None):
     if not book_ids and show_error:
@@ -251,11 +240,11 @@ def _BookIds_error(book_ids, show_error, title, name=None):
 
 def get_BookIds_selected(show_error=False):
     """return the books id selected in the gui"""
-    rows = GUI.library_view.selectionModel().selectedRows()
+    rows = gui.library_view.selectionModel().selectedRows()
     if not rows or len(rows) == 0:
         ids = []
     else:
-        ids = GUI.library_view.get_selected_ids()
+        ids = gui.library_view.get_selected_ids()
    
     return _BookIds_error(ids, show_error, _('No book selected'))
 
@@ -302,11 +291,11 @@ def get_BookIds(query, use_search_restriction=True, use_virtual_library=True):
 
 def get_curent_search():
     """Get the current search string. Can be invalid"""
-    return GUI.search.current_text
+    return gui.search.current_text
 
 def get_last_search():
     """Get last search string performed with succes"""
-    return GUI.library_view.model().last_search
+    return gui.library_view.model().last_search
 
 def get_curent_virtual():
     """The virtual library, can't be a temporary VL"""
@@ -384,6 +373,91 @@ def set_marked(label, book_ids, append=False, reset=False):
     current_db().data.set_marked_ids(marked)
 
 
+# ----------------------------------------------
+#                Menu functions
+# ----------------------------------------------
+
+from calibre.gui2.actions import menu_action_unique_name
+
+# Global definition of our menu actions. Used to ensure we can cleanly unregister
+# keyboard shortcuts when rebuilding our menus.
+plugin_menu_actions = []
+
+def unregister_menu_actions():
+    """
+    For plugins that dynamically rebuild their menus, we need to ensure that any
+    keyboard shortcuts are unregistered for them each time.
+    Make sure to call this before .clear() of the menu items.
+    """
+    global plugin_menu_actions
+    for action in plugin_menu_actions:
+        if hasattr(action, 'calibre_shortcut_unique_name'):
+            gui.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
+        # starting in calibre 2.10.0, actions are registers at
+        # the top gui level for OSX' benefit.
+        if calibre_version >= (2,10,0):
+            gui.removeAction(action)
+    plugin_menu_actions = []
+
+def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=None,
+                       shortcut=None, triggered=None, is_checked=None, shortcut_name=None,
+                       unique_name=None, favourites_menu_unique_name=None):
+    """
+    Create a menu action with the specified criteria and action, using the new
+    InterfaceAction.create_menu_action() function which ensures that regardless of
+    whether a shortcut is specified it will appear in Preferences->Keyboard
+    
+    For a full description of the parameters, see: calibre\gui2\actions\__init__.py
+    """
+    orig_shortcut = shortcut
+    kb = ia.gui.keyboard
+    if unique_name is None:
+        unique_name = menu_text
+    if not shortcut == False:
+        full_unique_name = menu_action_unique_name(ia, unique_name)
+        if full_unique_name in kb.shortcuts:
+            shortcut = False
+        else:
+            if shortcut is not None and not shortcut == False:
+                if len(shortcut) == 0:
+                    shortcut = None
+    
+    if shortcut_name is None:
+        shortcut_name = menu_text.replace('&','')
+    
+    if calibre_version >= (5,4,0):
+        # The persist_shortcut parameter only added from 5.4.0 onwards.
+        # Used so that shortcuts specific to other libraries aren't discarded.
+        ac = ia.create_menu_action(parent_menu, unique_name, menu_text, icon=None,
+                                   shortcut=shortcut, description=tooltip,
+                                   triggered=triggered, shortcut_name=shortcut_name,
+                                   persist_shortcut=True)
+    else:
+        ac = ia.create_menu_action(parent_menu, unique_name, menu_text, icon=None,
+                                   shortcut=shortcut, description=tooltip,
+                                   triggered=triggered, shortcut_name=shortcut_name)
+    if shortcut == False and not orig_shortcut == False:
+        if ac.calibre_shortcut_unique_name in ia.gui.keyboard.shortcuts:
+            kb.replace_action(ac.calibre_shortcut_unique_name, ac)
+    if image:
+        ac.setIcon(get_icon(image))
+    if is_checked is not None:
+        ac.setCheckable(True)
+        if is_checked:
+            ac.setChecked(True)
+    # For use by the Favourites Menu plugin. If this menu action has text
+    # that is not constant through the life of this plugin, then we need
+    # to attribute it with something that will be constant that the
+    # Favourites Menu plugin can use to identify it.
+    if favourites_menu_unique_name:
+        ac.favourites_menu_unique_name = favourites_menu_unique_name
+    
+    # Append to our list of actions for this plugin to unregister when menu rebuilt
+    global plugin_menu_actions
+    plugin_menu_actions.append(ac)
+    
+    return ac
+
 def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
                      shortcut=(), triggered=None, is_checked=None):
     """
@@ -391,12 +465,13 @@ def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
     Note that if no shortcut is specified, will not appear in Preferences->Keyboard
     This method should only be used for actions which either have no shortcuts,
     or register their menus only once. Use create_menu_action_unique for all else.
+
+    Currently this function is only used by open_with and search_the_internet plugins
+    and would like to investigate one day if it can be removed from them.
     """
     if shortcut is not None:
         if len(shortcut) == 0:
             shortcut = ()
-        else:
-            shortcut = _(shortcut)
     ac = ia.create_action(spec=(menu_text, None, tooltip, shortcut),
         attr=menu_text)
     if image:
@@ -409,54 +484,28 @@ def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
             ac.setChecked(True)
     
     parent_menu.addAction(ac)
+    
+    # Append to our list of actions for this plugin to unregister when menu rebuilt
+    global plugin_menu_actions
+    plugin_menu_actions.append(ac)
+    
     return ac
 
-def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=None,
-                              shortcut=None, shortcut_name=None, triggered=None, is_checked=None,
-                              unique_name=None, favourites_menu_unique_name=None,submenu=None, enabled=True):
-    """
-    Create a menu action with the specified criteria and action, using the new
-    InterfaceAction.create_menu_action() function which ensures that regardless of
-    whether a shortcut is specified it will appear in Preferences->Keyboard
-    """
-    orig_shortcut = shortcut
-    kb = GUI.keyboard
-    unique_name = unique_name or menu_text
-        
-    if not shortcut == False:
-        full_unique_name = menu_action_unique_name(ia, unique_name)
-        if full_unique_name in kb.shortcuts:
-            shortcut = False
-        else:
-            if shortcut is not None and not shortcut == False:
-                if len(shortcut) == 0:
-                    shortcut = None
-                else:
-                    shortcut = _(shortcut)
-    
-    shortcut_name = shortcut_name = menu_text.replace('&','')
-    
-    ac = ia.create_menu_action(parent_menu, unique_name, menu_text, icon=None, shortcut=shortcut,
-        description=tooltip, triggered=triggered, shortcut_name=shortcut_name)
-    if shortcut == False and not orig_shortcut == False:
-        if ac.calibre_shortcut_unique_name in GUI.keyboard.shortcuts:
-            kb.replace_action(ac.calibre_shortcut_unique_name, ac)
-    if image:
-        ac.setIcon(get_icon(image))
-    if is_checked is not None:
-        ac.setCheckable(True)
-        if is_checked:
-            ac.setChecked(True)
-            
-    if submenu:
-        ac.setMenu(submenu)
-        
-    if not enabled:
-        ac.setEnabled(False)
-    else:
-        ac.setEnabled(True)
-    return ac
 
+# ----------------------------------------------
+#               Widgets
+# ----------------------------------------------
+
+try:
+    from qt.core import (Qt, QTableWidgetItem, QComboBox, QHBoxLayout, QLabel, QFont, 
+                        QDateTime, QStyledItemDelegate, QLineEdit)
+except ImportError:
+    from PyQt5.Qt import (Qt, QTableWidgetItem, QComboBox, QHBoxLayout, QLabel, QFont, 
+                        QDateTime, QStyledItemDelegate, QLineEdit)
+
+from calibre.gui2 import error_dialog, UNDEFINED_QDATETIME
+from calibre.utils.date import now, format_date, qt_to_dt, UNDEFINED_DATE
+from calibre.gui2.library.delegates import DateDelegate as _DateDelegate
 
 class ImageTitleLayout(QHBoxLayout):
     """
@@ -485,55 +534,70 @@ class ImageTitleLayout(QHBoxLayout):
         self.title_image_label.setMaximumSize(32, 32)
         self.title_image_label.setScaledContents(True)
 
-class SizePersistedDialog(QDialog):
+class CheckableTableWidgetItem(QTableWidgetItem):
     """
-    This dialog is a base class for any dialogs that want their size/position
-    restored when they are next opened.
+    For use in a table cell, displays a checkbox that can potentially be tristate
     """
-    def __init__(self, parent, unique_pref_name):
-        QDialog.__init__(self, parent)
-        self.unique_pref_name = unique_pref_name
-        self.geom = gprefs.get(unique_pref_name, None)
-        self.finished.connect(self.dialog_closing)
-    
-    def resize_dialog(self):
-        if self.geom is None:
-            self.resize(self.sizeHint())
-        else:
-            self.restoreGeometry(self.geom)
-    
-    def dialog_closing(self, result):
-        geom = bytearray(self.saveGeometry())
-        gprefs[self.unique_pref_name] = geom
-        self.persist_custom_prefs()
-    
-    def persist_custom_prefs(self):
-        """
-        Invoked when the dialog is closing. Override this function to call
-        save_custom_pref() if you have a setting you want persisted that you can
-        retrieve in your __init__() using load_custom_pref() when next opened
-        """
-        pass
-    
-    def load_custom_pref(self, name, default=None):
-        return gprefs.get(self.unique_pref_name+':'+name, default)
-    
-    def save_custom_pref(self, name, value):
-        gprefs[self.unique_pref_name+':'+name] = value
-
-
-class ReadOnlyTableWidgetItem(QTableWidgetItem):
-    def __init__(self, text):
-        text = text or ''
-        QTableWidgetItem.__init__(self, text)
-        self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
-
-class RatingTableWidgetItem(QTableWidgetItem):
-    def __init__(self, rating, is_read_only=False):
+    def __init__(self, checked=False, is_tristate=False):
         QTableWidgetItem.__init__(self, '')
-        self.setData(Qt.DisplayRole, rating)
-        if is_read_only:
-            self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
+        self.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled )
+        if is_tristate:
+            self.setFlags(self.flags() | Qt.ItemFlag.ItemIsUserTristate)
+        if checked:
+            self.setCheckState(Qt.Checked)
+        else:
+            if is_tristate and checked is None:
+                self.setCheckState(Qt.CheckState.PartiallyChecked)
+            else:
+                self.setCheckState(Qt.CheckState.Unchecked)
+    
+    def get_boolean_value(self):
+        """
+        Return a boolean value indicating whether checkbox is checked
+        If this is a tristate checkbox, a partially checked value is returned as None
+        """
+        if self.checkState() == Qt.PartiallyChecked:
+            return None
+        else:
+            return self.checkState() == Qt.Checked
+
+class DateDelegate(_DateDelegate):
+    """
+    Delegate for dates. Because this delegate stores the
+    format as an instance variable, a new instance must be created for each
+    column. This differs from all the other delegates.
+    """
+    def __init__(self, parent, fmt='dd MMM yyyy', default_to_today=True):
+        super(DateDelegate, self).__init__(parent)
+        self.format = fmt
+        self.default_to_today = default_to_today
+        print('DateDelegate fmt:',fmt)
+
+    def createEditor(self, parent, option, index):
+        qde = QStyledItemDelegate.createEditor(self, parent, option, index)
+        qde.setDisplayFormat(self.format)
+        qde.setMinimumDateTime(UNDEFINED_QDATETIME)
+        qde.setSpecialValueText(_('Undefined'))
+        qde.setCalendarPopup(True)
+        return qde
+
+    def setEditorData(self, editor, index):
+        val = index.model().data(index, Qt.DisplayRole)
+        print('setEditorData val:',val)
+        if val is None or val == UNDEFINED_QDATETIME:
+            if self.default_to_today:
+                val = self.default_date
+            else:
+                val = UNDEFINED_QDATETIME
+        editor.setDateTime(val)
+
+    def setModelData(self, editor, model, index):
+        val = editor.dateTime()
+        print('setModelData: ',val)
+        if val <= UNDEFINED_QDATETIME:
+            model.setData(index, UNDEFINED_QDATETIME, Qt.EditRole)
+        else:
+            model.setData(index, QDateTime(val), Qt.EditRole)
 
 class DateTableWidgetItem(QTableWidgetItem):
     def __init__(self, date_read, is_read_only=False, default_to_today=False, fmt=None):
@@ -547,45 +611,40 @@ class DateTableWidgetItem(QTableWidgetItem):
             dt = UNDEFINED_QDATETIME if date_read is None else QDateTime(date_read)
             self.setData(Qt.DisplayRole, dt)
 
-class CheckableTableWidgetItem(QTableWidgetItem):
-    def __init__(self, checked=False, is_tristate=False):
+class RatingTableWidgetItem(QTableWidgetItem):
+    def __init__(self, rating, is_read_only=False):
         QTableWidgetItem.__init__(self, '')
-        self.setFlags(Qt.ItemFlag(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
-        if is_tristate:
-            self.setFlags(self.flags() | Qt.ItemIsTristate)
-        if checked:
-            self.setCheckState(Qt.Checked)
-        else:
-            if is_tristate and checked is None:
-                self.setCheckState(Qt.PartiallyChecked)
-            else:
-                self.setCheckState(Qt.Unchecked)
-    
-    def get_boolean_value(self):
-        """
-        Return a boolean value indicating whether checkbox is checked
-        If this is a tristate checkbox, a partially checked value is returned as None
-        """
-        if self.checkState() == Qt.PartiallyChecked:
-            return None
-        else:
-            return self.checkState() == Qt.Checked
+        self.setData(Qt.DisplayRole, rating)
+        if is_read_only:
+            self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
 
 class TextIconWidgetItem(QTableWidgetItem):
     def __init__(self, text, icon, tooltip=None, is_read_only=False):
         QTableWidgetItem.__init__(self, text)
-        if icon:
-            self.setIcon(icon)
-        if tooltip:
-            self.setToolTip(tooltip)
-        if is_read_only:
-            self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
+        if icon: self.setIcon(icon)
+        if tooltip: self.setToolTip(tooltip)
+        if is_read_only: self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
+
+class ReadOnlyTableWidgetItem(QTableWidgetItem):
+    """
+    For use in a table cell, displays text the user cannot select or modify.
+    """
+    def __init__(self, text):
+        text = text or ''
+        QTableWidgetItem.__init__(self, text)
+        self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
 
 class ReadOnlyTextIconWidgetItem(ReadOnlyTableWidgetItem):
+    """
+    For use in a table cell, displays an icon the user cannot select or modify.
+    """
     def __init__(self, text, icon):
         ReadOnlyTableWidgetItem.__init__(self, text)
         if icon: self.setIcon(icon)
 
+# ----------------------------------------------
+#               Controls
+# ----------------------------------------------
 
 class ReadOnlyLineEdit(QLineEdit):
     def __init__(self, text, parent):
@@ -594,9 +653,12 @@ class ReadOnlyLineEdit(QLineEdit):
         self.setEnabled(False)
 
 class NoWheelComboBox(QComboBox):
-    
+    """
+    For combobox displayed in a table cell using the mouse wheel has nasty interactions
+    due to the conflict between scrolling the table vs scrolling the combobox item.
+    Inherit from this class to disable the combobox changing value with mouse wheel.
+    """
     def wheelEvent(self, event):
-        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
         event.ignore()
 
 class ImageComboBox(NoWheelComboBox):
@@ -665,18 +727,17 @@ class KeyValueComboBox(QComboBox):
         if self.values_ToolTip:
             self.setToolTip(self.values_ToolTip.get(self.selected_key(), ''))
 
-
 class CustomColumnComboBox(QComboBox):
     def __init__(self, parent, custom_columns, selected_column='', initial_items=['']):
         QComboBox.__init__(self, parent)
         self.populate_combo(custom_columns, selected_column, initial_items)
         self.refresh_ToolTip()
-        self.currentIndexChanged.connect(self.column_changed)
+        self.currentTextChanged.connect(self.current_text_changed)
     
     def populate_combo(self, custom_columns, selected_column='', initial_items=['']):
         self.clear()
         self.custom_columns = custom_columns
-        self.column_names = list()
+        self.column_names = []
         initial_items = initial_items or []
         
         selected_idx = start = 0
@@ -692,18 +753,19 @@ class CustomColumnComboBox(QComboBox):
         
         self.setCurrentIndex(selected_idx)
     
-    def selected_column(self):
-        return self.column_names[self.currentIndex()]
-    
-    def column_changed(self, val):
-        self.refresh_ToolTip()
-    
     def refresh_ToolTip(self):
-        cc = self.custom_columns.get(self.selected_column(), None)
+        cc = self.custom_columns.get(self.get_selected_column(), None)
         if cc:
             self.setToolTip(cc.description)
         else:
             self.setToolTip('')
+    
+    def get_selected_column(self):
+        return self.column_names[self.currentIndex()]
+    
+    def current_text_changed(self, new_text):
+        self.refresh_ToolTip()
+        self.current_index = self.currentIndex()
 
 class ReorderedComboBox(QComboBox):
     def __init__(self, parent, strip_items=True):
@@ -818,12 +880,69 @@ class DragDropComboBox(ReorderedComboBox):
         self.lineEdit().dropEvent(event)
 
 
+# ----------------------------------------------
+#               Dialog functions
+# ----------------------------------------------
+
+try:
+    from qt.core import (QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, 
+                        QListWidget, QProgressBar, QAbstractItemView, QTextEdit, 
+                        QApplication, Qt, QTextBrowser, QSize, QLabel)
+except ImportError:
+    from PyQt5.Qt import (QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, 
+                        QListWidget, QProgressBar, QAbstractItemView, QTextEdit, 
+                        QApplication, Qt, QTextBrowser, QSize, QLabel)
+
+from calibre.gui2 import gprefs, Application
+from calibre.gui2.keyboard import ShortcutConfig
+
+class SizePersistedDialog(QDialog):
+    """
+    This dialog is a base class for any dialogs that want their size/position
+    restored when they are next opened.
+    """
+    def __init__(self, parent, unique_pref_name):
+        QDialog.__init__(self, parent)
+        self.unique_pref_name = unique_pref_name
+        self.geom = gprefs.get(unique_pref_name, None)
+        self.finished.connect(self.dialog_closing)
+    
+    def resize_dialog(self):
+        if self.geom is None:
+            self.resize(self.sizeHint())
+        else:
+            self.restoreGeometry(self.geom)
+    
+    def dialog_closing(self, result):
+        geom = bytearray(self.saveGeometry())
+        gprefs[self.unique_pref_name] = geom
+        self.persist_custom_prefs()
+    
+    def persist_custom_prefs(self):
+        """
+        Invoked when the dialog is closing. Override this function to call
+        save_custom_pref() if you have a setting you want persisted that you can
+        retrieve in your __init__() using load_custom_pref() when next opened
+        """
+        pass
+    
+    def load_custom_pref(self, name, default=None):
+        return gprefs.get(self.unique_pref_name+':'+name, default)
+    
+    def save_custom_pref(self, name, value):
+        gprefs[self.unique_pref_name+':'+name] = value
+    
+    def help_link_activated(self, url):
+        if self.plugin_action is not None:
+            self.plugin_action.show_help(anchor=self.help_anchor)
+
 class KeyboardConfigDialog(SizePersistedDialog):
     """
     This dialog is used to allow editing of keyboard shortcuts.
     """
-    def __init__(self, group_name):
-        SizePersistedDialog.__init__(self, GUI, _('Keyboard shortcut dialog'))
+    def __init__(self, gui, group_name):
+        SizePersistedDialog.__init__(self, gui, _('Keyboard shortcut dialog'))
+        self.gui = gui
         self.setWindowTitle(_('Keyboard shortcuts'))
         layout = QVBoxLayout(self)
         self.setLayout(layout)
@@ -842,21 +961,211 @@ class KeyboardConfigDialog(SizePersistedDialog):
         self.initialize()
     
     def initialize(self):
-        self.keyboard_widget.initialize(GUI.keyboard)
+        self.keyboard_widget.initialize(self.gui.keyboard)
         self.keyboard_widget.highlight_group(self.group_name)
     
     def commit(self):
         self.keyboard_widget.commit()
         self.accept()
+
+def edit_keyboard_shortcuts(plugin_action):
+    getattr(plugin_action, 'rebuild_menus', ())()
+    d = KeyboardConfigDialog(gui, plugin_action.action_spec[0])
+    if d.exec_() == d.Accepted:
+        gui.keyboard.finalize()
+
+class PrefsViewerDialog(SizePersistedDialog):
+    def __init__(self, gui, namespace):
+        SizePersistedDialog.__init__(self, gui, _('Prefs Viewer dialog'))
+        self.setWindowTitle(_('Preferences for:')+' '+namespace)
+        
+        self.gui = gui
+        self.db = gui.current_db
+        self.namespace = namespace
+        self._init_controls()
+        self.resize_dialog()
+        
+        self._populate_settings()
+        
+        if self.keys_list.count():
+            self.keys_list.setCurrentRow(0)
     
-    @staticmethod
-    def edit_shortcuts(plugin_action):
-        getattr(plugin_action, 'rebuild_menus', ())()
-        d = KeyboardConfigDialog(plugin_action.action_spec[0])
-        if d.exec_() == d.Accepted:
-            GUI.keyboard.finalize()
+    def _init_controls(self):
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        
+        ml = QHBoxLayout()
+        layout.addLayout(ml, 1)
+        
+        self.keys_list = QListWidget(self)
+        self.keys_list.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.keys_list.setFixedWidth(150)
+        self.keys_list.setAlternatingRowColors(True)
+        ml.addWidget(self.keys_list)
+        self.value_text = QTextEdit(self)
+        self.value_text.setReadOnly(False)
+        ml.addWidget(self.value_text, 1)
+        
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self._apply_changes)
+        button_box.rejected.connect(self.reject)
+        self.clear_button = button_box.addButton(_('Clear'), QDialogButtonBox.ResetRole)
+        self.clear_button.setIcon(get_icon('trash.png'))
+        self.clear_button.setToolTip(_('Clear all settings for this plugin'))
+        self.clear_button.clicked.connect(self._clear_settings)
+        layout.addWidget(button_box)
+    
+    def _populate_settings(self):
+        self.keys_list.clear()
+        ns_prefix = self._get_ns_prefix()
+        keys = sorted([k[len(ns_prefix):] for k in six.iterkeys(self.db.prefs)
+                       if k.startswith(ns_prefix)])
+        for key in keys:
+            self.keys_list.addItem(key)
+        self.keys_list.setMinimumWidth(self.keys_list.sizeHintForColumn(0))
+        self.keys_list.currentRowChanged[int].connect(self._current_row_changed)
+    
+    def _current_row_changed(self, new_row):
+        if new_row < 0:
+            self.value_text.clear()
+            return
+        key = unicode(self.keys_list.currentItem().text())
+        val = self.db.prefs.get_namespaced(self.namespace, key, '')
+        self.value_text.setPlainText(self.db.prefs.to_raw(val))
+    
+    def _get_ns_prefix(self):
+        return 'namespaced:%s:'% self.namespace
+    
+    def _apply_changes(self):
+        from calibre.gui2.dialogs.confirm_delete import confirm
+        message = '<p>'+_('Are you sure you want to change your settings in this library for this plugin?')+'</p>' \
+                  '<p>'+_('Any settings in other libraries or stored in a JSON file in your calibre plugins ' \
+                  'folder will not be touched.')+'</p>' \
+                  '<>'+_('You must restart calibre afterwards.')+'</p>'
+        if not confirm(message, self.namespace+'_clear_settings', self):
+            return
+        
+        val = self.db.prefs.raw_to_object(unicode(self.value_text.toPlainText()))
+        key = unicode(self.keys_list.currentItem().text())
+        self.db.prefs.set_namespaced(self.namespace, key, val)
+        
+        restart = prompt_for_restart(self, _('Settings changed'),
+                           '<p>'+_('Settings for this plugin in this library have been changed.')+'</p>' \
+                           '<p>'+_('Please restart calibre now.')+'</p>')
+        self.close()
+        if restart:
+            self.gui.quit(restart=True)
+    
+    def _clear_settings(self):
+        from calibre.gui2.dialogs.confirm_delete import confirm
+        message = '<p>'+_('Are you sure you want to clear your settings in this library for this plugin?')+'</p>' \
+                  '<p>'+_('Any settings in other libraries or stored in a JSON file in your calibre plugins ' \
+                  'folder will not be touched.')+'</p>' \
+                  '<p>'+_('You must restart calibre afterwards.')+'</p>'
+        if not confirm(message, self.namespace+'_clear_settings', self):
+            return
+        
+        ns_prefix = self._get_ns_prefix()
+        keys = [k for k in six.iterkeys(self.db.prefs) if k.startswith(ns_prefix)]
+        for k in keys:
+            del self.db.prefs[k]
+        self._populate_settings()
+        restart = prompt_for_restart(self, _('Settings deleted'),
+                           '<p>'+_('All settings for this plugin in this library have been cleared.')+'</p>'
+                           '<p>'+_('Please restart calibre now.')+'</p>')
+        self.close()
+        if restart:
+            self.gui.quit(restart=True)
+
+class ProgressBarDialog(QDialog):
+    def __init__(self, parent=None, max_items=100, window_title='Progress Bar',
+                 label='Label goes here', on_top=False):
+        if on_top:
+            super(ProgressBarDialog, self).__init__(parent=parent, flags=Qt.WindowStaysOnTopHint)
+        else:
+            super(ProgressBarDialog, self).__init__(parent=parent)
+        self.application = Application
+        self.setWindowTitle(window_title)
+        self.l = QVBoxLayout(self)
+        self.setLayout(self.l)
+        
+        self.label = QLabel(label)
+        #self.label.setAlignment(Qt.AlignHCenter)
+        self.l.addWidget(self.label)
+        
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setRange(0, max_items)
+        self.progressBar.setValue(0)
+        self.l.addWidget(self.progressBar)
+    
+    def increment(self):
+        self.progressBar.setValue(self.progressBar.value() + 1)
+        self.refresh()
+    
+    def refresh(self):
+        self.application.processEvents()
+    
+    def set_label(self, value):
+        self.label.setText(value)
+        self.refresh()
+    
+    def left_align_label(self):
+        self.label.setAlignment(Qt.AlignLeft )
+    
+    def set_maximum(self, value):
+        self.progressBar.setMaximum(value)
+        self.refresh()
+    
+    def set_value(self, value):
+        self.progressBar.setValue(value)
+        self.refresh()
+    
+    def set_progress_format(self, progress_format=None):
+        pass
+
+class ViewLogDialog(QDialog):
+    def __init__(self, title, html, parent=None):
+        QDialog.__init__(self, parent)
+        self.l = l = QVBoxLayout()
+        self.setLayout(l)
+        
+        self.tb = QTextBrowser(self)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        # Rather than formatting the text in <pre> blocks like the calibre
+        # ViewLog does, instead just format it inside divs to keep style formatting
+        html = html.replace('\t','&nbsp;&nbsp;&nbsp;&nbsp;').replace('\n', '<br/>')
+        html = html.replace('> ','>&nbsp;')
+        self.tb.setHtml('<div>%s</div>' % html)
+        QApplication.restoreOverrideCursor()
+        l.addWidget(self.tb)
+        
+        self.bb = QDialogButtonBox(QDialogButtonBox.Ok)
+        self.bb.accepted.connect(self.accept)
+        self.bb.rejected.connect(self.reject)
+        self.copy_button = self.bb.addButton(_('Copy to clipboard'),
+                self.bb.ActionRole)
+        self.copy_button.setIcon(get_icon('edit-copy.png'))
+        self.copy_button.clicked.connect(self.copy_to_clipboard)
+        l.addWidget(self.bb)
+        self.setModal(False)
+        self.resize(QSize(700, 500))
+        self.setWindowTitle(title)
+        self.setWindowIcon(get_icon('debug.png'))
+        self.show()
+    
+    def copy_to_clipboard(self):
+        txt = self.tb.toPlainText()
+        QApplication.clipboard().setText(txt)
 
 
+# ----------------------------------------------
+#               Ohters
+# ----------------------------------------------
+
+from calibre.utils.config import JSONConfig, DynamicConfig
+
+def duplicate_entry(lst):
+    return list(set([x for x in lst if lst.count(x) > 1]))
 
 # Simple Regex
 class regex():
@@ -922,6 +1231,7 @@ class regex():
 regex = regex()
 """Easy Regex"""
 
+
 def CustomExceptionErrorDialog(exception, custome_title=None, custome_msg=None, show=True):
     
     from polyglot.io import PolyglotStringIO
@@ -953,7 +1263,7 @@ def CustomExceptionErrorDialog(exception, custome_title=None, custome_msg=None, 
     
     msg = custome_msg + '<b>{:s}</b>: '.format(exception.__class__.__name__) + prepare_string_for_xml(as_unicode(str(exception)))
     
-    return error_dialog(GUI, custome_title, msg, det_msg=fe, show=show, show_copy_button=True)
+    return error_dialog(gui, custome_title, msg, det_msg=fe, show=show, show_copy_button=True)
 
 
 class PREFS_json(JSONConfig):
