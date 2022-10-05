@@ -57,11 +57,6 @@ GUI = get_gui()
 class ICON:
     PLUGIN    = 'images/plugin.png'
     WARNING   = 'images/warning.png'
-    
-    ALL = [
-        PLUGIN,
-        WARNING,
-    ]
 
 
 class FIELD:

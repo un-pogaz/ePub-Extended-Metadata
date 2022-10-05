@@ -69,6 +69,7 @@ def debug_print(*args):
 # ----------------------------------------------
 #          Icon Management functions
 # ----------------------------------------------
+def __Icon_Management__(): pass
 
 try:
     from qt.core import QIcon, QPixmap, QApplication
@@ -98,25 +99,25 @@ def get_icon_themed(icon_name, theme_color=None):
 
 def load_plugin_resources(plugin_path, names=[]):
     """
+    Load all images in the plugin and the additional specified name.
     Set our global store of plugin name and icon resources for sharing between
     the InterfaceAction class which reads them and the ConfigWidget
     if needed for use on the customization dialog for this plugin.
     """
-    names = names or []
+    from calibre.utils.zipfile import ZipFile
+    
+    global PLUGIN_RESOURCES
     
     if plugin_path is None:
         raise ValueError('This plugin was not loaded from a ZIP file')
-    ans = {}
-    from calibre.utils.zipfile import ZipFile
-    with ZipFile(plugin_path, 'r') as zf:
-        lst = zf.namelist()
-        for name in names:
-            for color in THEME_COLOR:
-                themed = get_icon_themed(name, color)
-                if themed in lst:
-                    ans[themed] = zf.read(themed)
     
-    global PLUGIN_RESOURCES
+    names = names or []
+    ans = {}
+    with ZipFile(plugin_path, 'r') as zf:
+        for entry in zf.namelist():
+            if entry in names or (entry.startswith('images/') and os.path.splitext(entry)[1].lower() == '.png' and entry not in PLUGIN_RESOURCES):
+                ans[entry] = zf.read(entry)
+    
     PLUGIN_RESOURCES.update(ans)
 
 def get_icon(icon_name):
@@ -186,10 +187,8 @@ def get_pixmap(icon_name):
     pixmap = get_from_resources(icon_themed)
     if not pixmap:
         pixmap = get_from_resources(icon_name)
-    if pixmap:
-        return pixmap
     
-    return None
+    return pixmap
 
 def get_local_resource(*subfolder):
     """
@@ -206,6 +205,7 @@ def get_local_resource(*subfolder):
 # ----------------------------------------------
 #                Library functions
 # ----------------------------------------------
+def __Library__(): pass
 
 from calibre.gui2 import error_dialog, show_restart_warning
 
@@ -376,6 +376,7 @@ def set_marked(label, book_ids, append=False, reset=False):
 # ----------------------------------------------
 #                Menu functions
 # ----------------------------------------------
+def __Menu__(): pass
 
 from calibre.gui2.actions import menu_action_unique_name
 
@@ -495,6 +496,7 @@ def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
 # ----------------------------------------------
 #               Widgets
 # ----------------------------------------------
+def __Widgets__(): pass
 
 try:
     from qt.core import (Qt, QTableWidgetItem, QComboBox, QHBoxLayout, QLabel, QFont, 
@@ -645,6 +647,7 @@ class ReadOnlyTextIconWidgetItem(ReadOnlyTableWidgetItem):
 # ----------------------------------------------
 #               Controls
 # ----------------------------------------------
+def __Controls__(): pass
 
 class ReadOnlyLineEdit(QLineEdit):
     def __init__(self, text, parent):
@@ -883,6 +886,7 @@ class DragDropComboBox(ReorderedComboBox):
 # ----------------------------------------------
 #               Dialog functions
 # ----------------------------------------------
+def __Dialog__(): pass
 
 try:
     from qt.core import (QDialog, QDialogButtonBox, QVBoxLayout, QHBoxLayout, 
@@ -1174,6 +1178,7 @@ class ViewLogDialog(QDialog):
 # ----------------------------------------------
 #               Ohters
 # ----------------------------------------------
+def __Ohters__(): pass
 
 from calibre.utils.config import JSONConfig, DynamicConfig
 

@@ -2,6 +2,7 @@
 ## https://git-scm.com/docs/gitignore
 ##
 
+__pycache__/
 --*/
 zz*
 *.lnk

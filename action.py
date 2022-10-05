@@ -59,7 +59,7 @@ class ePubExtendedMetadataAction(InterfaceAction):
         self.is_library_selected = True
         self.menu = QMenu(GUI)
         # Read the plugin icons and store for potential sharing with the config widget
-        load_plugin_resources(self.plugin_path, ICON.ALL)
+        load_plugin_resources(self.plugin_path)
         
         self.rebuild_menus()
         
