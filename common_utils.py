@@ -1024,7 +1024,7 @@ class PrefsViewerDialog(SizePersistedDialog):
     def _populate_settings(self):
         self.prefs.clear()
         self.keys_list.clear()
-        ns_prefix = self._get_ns_prefix()
+        ns_prefix = 'namespaced:{:s}:'.format(self.namespace)
         ns_len = len(ns_prefix)
         for key in sorted([k[ns_len:] for k in self.db.prefs.keys() if k.startswith(ns_prefix)]):
             self.keys_list.addItem(key)
@@ -1047,9 +1047,6 @@ class PrefsViewerDialog(SizePersistedDialog):
         
         self.current_key = unicode(self.keys_list.currentItem().text())
         self.value_text.setPlainText(self.prefs[self.current_key])
-    
-    def _get_ns_prefix(self):
-        return 'namespaced:{:s}:'.format(self.namespace)
     
     def _apply_changes(self):
         self._save_current_row()
@@ -1079,9 +1076,9 @@ class PrefsViewerDialog(SizePersistedDialog):
         if not confirm(message, self.namespace+'_clear_settings', self):
             return
         
-        ns_prefix = self._get_ns_prefix()
-        for k in [k for k in self.db.prefs.keys() if k.startswith(ns_prefix)]:
-            del self.db.prefs[k]
+        for k in self.prefs.keys():
+            self.prefs[k] = '{}'
+            self.db.prefs.set_namespaced(self.namespace, k, self.db.prefs.raw_to_object('{}'))
         self._populate_settings()
         self.close()
 
@@ -1313,19 +1310,19 @@ class PREFS_dynamic(DynamicConfig):
     to store the preferences for plugin
     """
     def __init__(self):
-        self.no_commit = False
+        self._no_commit = False
         DynamicConfig.__init__(self, 'plugins/'+PLUGIN_NAME)
     
     def commit(self):
-        if self.no_commit:
+        if self._no_commit:
             return
         DynamicConfig.commit(self)
     
     def __enter__(self):
-        self.no_commit = True
+        self._no_commit = True
 
     def __exit__(self, *args):
-        self.no_commit = False
+        self._no_commit = False
         self.commit()
     
     def __call__(self):
@@ -1356,7 +1353,7 @@ class PREFS_library(dict):
     Defined a custom namespaced at the root of __init__.py // __init__.PREFS_NAMESPACE
     """
     def __init__(self, key='settings', defaults={}):
-        self.no_commit = False
+        self._no_commit = False
         self._db = None
         self.key = key if key else ''
         self.defaults = defaults if defaults else {}
@@ -1410,30 +1407,34 @@ class PREFS_library(dict):
         self.refresh()
         return dict.__str__(self.deepcopy_dict())
     
-    def refresh(self):
+    def _check_db(self):
         new_db = current_db()
         if new_db and self._db != new_db:
             self._db = new_db
-            self.clear()
+        return self._db != None
+    
+    def refresh(self):
+        if self._check_db():
             rslt = self._db.prefs.get_namespaced(self.namespace, self.key, {})
-            self.no_commit = True
+            self._no_commit = True
+            self.clear()
             self.update(rslt)
-            self.no_commit = False
+            self._no_commit = False
     
     def commit(self):
-        if self.no_commit:
+        if self._no_commit:
             return
-        self.refresh()
         
-        self._db.prefs.set_namespaced(self.namespace, self.key, self.deepcopy_dict())
-        self.refresh()
+        if self._check_db():
+            self._db.prefs.set_namespaced(self.namespace, self.key, self.deepcopy_dict())
+            self.refresh()
     
     def __enter__(self):
-        self.no_commit = True
         self.refresh()
+        self._no_commit = True
     
     def __exit__(self, *args):
-        self.no_commit = False
+        self._no_commit = False
         self.commit()
     
     def __call__(self):

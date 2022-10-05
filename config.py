@@ -355,13 +355,20 @@ class ConfigWidget(QWidget):
     
     def library_prefs(self):
         view_library_prefs()
+        self.table.populate_table(PREFS[KEY.CONTRIBUTORS])
+        self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
+        plugin_check_enable_library()
+        self.reader_button.pluginEnable = PREFS[KEY.AUTO_IMPORT]
+        self.writer_button.pluginEnable = PREFS[KEY.AUTO_EMBED]
+        button_plugin_icon(self.reader_button)
+        button_plugin_icon(self.writer_button)
 
 
 def button_plugin_initialized(button, key):
     button.pluginEnable = plugin_realy_enable(key)
     if KEY.find_plugin(key):
         button.clicked.connect(partial(button_plugin_clicked, button, key))
-        button_plugin_icon(button, key)
+        button_plugin_icon(button)
     else:
         button.setIcon(get_icon(ICON.WARNING))
         button.setEnabled(False)
@@ -369,9 +376,9 @@ def button_plugin_initialized(button, key):
 
 def button_plugin_clicked(button, key):
     button.pluginEnable = not button.pluginEnable
-    button_plugin_icon(button, key)
+    button_plugin_icon(button)
 
-def button_plugin_icon(button, key):
+def button_plugin_icon(button):
     if button.pluginEnable:
         button.setIcon(get_icon('dot_green.png'))
     else:
@@ -404,7 +411,7 @@ class ContributorTableWidget(QTableWidget):
             columns = KEY.get_names()
             for role in CONTRIBUTORS_ROLES:
                 for column in columns:
-                    if strcmp('#'+role, column):
+                    if strcmp('#'+role, column) == 0:
                         contributors_pair_list[role] = column
         
         self.setRowCount(len(contributors_pair_list))
