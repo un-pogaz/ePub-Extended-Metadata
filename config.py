@@ -104,9 +104,9 @@ class KEY:
     
     @staticmethod
     def find_plugin(key):
-        from .common import NAME
+        from .common_utils import _PLUGIN
         from calibre.customize.ui import find_plugin
-        return find_plugin(NAME.WRITER if key == KEY.AUTO_EMBED else NAME.READER) 
+        return find_plugin(_PLUGIN.name_writer if key == KEY.AUTO_EMBED else _PLUGIN.name_reader) 
     
     @staticmethod
     def enable_plugin(key):
