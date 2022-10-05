@@ -207,21 +207,7 @@ def get_local_resource(*subfolder):
 # ----------------------------------------------
 def __Library__(): pass
 
-from calibre.gui2 import error_dialog, show_restart_warning
-
-def current_db():
-    """Safely provides the current_db or None"""
-    return getattr(get_gui(),'current_db', None)
-    # db.library_id
-
-def has_restart_pending(show_warning=True, msg_warning=None):
-    restart_pending = gui.must_restart_before_config
-    if restart_pending and show_warning:
-        msg = msg_warning if msg_warning else _('You cannot configure this plugin before calibre is restarted.')
-        if show_restart_warning(msg):
-            gui.quit(restart=True)
-    return restart_pending
-
+from calibre.gui2 import error_dialog
 
 def no_launch_error(title, name=None, msg=None):
     """Show a error dialog  for an operation that cannot be launched"""
@@ -240,17 +226,17 @@ def _BookIds_error(book_ids, show_error, title, name=None):
 
 def get_BookIds_selected(show_error=False):
     """return the books id selected in the gui"""
-    rows = gui.library_view.selectionModel().selectedRows()
+    rows = GUI.library_view.selectionModel().selectedRows()
     if not rows or len(rows) == 0:
         ids = []
     else:
-        ids = gui.library_view.get_selected_ids()
+        ids = GUI.library_view.get_selected_ids()
    
     return _BookIds_error(ids, show_error, _('No book selected'))
 
 def get_BookIds_all(show_error=False):
     """return all books id in the library"""
-    ids = current_db().all_ids()
+    ids = GUI.current_db.all_ids()
     return _BookIds_error(ids, show_error, _('No book in the library'))
 
 def get_BookIds_virtual(show_error=False):
@@ -282,7 +268,7 @@ def get_BookIds(query, use_search_restriction=True, use_virtual_library=True):
     use_virtual_library:
         Limit the search to the actual virtual library
     """
-    data = current_db().data
+    data = GUI.current_db.data
     query = query or ''
     search_restriction = data.search_restriction if use_search_restriction else ''
     return data.search_getting_ids(query, search_restriction,
@@ -291,30 +277,30 @@ def get_BookIds(query, use_search_restriction=True, use_virtual_library=True):
 
 def get_curent_search():
     """Get the current search string. Can be invalid"""
-    return gui.search.current_text
+    return GUI.search.current_text
 
 def get_last_search():
     """Get last search string performed with succes"""
-    return gui.library_view.model().last_search
+    return GUI.library_view.model().last_search
 
 def get_curent_virtual():
     """The virtual library, can't be a temporary VL"""
-    data = current_db().data
+    data = GUI.current_db.data
     return data.get_base_restriction_name(), data.get_base_restriction()
 
 def get_curent_restriction_search():
     """The search restriction is a top level filtre, based on the saved searches"""
-    data = current_db().data
+    data = GUI.current_db.data
     name = data.get_search_restriction_name()
     return name, get_saved_searches().get(name, data.search_restriction)
 
 def get_virtual_libraries():
     """Get all virtual library set in the database"""
-    return current_db().prefs.get('virtual_libraries', {})
+    return GUI.current_db.prefs.get('virtual_libraries', {})
 
 def get_saved_searches():
     """Get all saved searches set in the database"""
-    return current_db().prefs.get('saved_searches', {})
+    return GUI.current_db.prefs.get('saved_searches', {})
 
 
 def get_marked(label=None):
@@ -328,7 +314,7 @@ def get_marked(label=None):
     """
     
     rslt = {}
-    for k,v in iteritems(current_db().data.marked_ids):
+    for k,v in iteritems(GUI.current_db.data.marked_ids):
         v = str(v).lower()
         if v not in rslt:
             rslt[v] = [k]
@@ -359,7 +345,7 @@ def set_marked(label, book_ids, append=False, reset=False):
         Book id to affect the label
     """
     label = str(label).lower()
-    marked = {} if reset else current_db().data.marked_ids.copy()
+    marked = {} if reset else GUI.current_db.data.marked_ids.copy()
     
     if not append:
         del_id = []
@@ -370,7 +356,7 @@ def set_marked(label, book_ids, append=False, reset=False):
             del marked[k]
     
     marked.update( {idx:label for idx in book_ids} )
-    current_db().data.set_marked_ids(marked)
+    GUI.current_db.data.set_marked_ids(marked)
 
 
 # ----------------------------------------------
@@ -393,11 +379,11 @@ def unregister_menu_actions():
     global plugin_menu_actions
     for action in plugin_menu_actions:
         if hasattr(action, 'calibre_shortcut_unique_name'):
-            gui.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
+            GUI.keyboard.unregister_shortcut(action.calibre_shortcut_unique_name)
         # starting in calibre 2.10.0, actions are registers at
         # the top gui level for OSX' benefit.
         if calibre_version >= (2,10,0):
-            gui.removeAction(action)
+            GUI.removeAction(action)
     plugin_menu_actions = []
 
 def create_menu_action_unique(ia, parent_menu, menu_text, image=None, tooltip=None,
@@ -976,7 +962,7 @@ def edit_keyboard_shortcuts(plugin_action):
     getattr(plugin_action, 'rebuild_menus', ())()
     d = KeyboardConfigDialog(gui, plugin_action.action_spec[0])
     if d.exec_() == d.Accepted:
-        gui.keyboard.finalize()
+        GUI.keyboard.finalize()
 
 class PrefsViewerDialog(SizePersistedDialog):
     def __init__(self, gui, namespace):
@@ -984,7 +970,7 @@ class PrefsViewerDialog(SizePersistedDialog):
         self.setWindowTitle(_('Preferences for:')+' '+namespace)
         
         self.gui = gui
-        self.db = gui.current_db
+        self.db = GUI.current_db
         self.namespace = namespace
         self.prefs = {}
         self.current_key = None
@@ -1083,7 +1069,7 @@ class PrefsViewerDialog(SizePersistedDialog):
         self.close()
 
 def view_library_prefs():
-    gui.current_db
+    GUI.current_db
     d = PrefsViewerDialog(gui, PREFS_NAMESPACE)
     d.exec_()
 
@@ -1173,7 +1159,22 @@ class ViewLogDialog(QDialog):
 # ----------------------------------------------
 def __Ohters__(): pass
 
+from calibre.gui2 import error_dialog, show_restart_warning
 from calibre.utils.config import JSONConfig, DynamicConfig
+
+def current_db():
+    """Safely provides the current_db or None"""
+    return getattr(get_gui(),'current_db', None)
+    # db.library_id
+
+def has_restart_pending(show_warning=True, msg_warning=None):
+    restart_pending = GUI.must_restart_before_config
+    if restart_pending and show_warning:
+        msg = msg_warning if msg_warning else _('You cannot configure this plugin before calibre is restarted.')
+        if show_restart_warning(msg):
+            GUI.quit(restart=True)
+    return restart_pending
+
 
 def duplicate_entry(lst):
     return list(set([x for x in lst if lst.count(x) > 1]))
@@ -1408,7 +1409,7 @@ class PREFS_library(dict):
         return dict.__str__(self.deepcopy_dict())
     
     def _check_db(self):
-        new_db = current_db()
+        new_db = GUI.current_db
         if new_db and self._db != new_db:
             self._db = new_db
         return self._db != None

@@ -223,7 +223,7 @@ def create_extended_metadata(miA, prefs):
 class ePubExtendedMetadataProgressDialog(QProgressDialog):
     def __init__(self, book_ids):
         # DB
-        self.db = current_db()
+        self.db = GUI.current_db
         # DB API
         self.dbAPI = self.db.new_api
         
