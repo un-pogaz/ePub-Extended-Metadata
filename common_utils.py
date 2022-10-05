@@ -1409,7 +1409,7 @@ class PREFS_library(dict):
         return dict.__str__(self.deepcopy_dict())
     
     def _check_db(self):
-        new_db = GUI.current_db
+        new_db = current_db()
         if new_db and self._db != new_db:
             self._db = new_db
         return self._db != None
