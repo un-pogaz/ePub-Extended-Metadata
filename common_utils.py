@@ -945,7 +945,7 @@ class KeyboardConfigDialog(SizePersistedDialog):
     This dialog is used to allow editing of keyboard shortcuts.
     """
     def __init__(self, gui, group_name):
-        SizePersistedDialog.__init__(self, gui, _('Keyboard shortcut dialog'))
+        SizePersistedDialog.__init__(self, gui, 'Keyboard shortcut dialog')
         self.gui = gui
         self.setWindowTitle(_('Keyboard shortcuts'))
         layout = QVBoxLayout(self)
@@ -978,27 +978,16 @@ def edit_keyboard_shortcuts(plugin_action):
     if d.exec_() == d.Accepted:
         gui.keyboard.finalize()
 
-def prompt_for_restart(parent, title, message):
-    d = info_dialog(parent, title, message, show_copy_button=False)
-    b = d.bb.addButton(_('Restart calibre now'), d.bb.AcceptRole)
-    b.setIcon(get_icon('lt.png'))
-    d.do_restart = False
-    def rf():
-        d.do_restart = True
-    b.clicked.connect(rf)
-    d.set_details('')
-    d.exec_()
-    b.clicked.disconnect()
-    return d.do_restart
-
 class PrefsViewerDialog(SizePersistedDialog):
     def __init__(self, gui, namespace):
-        SizePersistedDialog.__init__(self, gui, _('Prefs Viewer dialog'))
+        SizePersistedDialog.__init__(self, gui, 'Prefs Viewer dialog')
         self.setWindowTitle(_('Preferences for:')+' '+namespace)
         
         self.gui = gui
         self.db = gui.current_db
         self.namespace = namespace
+        self.prefs = {}
+        self.current_key = None
         self._init_controls()
         self.resize_dialog()
         
@@ -1033,66 +1022,73 @@ class PrefsViewerDialog(SizePersistedDialog):
         layout.addWidget(button_box)
     
     def _populate_settings(self):
+        self.prefs.clear()
         self.keys_list.clear()
         ns_prefix = self._get_ns_prefix()
-        keys = sorted([k[len(ns_prefix):] for k in six.iterkeys(self.db.prefs)
-                       if k.startswith(ns_prefix)])
-        for key in keys:
+        ns_len = len(ns_prefix)
+        for key in sorted([k[ns_len:] for k in self.db.prefs.keys() if k.startswith(ns_prefix)]):
             self.keys_list.addItem(key)
+            val = self.db.prefs.get_namespaced(self.namespace, key, None)
+            self.prefs[key] = self.db.prefs.to_raw(val) if val != None else None
         self.keys_list.setMinimumWidth(self.keys_list.sizeHintForColumn(0))
         self.keys_list.currentRowChanged[int].connect(self._current_row_changed)
     
+    def _save_current_row(self):
+        if self.current_key != None:
+            self.prefs[self.current_key] = unicode(self.value_text.toPlainText())
+    
     def _current_row_changed(self, new_row):
+        self._save_current_row()
+        
         if new_row < 0:
             self.value_text.clear()
+            self.current_key = None
             return
-        key = unicode(self.keys_list.currentItem().text())
-        val = self.db.prefs.get_namespaced(self.namespace, key, '')
-        self.value_text.setPlainText(self.db.prefs.to_raw(val))
+        
+        self.current_key = unicode(self.keys_list.currentItem().text())
+        self.value_text.setPlainText(self.prefs[self.current_key])
     
     def _get_ns_prefix(self):
-        return 'namespaced:%s:'% self.namespace
+        return 'namespaced:{:s}:'.format(self.namespace)
     
     def _apply_changes(self):
+        self._save_current_row()
+        for k,v in iteritems(self.prefs):
+            try:
+                self.db.prefs.raw_to_object(v)
+            except Exception as ex:
+                CustomExceptionErrorDialog(ex, custome_msg=_('The changes cannot be applied.'))
+                return
+        
         from calibre.gui2.dialogs.confirm_delete import confirm
         message = '<p>'+_('Are you sure you want to change your settings in this library for this plugin?')+'</p>' \
                   '<p>'+_('Any settings in other libraries or stored in a JSON file in your calibre plugins ' \
-                  'folder will not be touched.')+'</p>' \
-                  '<>'+_('You must restart calibre afterwards.')+'</p>'
-        if not confirm(message, self.namespace+'_clear_settings', self):
+                  'folder will not be touched.')+'</p>'
+        if not confirm(message, self.namespace+'_apply_settings', self):
             return
         
-        val = self.db.prefs.raw_to_object(unicode(self.value_text.toPlainText()))
-        key = unicode(self.keys_list.currentItem().text())
-        self.db.prefs.set_namespaced(self.namespace, key, val)
-        
-        restart = prompt_for_restart(self, _('Settings changed'),
-                           '<p>'+_('Settings for this plugin in this library have been changed.')+'</p>' \
-                           '<p>'+_('Please restart calibre now.')+'</p>')
+        for k,v in iteritems(self.prefs):
+            self.db.prefs.set_namespaced(self.namespace, k, self.db.prefs.raw_to_object(v))
         self.close()
-        if restart:
-            self.gui.quit(restart=True)
     
     def _clear_settings(self):
         from calibre.gui2.dialogs.confirm_delete import confirm
         message = '<p>'+_('Are you sure you want to clear your settings in this library for this plugin?')+'</p>' \
                   '<p>'+_('Any settings in other libraries or stored in a JSON file in your calibre plugins ' \
-                  'folder will not be touched.')+'</p>' \
-                  '<p>'+_('You must restart calibre afterwards.')+'</p>'
+                  'folder will not be touched.')+'</p>'
         if not confirm(message, self.namespace+'_clear_settings', self):
             return
         
         ns_prefix = self._get_ns_prefix()
-        keys = [k for k in six.iterkeys(self.db.prefs) if k.startswith(ns_prefix)]
-        for k in keys:
+        for k in [k for k in self.db.prefs.keys() if k.startswith(ns_prefix)]:
             del self.db.prefs[k]
         self._populate_settings()
-        restart = prompt_for_restart(self, _('Settings deleted'),
-                           '<p>'+_('All settings for this plugin in this library have been cleared.')+'</p>'
-                           '<p>'+_('Please restart calibre now.')+'</p>')
         self.close()
-        if restart:
-            self.gui.quit(restart=True)
+
+def view_library_prefs():
+    gui.current_db
+    d = PrefsViewerDialog(gui, PREFS_NAMESPACE)
+    d.exec_()
 
 class ProgressBarDialog(QDialog):
     def __init__(self, parent=None, max_items=100, window_title='Progress Bar',
@@ -1152,7 +1148,7 @@ class ViewLogDialog(QDialog):
         # ViewLog does, instead just format it inside divs to keep style formatting
         html = html.replace('\t','&nbsp;&nbsp;&nbsp;&nbsp;').replace('\n', '<br/>')
         html = html.replace('> ','>&nbsp;')
-        self.tb.setHtml('<div>%s</div>' % html)
+        self.tb.setHtml('<div>{:s}</div>'.format(html))
         QApplication.restoreOverrideCursor()
         l.addWidget(self.tb)
         
@@ -1274,14 +1270,12 @@ def CustomExceptionErrorDialog(exception, custome_title=None, custome_msg=None, 
     if not custome_title:
         custome_title = _('Unhandled exception')
     
-    if custome_msg:
-        custome_msg = '<span>' + prepare_string_for_xml(as_unicode(custome_msg +'\n')).replace('\n', '<br>')
-    else:
-        custome_msg = '<span>' + prepare_string_for_xml(as_unicode(_('The {:s} plugin has encounter a unhandled exception.').format(PLUGIN_NAME)+'\n')).replace('\n', '<br>')
+    msg = []
+    msg.append('<span>' + prepare_string_for_xml(as_unicode(_('The {:s} plugin has encounter a unhandled exception.').format(PLUGIN_NAME))))
+    if custome_msg: msg.append(custome_msg)
+    msg.append('<b>{:s}</b>: '.format(exception.__class__.__name__) + prepare_string_for_xml(as_unicode(str(exception))))
     
-    msg = custome_msg + '<b>{:s}</b>: '.format(exception.__class__.__name__) + prepare_string_for_xml(as_unicode(str(exception)))
-    
-    return error_dialog(gui, custome_title, msg, det_msg=fe, show=show, show_copy_button=True)
+    return error_dialog(gui, custome_title, '\n'.join(msg).replace('\n', '<br>'), det_msg=fe, show=show, show_copy_button=True)
 
 
 class PREFS_json(JSONConfig):
