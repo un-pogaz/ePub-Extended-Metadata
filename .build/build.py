@@ -90,6 +90,7 @@ def build_plugin():
     files.extend(glob('**/*.py', recursive=True))
     files.extend(glob('images/**/*.png', recursive=True))
     files.extend(glob('translations/*.pot'))
+    files.extend(glob('translations/*.mo'))
     files.extend(glob('translations/*.po'))
     files.extend(glob('**/*.md', recursive=True))
     files.extend(glob('**/*.html', recursive=True))
