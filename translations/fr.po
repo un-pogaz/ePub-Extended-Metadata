@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-10-05 02:42+0200\n"
+"POT-Creation-Date: 2022-10-05 14:54+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -106,151 +106,127 @@ msgstr "Pas de livres dans la bibliothèque virtuel"
 msgid "No book in the current search"
 msgstr "Pas de livres dans la recherche actuelle"
 
-#: common_utils.py:530
+#: common_utils.py:532
 msgid "Restart required"
 msgstr "Redémarrage nécessaire"
 
-#: common_utils.py:531
+#: common_utils.py:533
 msgid "Title image not found - you must restart Calibre before using this plugin!"
 msgstr "L'image d'icone n'a pas était trouvée - vous devriez mieux redémarrer Calibre avant d'utiliser ce plugin !"
 
-#: common_utils.py:580
+#: common_utils.py:582
 msgid "Undefined"
-msgstr ""
+msgstr "Non défini"
 
-#: common_utils.py:944
-msgid "Keyboard shortcut dialog"
-msgstr "Raccourcis clavier"
-
-#: common_utils.py:946
+#: common_utils.py:950 config.py:307
 msgid "Keyboard shortcuts"
 msgstr "Raccourcis clavier"
 
-#: common_utils.py:979
-msgid "Prefs Viewer dialog"
-msgstr ""
-
-#: common_utils.py:980
+#: common_utils.py:984
 msgid "Preferences for:"
-msgstr ""
+msgstr "Préférences pour :"
 
-#: common_utils.py:1012
+#: common_utils.py:1018
 msgid "Clear"
-msgstr ""
+msgstr "Effacer"
 
-#: common_utils.py:1014
+#: common_utils.py:1020
 msgid "Clear all settings for this plugin"
-msgstr ""
+msgstr "Effacer tous les paramètres de ce plugin"
 
-#: common_utils.py:1041
+#: common_utils.py:1060
+msgid "The changes cannot be applied."
+msgstr "Les modifications ne peuvent pas être appliquées."
+
+#: common_utils.py:1064
 msgid "Are you sure you want to change your settings in this library for this plugin?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir modifier vos paramètres dans cette bibliothèque pour ce plugin ?"
 
-#: common_utils.py:1042 common_utils.py:1062
+#: common_utils.py:1065 common_utils.py:1077
 msgid "Any settings in other libraries or stored in a JSON file in your calibre plugins folder will not be touched."
-msgstr ""
+msgstr "Les paramètres présents dans d'autres bibliothèques ou stockés dans un fichier JSON dans le dossier des plugins de Calibre ne seront pas modifiés."
 
-#: common_utils.py:1044 common_utils.py:1064
-msgid "You must restart calibre afterwards."
-msgstr ""
-
-#: common_utils.py:1052
-msgid "Settings changed"
-msgstr ""
-
-#: common_utils.py:1053
-msgid "Settings for this plugin in this library have been changed."
-msgstr ""
-
-#: common_utils.py:1054 common_utils.py:1075
-msgid "Please restart calibre now."
-msgstr ""
-
-#: common_utils.py:1061
+#: common_utils.py:1076
 msgid "Are you sure you want to clear your settings in this library for this plugin?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir effacer vos paramètres dans cette bibliothèque pour ce plugin ?"
 
-#: common_utils.py:1073
-msgid "Settings deleted"
-msgstr ""
-
-#: common_utils.py:1074
-msgid "All settings for this plugin in this library have been cleared."
-msgstr ""
-
-#: common_utils.py:1145
+#: common_utils.py:1158
 msgid "Copy to clipboard"
-msgstr ""
+msgstr "Copier dans le presse-papiers"
 
-#: common_utils.py:1257
+#: common_utils.py:1271
 msgid "Unhandled exception"
 msgstr "Exception non gérée"
 
-#: common_utils.py:1262
+#: common_utils.py:1274
 msgid "The {:s} plugin has encounter a unhandled exception."
 msgstr "Le plugin {:s} a rencontré une exception non gérée."
 
-#: config.py:220
+#: config.py:215
 msgid "ePub Extended Metadata options"
 msgstr "ePub Extended Metadata options"
 
-#: config.py:234 marc_relators.py:94
+#: config.py:229 marc_relators.py:94
 msgid "Contributor"
 msgstr "Contributeur"
 
-#: config.py:244
+#: config.py:239
 msgid "Add a Column/Contributor pair"
 msgstr "Ajouter une paire Colonne/Contributeur"
 
-#: config.py:250
+#: config.py:245
 msgid "Delete Column/Contributor pair"
 msgstr "Supprimer la paire Colonne/Contributeur"
 
-#: config.py:262
+#: config.py:257
 msgid "Embed \"{:s}\" column"
 msgstr "Intégrer la colonne \"{:s}\""
 
-#: config.py:263
+#: config.py:258
 msgid "Embed the \"{:s}\" column as a Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column."
 msgstr "Intégrer la colonne \"{:s}\" comme des métadonnée de contributeurs. Cette option est en écriture seule, l'action d'importation ne modifiera pas la colonne Calibre {:s}."
 
-#: config.py:283
+#: config.py:278
 msgid "ePub3 metadata"
 msgstr "Métadonnées ePub3"
 
-#: config.py:299
+#: config.py:294
 msgid "Automatic import"
 msgstr "Importation automatique"
 
-#: config.py:300
+#: config.py:295
 msgid "Allows to automatically import the extended metadata when adding a new book to the library"
 msgstr "Permet d'importer automatiquement les métadonnées étendues lors de l'ajout d'un nouveau livre à la bibliothèque"
 
-#: config.py:303
+#: config.py:298
 msgid "Automatic embed"
 msgstr "Intégration automatique"
 
-#: config.py:304
+#: config.py:299
 msgid "Allows to to automatically embed the extended metadata at the same time as the default Calibre action"
 msgstr "Permet d'intégrer automatiquement les métadonnées étendues en même temps que l'action par défaut de Calibre"
 
-#: config.py:312
-msgid "Keyboard shortcuts..."
-msgstr "Raccourcis clavier..."
-
-#: config.py:313
+#: config.py:308
 msgid "Edit the keyboard shortcuts associated with this plugin"
 msgstr "Modifier les raccourcis clavier associés à cette extension"
 
-#: config.py:318
+#: config.py:312
+msgid "View library preferences"
+msgstr "Afficher les préférences de la bibliothèque"
+
+#: config.py:313
+msgid "View data stored in the library database for this plugin"
+msgstr "Afficher les données stockées dans la base de données de la bibliothèque pour ce plugin"
+
+#: config.py:319
 msgid "Edit import options"
 msgstr "Modifier les options d'importation"
 
-#: config.py:329
+#: config.py:330
 msgid "Duplicate values"
 msgstr "Valeurs en double"
 
-#: config.py:330
+#: config.py:331
 msgid ""
 "The current parameters contain duplicate values.\n"
 "Your changes can't be saved and have been cancelled."
@@ -258,35 +234,35 @@ msgstr ""
 "Les paramètres actuels contiennent des valeurs en double.\n"
 "Vos modifications ne peuvent pas être enregistrées et ont été annulées."
 
-#: config.py:364
+#: config.py:368
 msgid "This feature has been incorrectly initialized. Restart Calibre to fix this."
 msgstr "Cette fonctionnalité a été initialisée de manière incorrecte. Redémarrez Calibre pour résoudre ce problème."
 
-#: config.py:377
+#: config.py:381
 msgid "Contributor type"
 msgstr "Type de Contributeur"
 
-#: config.py:377
+#: config.py:381
 msgid "Column"
 msgstr "Colonne"
 
-#: config.py:436
+#: config.py:440
 msgid "Are you sure you want to delete this Column/Contributor pair?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette paire Colonne/Contributeur ?"
 
-#: config.py:438
+#: config.py:442
 msgid "Are you sure you want to delete the selected {:d} Column/Contributor pairs?"
 msgstr "Etes-vous sûr de vouloir supprimer les paires de Colonnes/Contributeurs {:d} sélectionnées ? Colonne/Contributeur sélectionnés ?"
 
-#: config.py:439
+#: config.py:443
 msgid "Are you sure?"
 msgstr "Êtes-vous sûr ?"
 
-#: config.py:488
+#: config.py:492
 msgid "Duplicate Contributors type"
 msgstr "Type de Contributeur en double"
 
-#: config.py:489
+#: config.py:493
 msgid ""
 "A Contributor was duplicated!\n"
 "Change the settings so that each contributor is present only once, otherwise the settings can not be saved.\n"
@@ -298,11 +274,11 @@ msgstr ""
 "\n"
 "Type en double :"
 
-#: config.py:507
+#: config.py:511
 msgid "Duplicate Custom column"
 msgstr "Colonne personnalisée en double"
 
-#: config.py:508
+#: config.py:512
 msgid ""
 "A Custom column was duplicated!\n"
 "Change the settings so that each Custom column is present only once, otherwise the settings can not be saved.\n"
@@ -314,47 +290,47 @@ msgstr ""
 "\n"
 "Type en double :"
 
-#: config.py:515
+#: config.py:519
 msgid "Keep Calibre metadata, fill only the empty fields"
 msgstr "Conserver les métadonnées Calibre, ne remplir que les champs vides"
 
-#: config.py:516
+#: config.py:520
 msgid "Overwrites Calibre metadata, considers that the book always reason"
 msgstr "Écrase les métadonnées Calibre, considère que le livre a toujours raison"
 
-#: config.py:520
+#: config.py:524
 msgid "Keep Calibre embed metadata that could exist in the book"
 msgstr "Conservez les métadonnées intégrées par Calibre qui pourraient exister dans le livre"
 
-#: config.py:521
+#: config.py:525
 msgid "Overwrites Calibre embed metadata, give priority to original metadata"
 msgstr "Écrase les métadonnées intégrées par Calibre, donne la priorité aux métadonnées originales"
 
-#: config.py:533
+#: config.py:537
 msgid "ePub Extended Metadata import options"
 msgstr "ePub Extended Metadata options d'importation"
 
-#: config.py:535
+#: config.py:539
 msgid "Set here the specifics options to read and automatic addition of metadata."
 msgstr "Définissez ici les options spécifiques pour la lecture et l'ajout automatique des métadonnées."
 
-#: config.py:539
+#: config.py:543
 msgid "Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata and the one already recorded by Calibre."
 msgstr "Choisissez le comportement à adopter en cas de conflit entre les métadonnées lues par ePub Extended Metadata et celles déjà enregistrées par Calibre."
 
-#: config.py:545
+#: config.py:549
 msgid "When importing manually:"
 msgstr "Lors d'une importation manuelle :"
 
-#: config.py:546
+#: config.py:550
 msgid "The manual import is executed by clicking on \"Import Extended Metadata\" in the menu of 'ePub Extended Metadata'"
 msgstr "L'importation manuelle est exécutée en cliquant sur \"Importer les métadonnées étendues\" dans le menu de « ePub Extended Metadata »."
 
-#: config.py:553
+#: config.py:557
 msgid "During automatic import:"
 msgstr "Pendant l'importation automatique :"
 
-#: config.py:554
+#: config.py:558
 msgid "The auto import is executed when Calibre add a book to the library"
 msgstr "L'importation automatique est exécutée lorsque Calibre ajoute un livre à la bibliothèque"
 
