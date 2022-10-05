@@ -974,6 +974,19 @@ def edit_keyboard_shortcuts(plugin_action):
     if d.exec_() == d.Accepted:
         gui.keyboard.finalize()
 
+def prompt_for_restart(parent, title, message):
+    d = info_dialog(parent, title, message, show_copy_button=False)
+    b = d.bb.addButton(_('Restart calibre now'), d.bb.AcceptRole)
+    b.setIcon(get_icon('lt.png'))
+    d.do_restart = False
+    def rf():
+        d.do_restart = True
+    b.clicked.connect(rf)
+    d.set_details('')
+    d.exec_()
+    b.clicked.disconnect()
+    return d.do_restart
+
 class PrefsViewerDialog(SizePersistedDialog):
     def __init__(self, gui, namespace):
         SizePersistedDialog.__init__(self, gui, _('Prefs Viewer dialog'))
