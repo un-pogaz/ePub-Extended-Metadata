@@ -35,7 +35,7 @@ from calibre.gui2.ui import get_gui
 
 PYTHON = sys.version_info
 
-gui = get_gui()
+GUI = get_gui()
 
 _PLUGIN = None
 def get_plugin_attribut(name, default=None):
@@ -217,7 +217,7 @@ def no_launch_error(title, name=None, msg=None):
     else:
         msg = ''
     
-    error_dialog(gui, title, (title +'.\n'+ _('Could not to launch {:s}').format(PLUGIN_NAME or name) + msg), show=True, show_copy_button=False)
+    error_dialog(GUI, title, (title +'.\n'+ _('Could not to launch {:s}').format(PLUGIN_NAME or name) + msg), show=True, show_copy_button=False)
 
 def _BookIds_error(book_ids, show_error, title, name=None):
     if not book_ids and show_error:
@@ -960,7 +960,7 @@ class KeyboardConfigDialog(SizePersistedDialog):
 
 def edit_keyboard_shortcuts(plugin_action):
     getattr(plugin_action, 'rebuild_menus', ())()
-    d = KeyboardConfigDialog(gui, plugin_action.action_spec[0])
+    d = KeyboardConfigDialog(GUI, plugin_action.action_spec[0])
     if d.exec_() == d.Accepted:
         GUI.keyboard.finalize()
 
@@ -1070,7 +1070,7 @@ class PrefsViewerDialog(SizePersistedDialog):
 
 def view_library_prefs():
     GUI.current_db
-    d = PrefsViewerDialog(gui, PREFS_NAMESPACE)
+    d = PrefsViewerDialog(GUI, PREFS_NAMESPACE)
     d.exec_()
 
 class ProgressBarDialog(QDialog):
@@ -1273,7 +1273,7 @@ def CustomExceptionErrorDialog(exception, custome_title=None, custome_msg=None, 
     if custome_msg: msg.append(custome_msg)
     msg.append('<b>{:s}</b>: '.format(exception.__class__.__name__) + prepare_string_for_xml(as_unicode(str(exception))))
     
-    return error_dialog(gui, custome_title, '\n'.join(msg).replace('\n', '<br>'), det_msg=fe, show=show, show_copy_button=True)
+    return error_dialog(GUI, custome_title, '\n'.join(msg).replace('\n', '<br>'), det_msg=fe, show=show, show_copy_button=True)
 
 
 class PREFS_json(JSONConfig):
