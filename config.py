@@ -44,8 +44,8 @@ from calibre.library.field_metadata import FieldMetadata
 from polyglot.builtins import iteritems, itervalues
 from calibre.utils.icu import strcmp
 
-from .common_utils import (debug_print, get_icon, PREFS_library, PREFS_dynamic, ImageTitleLayout, edit_keyboard_shortcuts,
-                            duplicate_entry,
+from .common_utils import (debug_print, get_icon, PREFS_library, PREFS_dynamic, ImageTitleLayout,
+                            edit_keyboard_shortcuts, view_library_prefs, duplicate_entry,
                             KeyValueComboBox, CustomColumnComboBox, ReadOnlyTableWidgetItem)
 
 
@@ -304,10 +304,16 @@ class ConfigWidget(QWidget):
         # --- Keyboard shortcuts ---
         keyboard_layout = QHBoxLayout()
         layout.addLayout(keyboard_layout)
-        keyboard_shortcuts_button = QPushButton(_('Keyboard shortcuts...'), self)
+        keyboard_shortcuts_button = QPushButton(_('Keyboard shortcuts')+'...', self)
         keyboard_shortcuts_button.setToolTip(_('Edit the keyboard shortcuts associated with this plugin'))
         keyboard_shortcuts_button.clicked.connect(self.edit_shortcuts)
         keyboard_layout.addWidget(keyboard_shortcuts_button)
+        
+        view_prefs_button = QPushButton(_('View library preferences')+'...', self)
+        view_prefs_button.setToolTip(_('View data stored in the library database for this plugin'))
+        view_prefs_button.clicked.connect(self.library_prefs)
+        keyboard_layout.addWidget(view_prefs_button)
+        
         keyboard_layout.insertStretch(-1)
         
         import_option = QPushButton(_('Edit import options'))
@@ -346,6 +352,9 @@ class ConfigWidget(QWidget):
     
     def edit_shortcuts(self):
         edit_keyboard_shortcuts(self.plugin_action)
+    
+    def library_prefs(self):
+        view_library_prefs()
 
 
 def button_plugin_initialized(button, key):
