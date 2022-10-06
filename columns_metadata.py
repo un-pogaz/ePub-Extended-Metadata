@@ -115,7 +115,7 @@ def get_all_columns(only_custom=None, include_composite=False):
     return: dict(ColumnMetadata)
     """
     def predicate(column):
-        if not include_composite and column._is_composite:
+        if not include_composite and column.is_composite:
             return False
         elif include_composite and only_custom == None:
             return True
@@ -335,7 +335,7 @@ def get_possible_fields():
     all_fields = [cc.name for cc in itervalues(columns)]
     all_fields.sort()
     all_fields.insert(0, '{template}')
-    writable_fields = [cc.name for cc in itervalues(columns) if not cc._is_composite]
+    writable_fields = [cc.name for cc in itervalues(columns) if not cc.is_composite]
     writable_fields.sort()
     return all_fields, writable_fields
 
@@ -347,7 +347,7 @@ def get_possible_columns():
     """
     standard = ['title', 'authors', 'tags', 'series', 'publisher', 'pubdate', 'rating', 'languages', 'last_modified', 'timestamp', 'comments', 'author_sort', 'sort', 'marked']
     def predicate(column):
-        if column.is_custom and not (column._is_composite or column._is_series_index):
+        if column.is_custom and not (column.is_composite or column._is_series_index):
             return True
         else:
             return False
@@ -426,13 +426,15 @@ class ColumnTypes:
 
 class ColumnMetadata():
     """
-    You should only need the following @staticmethod and @property of the ColumnMetadata:
+    You should only need the following @property of the ColumnMetadata:
     
     @property string (read-only) to identify the ColumnMetadata instance
         name
         display_name
         description
         type
+        is_custom
+        is_composite
     
     @property (read-only) of ColumnMetadata instance
     return is None if the column does not support this element
@@ -483,8 +485,6 @@ class ColumnMetadata():
         _is_title
         
         _is_comments
-        _is_composite
-        _is_custom
         _is_news
     """
     
@@ -656,14 +656,14 @@ class ColumnMetadata():
         return bool(self._is_comments and self.display.get('interpret_as', None)== 'long-text')
     
     @property
-    def _is_composite(self):
+    def is_composite(self):
         return bool(self.datatype == 'composite')
     @typeproperty
     def _is_composite_text(self):
-        return bool(self._is_composite and self.is_multiple)
+        return bool(self.is_composite and self.is_multiple)
     @typeproperty
     def _is_composite_tag(self):
-        return bool(self._is_composite and not self.is_multiple)
+        return bool(self.is_composite and not self.is_multiple)
     
     @typeproperty
     def _is_identifiers(self):
@@ -698,25 +698,25 @@ class ColumnMetadata():
     
     @property
     def composite_sort(self):
-        if self._is_composite:
+        if self.is_composite:
             return self.display.get('composite_sort', None)
         else:
             return None
     @property
     def composite_make_category(self):
-        if self._is_composite:
+        if self.is_composite:
             return self.display.get('make_category', None)
         else:
             return None
     @property
     def composite_contains_html(self):
-        if self._is_composite:
+        if self.is_composite:
             return self.display.get('contains_html', None)
         else:
             return None
     @property
     def composite_template(self):
-        if self._is_composite:
+        if self.is_composite:
             return self.display.get('composite_template', None)
         else:
             return None
