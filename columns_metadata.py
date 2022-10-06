@@ -60,9 +60,9 @@ def string_to_authors(raw_string):
     return string_to_authors(raw_string)
 
 
-def get_columns_where(predicate=None):
+def get_columns_from_dict(src_dict, predicate=None):
     """
-    Get ColumnMetadata of the currend library
+    Convert a FieldMetadata dict to a ColumnMetadata dict
     
     predicate:
         function with ColumnMetadata as argument to filtre
@@ -72,9 +72,19 @@ def get_columns_where(predicate=None):
     def _predicate(column):
         return True
     predicate = predicate or _predicate
+    return {cm.name:cm for cm in [ColumnMetadata(fm, k.startswith('#')) for k,fm in iteritems(src_dict) if k != 'search'] if predicate(cm)}
+
+def get_columns_where(predicate=None):
+    """
+    Get ColumnMetadata of the currend library
+
+    predicate:
+        function with ColumnMetadata as argument to filtre
     
+    return: dict(ColumnMetadata)
+    """
     if current_db():
-        return {cm.name:cm for cm in [ColumnMetadata(fm, k.startswith('#')) for k,fm in iteritems(current_db().field_metadata) if k != 'search'] if predicate(cm)}
+        return get_columns_from_dict(current_db().field_metadata, predicate)
     else:
         return {}
 
@@ -315,7 +325,7 @@ def get_possible_fields():
     return: all_fields -> list(str), writable_fields -> list(str)
     """
     def predicate(column):
-        if column.name not in ['id' , 'au_map', 'timestamp', 'formats', 'ondevice', 'news', 'series_sort', 'path'] or column.type:
+        if column.name not in ['id' , 'au_map', 'timestamp', 'formats', 'ondevice', 'news', 'series_sort', 'path', 'in_tag_browser'] or column.type:
             return True
         else:
             return False
