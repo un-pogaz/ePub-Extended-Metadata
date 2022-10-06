@@ -60,20 +60,6 @@ def string_to_authors(raw_string):
     return string_to_authors(raw_string)
 
 
-def get_columns_from_dict(src_dict, predicate=None):
-    """
-    Convert a FieldMetadata dict to a ColumnMetadata dict
-    
-    predicate:
-        function with ColumnMetadata as argument to filtre
-    
-    return: dict(ColumnMetadata)
-    """
-    def _predicate(column):
-        return True
-    predicate = predicate or _predicate
-    return {cm.name:cm for cm in [ColumnMetadata(fm, k.startswith('#')) for k,fm in iteritems(src_dict)] if cm.name and predicate(cm)}
-
 def get_columns_where(predicate=None):
     """
     Get ColumnMetadata of the currend library
@@ -83,8 +69,12 @@ def get_columns_where(predicate=None):
     
     return: dict(ColumnMetadata)
     """
+    def _predicate(column):
+        return True
+    predicate = predicate or _predicate
+    
     if current_db():
-        return get_columns_from_dict(current_db().field_metadata, predicate)
+        return {cm.name:cm for cm in [ColumnMetadata(fm, k.startswith('#')) for k,fm in iteritems(current_db().field_metadata) if k != 'search'] if predicate(cm)}
     else:
         return {}
 
