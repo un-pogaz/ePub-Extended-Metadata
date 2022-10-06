@@ -115,7 +115,7 @@ def get_all_columns(only_custom=None, include_composite=False):
     return: dict(ColumnMetadata)
     """
     def predicate(column):
-        if not include_composite and column.is_composite:
+        if not include_composite and column._is_composite:
             return False
         elif include_composite and only_custom == None:
             return True
@@ -136,16 +136,12 @@ def get_column_from_name(name):
     return None
 
 
-def _get_columns_type(parent_func, only_custom):
-    type_property = getattr(ColumnMetadata, regex.simple(r'^get_', 'is_', parent_func.__name__), None)
+def _get_columns_type(type, only_custom):
     def predicate(column):
-        if type_property:
-            if type_property.fget(column):
-                return _test_is_custom(column, only_custom)
-            else:
-                return False
+        if type == column.type:
+            return _test_is_custom(column, only_custom)
         else:
-            raise ValueError('The parent function has no assosiated property.')
+            return False
     
     return get_columns_where(predicate)
 
@@ -159,7 +155,7 @@ def get_names(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_names, only_custom)
+    return _get_columns_type(ColumnTypes.names, only_custom)
 def get_tags(only_custom=None):
     """
     only_custom:
@@ -169,7 +165,7 @@ def get_tags(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_tags, only_custom)
+    return _get_columns_type(ColumnTypes.tags, only_custom)
 def get_enumeration(only_custom=None):
     """
     only_custom:
@@ -179,7 +175,7 @@ def get_enumeration(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_enumeration, only_custom)
+    return _get_columns_type(ColumnTypes.enumeration, only_custom)
 def get_float(only_custom=None):
     """
     only_custom:
@@ -189,7 +185,7 @@ def get_float(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_float, only_custom)
+    return _get_columns_type(ColumnTypes.float, only_custom)
 def get_datetime(only_custom=None):
     """
     only_custom:
@@ -199,7 +195,7 @@ def get_datetime(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_datetime, only_custom)
+    return _get_columns_type(ColumnTypes.datetime, only_custom)
 def get_rating(only_custom=None):
     """
     only_custom:
@@ -209,7 +205,7 @@ def get_rating(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_rating, only_custom)
+    return _get_columns_type(ColumnTypes.rating, only_custom)
 def get_series(only_custom=None):
     """
     only_custom:
@@ -219,7 +215,7 @@ def get_series(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_series, only_custom)
+    return _get_columns_type(ColumnTypes.series, only_custom)
 def get_series_index(only_custom=None):
     """
     only_custom:
@@ -229,7 +225,7 @@ def get_series_index(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_series_index, only_custom)
+    return _get_columns_type(ColumnTypes.series_index, only_custom)
 def get_text(only_custom=None):
     """
     only_custom:
@@ -239,7 +235,7 @@ def get_text(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_text, only_custom)
+    return _get_columns_type(ColumnTypes.text, only_custom)
 def get_bool(only_custom=None):
     """
     only_custom:
@@ -249,7 +245,7 @@ def get_bool(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_bool, only_custom)
+    return _get_columns_type(ColumnTypes.bool, only_custom)
 def get_comments(only_custom=None):
     """
     only_custom:
@@ -259,7 +255,7 @@ def get_comments(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_comments, only_custom)
+    return _get_columns_type(ColumnTypes.comments, only_custom)
 def get_html(only_custom=None):
     """
     only_custom:
@@ -269,7 +265,7 @@ def get_html(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_html, only_custom)
+    return _get_columns_type(ColumnTypes.html, only_custom)
 def get_markdown(only_custom=None):
     """
     only_custom:
@@ -279,7 +275,7 @@ def get_markdown(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_markdown, only_custom)
+    return _get_columns_type(ColumnTypes.markdown, only_custom)
 def get_long_text(only_custom=None):
     """
     only_custom:
@@ -289,7 +285,7 @@ def get_long_text(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_long_text, only_custom)
+    return _get_columns_type(ColumnTypes.long_text, only_custom)
 def get_title(only_custom=None):
     """
     only_custom:
@@ -299,7 +295,7 @@ def get_title(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_title, only_custom)
+    return _get_columns_type(ColumnTypes.title, only_custom)
 def get_composite_text(only_custom=None):
     """
     only_custom:
@@ -309,7 +305,7 @@ def get_composite_text(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_composite_text, only_custom)
+    return _get_columns_type(ColumnTypes.composite_text, only_custom)
 def get_composite_tag(only_custom=None):
     """
     only_custom:
@@ -319,7 +315,7 @@ def get_composite_tag(only_custom=None):
     
     return: dict(ColumnMetadata)
     """
-    return _get_columns_type(get_composite_tag, only_custom)
+    return _get_columns_type(ColumnTypes.composite_tag, only_custom)
 
 
 def get_possible_fields():
@@ -329,11 +325,8 @@ def get_possible_fields():
     return: all_fields -> list(str), writable_fields -> list(str)
     """
     def predicate(column):
-        if (column.name not in ['id' , 'au_map', 'timestamp', 'formats', 'ondevice', 'news', 'series_sort', 'path'] or
-            column.is_names or column.is_series or column.is_series_index or
-            column.is_title or column.is_float or column.is_rating or column.is_composite or
-            column.is_comments or column.is_enumeration or column.is_csp):
-                return True
+        if column.name not in ['id' , 'au_map', 'timestamp', 'formats', 'ondevice', 'news', 'series_sort', 'path'] or column.type:
+            return True
         else:
             return False
     
@@ -342,7 +335,7 @@ def get_possible_fields():
     all_fields = [cc.name for cc in itervalues(columns)]
     all_fields.sort()
     all_fields.insert(0, '{template}')
-    writable_fields = [cc.name for cc in itervalues(columns) if not cc.is_composite]
+    writable_fields = [cc.name for cc in itervalues(columns) if not cc._is_composite]
     writable_fields.sort()
     return all_fields, writable_fields
 
@@ -354,7 +347,7 @@ def get_possible_columns():
     """
     standard = ['title', 'authors', 'tags', 'series', 'publisher', 'pubdate', 'rating', 'languages', 'last_modified', 'timestamp', 'comments', 'author_sort', 'sort', 'marked']
     def predicate(column):
-        if column.is_custom and not (column.is_composite or column.is_series_index):
+        if column.is_custom and not (column._is_composite or column._is_series_index):
             return True
         else:
             return False
@@ -384,7 +377,7 @@ def is_enum_value(name, value):
     """
     value
     col_metadata = get_column_from_name(name)
-    if not col_metadata.is_enumeration:
+    if not col_metadata._is_enumeration:
         raise ValueError('The column "{:s}" is not a enumeration'.format(name))
     col_vals = col_metadata.enum_values
     if not value in col_vals:
@@ -408,6 +401,28 @@ def is_bool_value(value):
     else:
         raise ValueError('\'{:s}\' is not considered as a boulean by Calibre'.format(value))
 
+class ColumnTypes:
+    bool           = 'bool'
+    datetime       = 'datetime'
+    enumeration    = 'enumeration'
+    identifiers    = 'identifiers'
+    float          = 'float'
+    integer        = 'integer'
+    names          = 'names'
+    rating         = 'rating'
+    series         = 'series'
+    series_index   = 'series_index'
+    tags           = 'tags'
+    text           = 'text'
+    html           = 'html'
+    long_text      = 'long_text'
+    markdown       = 'markdown'
+    title          = 'title'
+    composite_tag  = 'composite_tag'
+    composite_text = 'composite_text'
+    
+    cover          = 'cover'
+    news           = 'news'
 
 class ColumnMetadata():
     """
@@ -417,84 +432,85 @@ class ColumnMetadata():
         name
         display_name
         description
+        type
     
-    @property bool (read-only) of ColumnMetadata instance
-    that which identifies the type of the ColumnMetadata
-        is_bool
-        is_composite_tag
-        is_composite_text
-        is_comments
-        is_composite
-        is_datetime
-        is_enumeration
-        is_float
-        is_integer
-        is_identifiers
-        is_names
-        is_rating
-        is_series
-        is_tags
-        is_text
-        is_html
-        is_long_text
-        is_markdown
-        is_title
-        is_custom
-        is_news
-        
     @property (read-only) of ColumnMetadata instance
     return is None if the column does not support this element
-        allow_half_stars = bool()
+        allow_half_stars = bool
         category_sort = string > one of then [None, 'value', 'name'] 
-        colnum = int()
+        colnum = int
         column = string > one of then [None, 'value', 'name'] 
-        composite_contains_html = bool()
-        composite_make_category = bool()
+        composite_contains_html = bool
+        composite_make_category = bool
         composite_sort = string > one of then ['text', 'number', 'date', 'bool']
-        composite_template = string()
-        datatype = string()
+        composite_template = string
+        datatype = string
         display = {} // contains an arbitrary data set. reanalys in other property
         enum_colors = string[]
         enum_values = string[]
         heading_position = string > one of then ['text', 'number', 'date', 'bool']
-        is_category = bool()
-        is_csp = bool()
-        is_editable = bool()
+        is_category = bool
+        is_csp = bool
+        is_editable = bool
         is_multiple = {} // contains an arbitrary data set. reanalys in other property
         kind = > one of then ['field', 'category', 'user', 'search']
-        label = string()
-        link_column = string()
-        rec_index = int()
+        label = string
+        link_column = string
+        rec_index = int
         search_terms = string[]
-        table = string()
-        use_decorations = bool()
+        table = string
+        use_decorations = bool
+    
+    @property bool (read-only) of ColumnMetadata instance
+    that which identifies the type of the ColumnMetadata
+        
+        _is_bool
+        _is_composite_tag
+        _is_composite_text
+        _is_datetime
+        _is_enumeration
+        _is_float
+        _is_integer
+        _is_identifiers
+        _is_names
+        _is_rating
+        _is_series
+        _is_tags
+        _is_text
+        _is_html
+        _is_long_text
+        _is_markdown
+        _is_title
+        
+        _is_comments
+        _is_composite
+        _is_custom
+        _is_news
     """
     
     def __init__(self, metadata, is_custom=True):
         self.metadata = copy.deepcopy(metadata)
         self._custom = is_custom
-        self._is_multiple = self.metadata['is_multiple']
         
+        self._multiple = self.metadata['is_multiple']
         if self.is_csp:
-            self._is_multiple = MutipleValue({'ui_to_list': ',', 'list_to_ui': ', ', 'cache_to_list': ','})
-        if self._is_multiple:
-            self._is_multiple = MutipleValue(self._is_multiple)
+            self._multiple = MutipleValue({'ui_to_list': ',', 'list_to_ui': ', ', 'cache_to_list': ','})
+        if self._multiple:
+            self._multiple = MutipleValue(self._multiple)
         else:
-            self._is_multiple = None
+            self._multiple = None
         
-        
+        self._type = None
+        for func in typeproperty_registry:
+            if func.__call__(self):
+                self._type = regex.simple(r'^_is_', '', func.__name__)
+        if not self._type:
+            raise TypeError('Invalide Column metadata.')
     
     def __repr__(self):
         #<calibre_plugins. __module__ .common_utils.ColumnMetadata instance at 0x1148C4B8>
         #''.join(['<', str(self.__class__), ' instance at ', hex(id(self)),'>'])
-        return ''.join(['<"',self.name,'"', str({ f:r for f,r in iteritems(self.look_types()) if r}),'>'])
-    
-    def look_types(self):
-        rslt = {}
-        for func in typeproperty_registry:
-            rslt[func.__name__] = func.__call__(self)
-        return rslt
-    
+        return ''.join(['<',self.name.__repr__(),' {type=', self.type,'}>'])
     
     """
         name: the key to the dictionary is:
@@ -563,54 +579,57 @@ class ColumnMetadata():
     @property
     def description(self):
         return self.display.get('description', None)
+    @property
+    def type(self):
+        return self._type
     
     @typeproperty
-    def is_names(self):
+    def _is_names(self):
         return bool(self.label == 'authors' or self.datatype == 'text' and self.is_multiple and self.display.get('is_names', False))
     @typeproperty
-    def is_tags(self):
+    def _is_tags(self):
         return bool(self.label == 'tags' or self.datatype == 'text' and self.is_multiple and not (self.label == 'authors' or self.display.get('is_names', False) or self.is_csp))
     
     @typeproperty
-    def is_title(self):
+    def _is_title(self):
         return bool(self.label == 'title' or self.datatype == 'comments' and self.display.get('interpret_as', None) == 'short-text')
     
     @typeproperty
-    def is_text(self):
+    def _is_text(self):
         return bool(self.label not in ['comments', 'title'] and self.datatype == 'text' and not self.is_multiple)
     
     @typeproperty
-    def is_series(self):
+    def _is_series(self):
         return bool(self.datatype == 'series')
     @typeproperty
-    def is_float(self):
+    def _is_float(self):
         return bool(self.label == 'size' or self.datatype == 'float' and self._src_is_custom and self.label != 'series_index')
     @typeproperty
-    def is_series_index(self):
+    def _is_series_index(self):
         return bool(self.label == 'series_index' or self.datatype == 'float' and not self._src_is_custom and self.label != 'size')
     
     @typeproperty
-    def is_integer(self):
+    def _is_integer(self):
         return bool(self.datatype == 'int' and self.label != 'cover')
     @typeproperty
-    def is_cover(self):
+    def _is_cover(self):
         return bool(self.label == 'cover')
     @typeproperty
-    def is_datetime(self):
+    def _is_datetime(self):
         return bool(self.datatype == 'datetime')
     @typeproperty
-    def is_rating(self):
+    def _is_rating(self):
         return bool(self.datatype == 'rating')
     @typeproperty
-    def is_bool(self):
+    def _is_bool(self):
         return bool(self.datatype == 'bool')
     @typeproperty
-    def is_enumeration(self):
+    def _is_enumeration(self):
         return bool(self.datatype == 'enumeration')
     
     @property
     def enum_values(self):
-        if self.is_enumeration:
+        if self._is_enumeration:
             rslt = self.display.get('enum_values', None)
             rslt.append('')
             return rslt
@@ -618,39 +637,39 @@ class ColumnMetadata():
             return None
     @property
     def enum_colors(self):
-        if self.is_enumeration:
+        if self._is_enumeration:
             return self.display.get('enum_colors', None)
         else:
             return None
     
-    @typeproperty
-    def is_comments(self):
+    @property
+    def _is_comments(self):
         return bool(self.label == 'comments' or self.datatype == 'comments' and self.display.get('interpret_as', None) != 'short-text')
     @typeproperty
-    def is_html(self):
-        return bool(self.label == 'comments' or self.is_comments and self.display.get('interpret_as', None) == 'html')
+    def _is_html(self):
+        return bool(self.label == 'comments' or self._is_comments and self.display.get('interpret_as', None) == 'html')
     @typeproperty
-    def is_markdown(self):
-        return bool(self.is_comments and self.display.get('interpret_as', None) == 'markdown')
+    def _is_markdown(self):
+        return bool(self._is_comments and self.display.get('interpret_as', None) == 'markdown')
     @typeproperty
-    def is_long_text(self):
-        return bool(self.is_comments and self.display.get('interpret_as', None)== 'long-text')
+    def _is_long_text(self):
+        return bool(self._is_comments and self.display.get('interpret_as', None)== 'long-text')
     
-    @typeproperty
-    def is_composite(self):
+    @property
+    def _is_composite(self):
         return bool(self.datatype == 'composite')
     @typeproperty
-    def is_composite_text(self):
-        return bool(self.is_composite and self.is_multiple)
+    def _is_composite_text(self):
+        return bool(self._is_composite and self.is_multiple)
     @typeproperty
-    def is_composite_tag(self):
-        return bool(self.is_composite and not self.is_multiple)
+    def _is_composite_tag(self):
+        return bool(self._is_composite and not self.is_multiple)
     
     @typeproperty
-    def is_identifiers(self):
+    def _is_identifiers(self):
         return bool(self.is_csp)
     @typeproperty
-    def is_news(self):
+    def _is_news(self):
         return bool(self.label == 'news')
     #
     
@@ -658,7 +677,7 @@ class ColumnMetadata():
     @property
     def heading_position(self):
         # 'hide', 'above', 'side'
-        if self.is_comments:
+        if self._is_comments:
             return self.display.get('heading_position', None)
         else:
             return None
@@ -666,44 +685,44 @@ class ColumnMetadata():
     @property
     def use_decorations(self):
         # 'hide', 'above', 'side'
-        if self.is_text or self.is_enumeration or self.is_composite_text:
+        if self._is_text or self._is_enumeration or self._is_composite_text:
             return self.display.get('use_decorations', None)
         else:
             return None
     @property
     def allow_half_stars(self):
-        if self.is_rating:
+        if self._is_rating:
             return self.display.get('allow_half_stars', None)
         else:
             return None
     
     @property
     def composite_sort(self):
-        if self.is_composite:
+        if self._is_composite:
             return self.display.get('composite_sort', None)
         else:
             return None
     @property
     def composite_make_category(self):
-        if self.is_composite:
+        if self._is_composite:
             return self.display.get('make_category', None)
         else:
             return None
     @property
     def composite_contains_html(self):
-        if self.is_composite:
+        if self._is_composite:
             return self.display.get('contains_html', None)
         else:
             return None
     @property
     def composite_template(self):
-        if self.is_composite:
+        if self._is_composite:
             return self.display.get('composite_template', None)
         else:
             return None
     @property
     def number_format(self):
-        if self.is_float:
+        if self._is_float:
             return self.display.get('number_format', None)
         else:
             return None
@@ -746,7 +765,10 @@ class ColumnMetadata():
         return self.metadata.get('is_category', None)
     @property
     def is_multiple(self):
-        return self._is_multiple
+        return self._multiple != None
+    @property
+    def multiple(self):
+        return self._multiple
     @property
     def link_column(self):
         return self.metadata.get('link_column', None)
