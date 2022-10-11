@@ -1,3 +1,6 @@
+### version 0.8.0
+[internal] big rework of common_utils.py
+
 ### version 0.7.2
 [fix] icon not display when a theme colors is used
 
