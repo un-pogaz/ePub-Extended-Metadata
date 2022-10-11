@@ -556,7 +556,7 @@ class DateDelegate(_DateDelegate):
     column. This differs from all the other delegates.
     """
     def __init__(self, parent, fmt='dd MMM yyyy', default_to_today=True):
-        super(DateDelegate, self).__init__(parent)
+        DateDelegate.__init__(self, parent)
         self.format = fmt
         self.default_to_today = default_to_today
         print('DateDelegate fmt:',fmt)
@@ -589,7 +589,7 @@ class DateDelegate(_DateDelegate):
 
 class DateTableWidgetItem(QTableWidgetItem):
     def __init__(self, date_read, is_read_only=False, default_to_today=False, fmt=None):
-        if date_read == UNDEFINED_DATE and default_to_today:
+        if date_read is None or date_read == UNDEFINED_DATE and default_to_today:
             date_read = now()
         if is_read_only:
             QTableWidgetItem.__init__(self, format_date(date_read, fmt))
@@ -621,6 +621,36 @@ class ReadOnlyTableWidgetItem(QTableWidgetItem):
         text = text or ''
         QTableWidgetItem.__init__(self, text)
         self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
+
+class ReadOnlyCheckableTableWidgetItem(ReadOnlyTableWidgetItem):
+    '''
+    For use in a table cell, displays a checkbox next to some text the user cannot select or modify.
+    '''
+    def __init__(self, text, checked=False, is_tristate=False):
+        ReadOnlyCheckableTableWidgetItem.__init__(self, text)
+        try: # For Qt Backwards compatibility.
+            self.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled )
+        except:
+            self.setFlags(Qt.ItemFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled ))
+        if is_tristate:
+            self.setFlags(self.flags() | Qt.ItemIsTristate)
+        if checked:
+            self.setCheckState(Qt.Checked)
+        else:
+            if is_tristate and checked is None:
+                self.setCheckState(Qt.PartiallyChecked)
+            else:
+                self.setCheckState(Qt.Unchecked)
+
+    def get_boolean_value(self):
+        '''
+        Return a boolean value indicating whether checkbox is checked
+        If this is a tristate checkbox, a partially checked value is returned as None
+        '''
+        if self.checkState() == Qt.PartiallyChecked:
+            return None
+        else:
+            return self.checkState() == Qt.Checked
 
 class ReadOnlyTextIconWidgetItem(ReadOnlyTableWidgetItem):
     """
@@ -1077,9 +1107,9 @@ class ProgressBarDialog(QDialog):
     def __init__(self, parent=None, max_items=100, window_title='Progress Bar',
                  label='Label goes here', on_top=False):
         if on_top:
-            super(ProgressBarDialog, self).__init__(parent=parent, flags=Qt.WindowStaysOnTopHint)
+            ProgressBarDialog.__init__(self, parent=parent, flags=Qt.WindowStaysOnTopHint)
         else:
-            super(ProgressBarDialog, self).__init__(parent=parent)
+            ProgressBarDialog.__init__(self, parent=parent)
         self.application = Application
         self.setWindowTitle(window_title)
         self.l = QVBoxLayout(self)
