@@ -504,7 +504,10 @@ class ColumnMetadata():
         for func in typeproperty_registry:
             if func.__call__(self):
                 self._type = regex.simple(r'^_is_', '', func.__name__)
+        
         if not self._type:
+            prints(self.name)
+            prints('metadata',self.metadata)
             raise TypeError('Invalide Column metadata.')
     
     def __repr__(self):
