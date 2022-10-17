@@ -492,7 +492,7 @@ except ImportError:
                         QDateTime, QStyledItemDelegate, QLineEdit)
 
 from calibre.gui2 import error_dialog, UNDEFINED_QDATETIME
-from calibre.utils.date import now, format_date, qt_to_dt, UNDEFINED_DATE
+from calibre.utils.date import now, format_date, UNDEFINED_DATE
 from calibre.gui2.library.delegates import DateDelegate as _DateDelegate
 
 class ImageTitleLayout(QHBoxLayout):

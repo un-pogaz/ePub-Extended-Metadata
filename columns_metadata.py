@@ -72,7 +72,7 @@ def get_columns_from_dict(src_dict, predicate=None):
     def _predicate(column):
         return True
     predicate = predicate or _predicate
-    return {cm.name:cm for cm in [ColumnMetadata(fm, k.startswith('#')) for k,fm in iteritems(src_dict) if k != 'search'] if predicate(cm)}
+    return {cm.name:cm for cm in [ColumnMetadata(fm, k.startswith('#')) for k,fm in iteritems(src_dict) if fm.get('label', None)] if predicate(cm)}
 
 def get_columns_where(predicate=None):
     """
