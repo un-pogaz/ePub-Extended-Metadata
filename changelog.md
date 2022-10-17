@@ -1,3 +1,6 @@
+### version 0.8.1
+fix a error when a user categorie exist in the library
+
 ### version 0.8.0
 [internal] big rework of common_utils.py
 
