@@ -6,16 +6,22 @@
         {
             "label": "build",
             "type": "shell",
-            "command": ".build/build.cmd",
+            "command": "common_utils/.build/build.cmd",
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
         },
         {
+            "label": "update_common_utils",
+            "type": "shell",
+            "command": "common_utils/.build/update_common_utils.cmd",
+            "problemMatcher": []
+        },
+        {
             "label": "debug",
             "type": "shell",
-            "command": ".build/debug.cmd"
+            "command": "common_utils/.build/debug.cmd"
         }
     ]
 }

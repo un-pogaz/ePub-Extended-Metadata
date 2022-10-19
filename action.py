@@ -33,9 +33,10 @@ from calibre.gui2.actions import InterfaceAction
 from calibre.gui2.ui import get_gui
 
 from .config import ICON, DYNAMIC, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
-from .common_utils import (debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version,
-                            get_BookIds_selected,
-                            create_menu_action_unique, has_restart_pending, CustomExceptionErrorDialog)
+from .common_utils import debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version, has_restart_pending
+from .common_utils.library import get_BookIds_selected
+from .common_utils.menu import create_menu_action_unique
+from .common_utils.dialog import CustomExceptionErrorDialog
 from .container_extended_metadata import read_extended_metadata, write_extended_metadata
 
 GUI = get_gui()
@@ -159,7 +160,7 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
     
     if check_user_metadata:
         #check if the Metadata object accepts those added
-        from .columns_metadata import get_columns_from_dict, string_to_authors
+        from .common_utils.columns import get_columns_from_dict, string_to_authors
         miA_columns = get_columns_from_dict(miA.get_all_user_metadata(True))
         miA_init_len = len(miA_columns)
         for k,cc in iteritems(check_user_metadata):

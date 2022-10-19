@@ -44,9 +44,9 @@ from calibre.library.field_metadata import FieldMetadata
 from polyglot.builtins import iteritems, itervalues
 from calibre.utils.icu import strcmp
 
-from .common_utils import (debug_print, get_icon, PREFS_library, PREFS_dynamic, ImageTitleLayout,
-                            edit_keyboard_shortcuts, view_library_prefs, duplicate_entry,
-                            KeyValueComboBox, CustomColumnComboBox, ReadOnlyTableWidgetItem)
+from .common_utils import debug_print, get_icon, PREFS_library, PREFS_dynamic, duplicate_entry
+from .common_utils.controls import KeyValueComboBox, CustomColumnComboBox
+from .common_utils.widgets import ImageTitleLayout, ReadOnlyTableWidgetItem
 
 
 from .marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION
@@ -118,7 +118,7 @@ class KEY:
     
     @staticmethod
     def get_current_columns():
-        from .columns_metadata import get_columns_from_dict
+        from .common_utils.columns import get_columns_from_dict
         d = DYNAMIC[KEY.SHARED_COLUMNS]
         d = get_columns_from_dict(DYNAMIC[KEY.SHARED_COLUMNS])
         
@@ -126,7 +126,7 @@ class KEY:
     
     @staticmethod
     def get_current_prefs():
-        from .columns_metadata import get_columns_from_dict
+        from .common_utils.columns import get_columns_from_dict
         prefs = DYNAMIC.deepcopy_dict()
         current_columns = KEY.get_current_columns().keys()
         link = DYNAMIC[KEY.LINK_AUTHOR]
@@ -151,12 +151,12 @@ class KEY:
     
     @staticmethod
     def get_names():
-        from .columns_metadata import get_names
+        from .common_utils.columns import get_names
         return get_names(True)
     
     @staticmethod
     def get_used_columns():
-        from .columns_metadata import get_columns_where, get_columns_from_dict
+        from .common_utils.columns import get_columns_where, get_columns_from_dict
         treated_column = [v for k,v in iteritems(PREFS) if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, unicode)] + [c for c in itervalues(PREFS[KEY.CONTRIBUTORS]) if isinstance(c, unicode)]
         def predicate(column):
             return column.is_custom and column.name in treated_column
