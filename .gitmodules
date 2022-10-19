@@ -1,0 +1,3 @@
+[submodule "common_utils"]
+	path = common_utils
+	url = https://github.com/un-pogaz/common_utils_plugins.git
