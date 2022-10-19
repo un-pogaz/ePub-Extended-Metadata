@@ -478,6 +478,17 @@ def create_menu_item(ia, parent_menu, menu_text, image=None, tooltip=None,
     
     return ac
 
+# ----------------------------------------------
+#               Functions
+# ----------------------------------------------
+def __Functions__(): pass
+
+def get_date_format(tweak_name='gui_timestamp_display_format', default_fmt='dd MMM yyyy'):
+    from calibre.utils.config import tweaks
+    format = tweaks[tweak_name]
+    if format is None:
+        format = default_fmt
+    return format
 
 # ----------------------------------------------
 #               Widgets
@@ -557,7 +568,7 @@ class DateDelegate(_DateDelegate):
     """
     def __init__(self, parent, fmt='dd MMM yyyy', default_to_today=True):
         DateDelegate.__init__(self, parent)
-        self.format = fmt
+        self.format = get_date_format(default_fmt=fmt)
         self.default_to_today = default_to_today
         print('DateDelegate fmt:',fmt)
 
@@ -596,8 +607,7 @@ class DateTableWidgetItem(QTableWidgetItem):
             self.setFlags(Qt.ItemIsSelectable|Qt.ItemIsEnabled)
         else:
             QTableWidgetItem.__init__(self, '')
-            dt = UNDEFINED_QDATETIME if date_read is None else QDateTime(date_read)
-            self.setData(Qt.DisplayRole, dt)
+            self.setData(Qt.DisplayRole, QDateTime(date_read))
 
 class RatingTableWidgetItem(QTableWidgetItem):
     def __init__(self, rating, is_read_only=False):
