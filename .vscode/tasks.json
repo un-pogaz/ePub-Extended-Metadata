@@ -19,6 +19,12 @@
             "problemMatcher": []
         },
         {
+            "label": "release",
+            "type": "shell",
+            "command": "common_utils/.build/release.cmd",
+            "problemMatcher": []
+        },
+        {
             "label": "debug",
             "type": "shell",
             "command": "common_utils/.build/debug.cmd"
