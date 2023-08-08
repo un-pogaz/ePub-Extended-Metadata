@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.10.0] - date
+
+### Changed
+- Update common_utils
+
 ## [0.9.0] - 2022/10/19
 
 ### Changed

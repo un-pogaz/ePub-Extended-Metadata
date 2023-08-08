@@ -34,9 +34,9 @@ from calibre.gui2.ui import get_gui
 
 from .config import ICON, DYNAMIC, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
 from .common_utils import debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version, has_restart_pending
-from .common_utils.library import get_BookIds_selected
-from .common_utils.menu import create_menu_action_unique
-from .common_utils.dialog import CustomExceptionErrorDialog
+from .common_utils.librarys import get_BookIds_selected
+from .common_utils.menus import create_menu_action_unique
+from .common_utils.dialogs import CustomExceptionErrorDialog, ProgressDialog
 from .container_extended_metadata import read_extended_metadata, write_extended_metadata
 
 GUI = get_gui()
@@ -149,9 +149,7 @@ class ePubExtendedMetadataAction(InterfaceAction):
     
     
     def runExtendedMetadataProgressDialog(self, book_ids):
-        srpg = ePubExtendedMetadataProgressDialog(book_ids)
-        srpg.close()
-        del srpg
+        ePubExtendedMetadataProgressDialog(book_ids)
 
 def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata={}):
     field_change = []
@@ -221,20 +219,11 @@ def create_extended_metadata(miA, prefs):
     return extended_metadata
 
 
-class ePubExtendedMetadataProgressDialog(QProgressDialog):
-    def __init__(self, book_ids):
-        # DB
-        self.db = GUI.current_db
-        # DB API
-        self.dbAPI = self.db.new_api
-        
+class ePubExtendedMetadataProgressDialog(ProgressDialog):
+    
+    def setup_progress(self, **kvargs):
         # prefs
         self.prefs = KEY.get_current_prefs()
-        
-        # liste of book id
-        self.book_ids = book_ids
-        # Count book
-        self.book_count = len(self.book_ids)
         
         # Count update
         self.no_epub_count = 0
@@ -242,34 +231,13 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
         self.import_field_count = 0
         self.export_count = 0
         
-        
         # Exception
         self.exception = None
         self.exception_unhandled = False
         self.exception_read = []
         self.exception_write = []
-        
-        self.time_execut = 0
-        
-        
-        QProgressDialog.__init__(self, '', _('Cancel'), 0, self.book_count, GUI)
-        
-        self.setWindowTitle(_('ePub Extended Metadata progress').format(PLUGIN_NAME))
-        self.setWindowIcon(get_icon(ICON.PLUGIN))
-        
-        self.setValue(0)
-        self.setMinimumWidth(500)
-        self.setMinimumDuration(10)
-        
-        self.setAutoClose(True)
-        self.setAutoReset(False)
-        
-        self.hide()
-        debug_print('Launch ePub Extended Metadata for {:d} books.'.format(self.book_count))
-        debug_print(self.prefs,'\n')
-        
-        QTimer.singleShot(0, self._run_contributors)
-        self.exec_()
+    
+    def end_progress(self):
         
         #info debug
         debug_print('ePub Extended Metadata launched for {:d} books.'.format(self.book_count))
@@ -311,17 +279,12 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
             debug_print('No Extended Metadata write in selected books.')
         
             debug_print('ePub Extended Metadata execute in {:0.3f} seconds.\n'.format(self.time_execut))
-            
+    
+    def job_progress(self):
         
-        self.close()
-    
-    def close(self):
-        QProgressDialog.close(self)
-    
-    
-    def _run_contributors(self):
-        start = time.time()
-        alreadyOperationError = False
+        debug_print('Launch ePub Extended Metadata for {:d} books.'.format(self.book_count))
+        debug_print(self.prefs,'\n')
+        
         typeString = type('')
         
         import_id = {}
@@ -330,22 +293,11 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
         export_id = []
         no_epub_id = []
         
-        self.setValue(0)
-        self.show()
-        
-        
-        for num, (book_id, extended_metadata) in enumerate(iteritems(self.book_ids), 1):
+        for book_id, extended_metadata in iteritems(self.book_ids):
             #update Progress
-            self.setValue(num)
-            self.setLabelText(_('Book {:d} of {:d}.').format(num, self.book_count))
-            
-            if self.book_count < 100:
-                self.hide()
-            else:
-                self.show()
+            num = self.increment()
             
             if self.wasCanceled():
-                self.close()
                 return
             
             ###
@@ -389,7 +341,6 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
         
         
         
-        
         for id, miA in iteritems(import_mi):
             self.dbAPI.set_metadata(book_id, miA)
         
@@ -402,10 +353,6 @@ class ePubExtendedMetadataProgressDialog(QProgressDialog):
         
         lst_id = list(import_id.keys()) + export_id
         GUI.iactions['Edit Metadata'].refresh_gui(lst_id, covers_changed=False)
-        
-        self.time_execut = round(time.time() - start, 3)
-        self.db.clean()
-        self.hide()
 
 
 ####
