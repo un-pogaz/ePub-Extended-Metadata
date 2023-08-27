@@ -145,10 +145,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
 # For testing, run from command line with this:
 # calibre-debug -e __init__.py
 if __name__ == '__main__':
-    try:
-        from qt.core import QApplication
-    except ImportError:
-        from PyQt5.Qt import QApplication
+    from calibre.gui2 import Application
     from calibre.gui2.preferences import test_widget
-    app = QApplication([])
+    app = Application([])
     test_widget('Advanced', 'Plugins')
