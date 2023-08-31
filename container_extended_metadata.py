@@ -24,15 +24,12 @@ from polyglot.builtins import iteritems, itervalues
 
 from lxml import etree
 from lxml.etree import XMLSyntaxError
-from six.moves.urllib.parse import urldefrag, urlparse, urlunparse
-from six.moves.urllib.parse import unquote as urlunquote
 
 from calibre import prints
 from calibre.ebooks.chardet import xml_to_unicode
 from calibre.ebooks.metadata import string_to_authors, author_to_author_sort, title_sort
 from calibre.ebooks.metadata.opf2 import OPF
-import calibre.ebooks.metadata.opf3 as opf3
-from calibre.ebooks.metadata.utils import parse_opf
+from calibre.ebooks.metadata.utils import parse_opf, pretty_print_opf
 from calibre.ebooks.metadata.epub import get_zip_reader, EPubException, OCFException, ContainerException
 from calibre.ebooks.oeb.parse_utils import RECOVER_PARSER
 from calibre.utils.zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED, safe_replace
@@ -99,12 +96,8 @@ class ContainerExtendedMetadata(object):
         return self
     
     def save_opf(self):
-        if hasattr(etree, 'indent'):
-            etree.indent(self.opf.root, space='  ')
-        else:
-            indent(self.opf.root)
-        
-        xml_opf = etree.tostring(self.opf.root, xml_declaration=True, encoding='UTF-8', pretty_print=True)
+        pretty_print_opf(self.opf.root)
+        xml_opf = etree.tostring(self.opf.root, encoding='UTF-8', pretty_print=True)
         
         if self.reader:
             if isinstance(xml_opf, bytes):
@@ -121,20 +114,6 @@ class ContainerExtendedMetadata(object):
     def close(self):
         self.ZIP.close()
 
-def indent(elem, level=0):
-    i = '\n' + level*'  '
-    if len(elem):
-        if not elem.text or not elem.text.strip():
-            elem.text = i + '  '
-        if not elem.tail or not elem.tail.strip():
-            elem.tail = i
-        for elem in elem:
-            indent(elem, level+1)
-        if not elem.tail or not elem.tail.strip():
-            elem.tail = i
-    else:
-        if level and (not elem.tail or not elem.tail.strip()):
-            elem.tail = i
 
 
 def read_extended_metadata(epub):
@@ -251,6 +230,8 @@ def _write_extended_metadata(container, extended_metadata):
         idx = container.metadata.index(creator[-1])+1
         
         for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):
+            for meta in container.metadata.xpath(f'dc:contributor[@opf:role="{role}"]', namespaces=NAMESPACES):
+                container.metadata.remove(meta)
             for contrib in epub_extended_metadata[KEY.CONTRIBUTORS][role]:
                 element = etree.Element(etree.QName(NS_DC, 'contributor'))
                 element.text = contrib
@@ -267,14 +248,14 @@ def _write_extended_metadata(container, extended_metadata):
             id_s = contrib.attrib.get('id', None)
             if id_s:
                 #remove all marc code
-                for meta in container.metadata.xpath('opf:meta[@refines="#{:s}" and @property="role" and @scheme="marc:relators"]'.format(id_s), namespaces=NAMESPACES):
+                for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}" and @property="role" and @scheme="marc:relators"]'.format(), namespaces=NAMESPACES):
                     container.metadata.remove(meta)
                 # if the contributor has others meta linked (except "file-as")
-                if not container.metadata.xpath('opf:meta[@refines="#{:s}" and not(@property="file-as")]'.format(id_s), namespaces=NAMESPACES):
+                if not container.metadata.xpath(f'opf:meta[@refines="#{id_s}" and not(@property="file-as")]', namespaces=NAMESPACES):
                     # coutain if the contributor has no others meta linked (or only "file-as"), del the contributor
                     container.metadata.remove(contrib)
                     #and del the "file-as"
-                    for meta in container.metadata.xpath('opf:meta[@refines="#{:s}"]'.format(id_s), namespaces=NAMESPACES):
+                    for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}"]', namespaces=NAMESPACES):
                         container.metadata.remove(meta)
             else:
                 #remove contributor without id

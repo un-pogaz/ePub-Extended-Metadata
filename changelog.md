@@ -1,9 +1,9 @@
 # Changelog - ePub Extended Metadata
 
-## [0.10.0] - date
+## [0.10.0] - 2023/08/31
 
-### Changed
-- Update common_utils
+### Bug fixes
+- fix duplicate contributor for ePub 2
 
 ## [0.9.0] - 2022/10/19
 
