@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.10.1] - 2023/09/31
+
+### Bug fixes
+- Don't update the config file when Calibre start
+
 ## [0.10.0] - 2023/08/31
 
 ### Bug fixes

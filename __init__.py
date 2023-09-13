@@ -32,7 +32,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
     description             = _('Read and write a wider range of metadata for ePub\'s files and associating them to columns in your libraries.')
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
-    version                 = (0, 10, 0)
+    version                 = (0, 10, 1)
     minimum_calibre_version = (4, 0, 0)
     
     name_reader              = name + ' {Reader}'
@@ -139,7 +139,6 @@ class ePubExtendedMetadata(InterfaceActionBase):
         :param config_widget: The widget returned by :meth:`config_widget`.
         '''
         config_widget.save_settings()
-
 
 
 # For testing, run from command line with this:
