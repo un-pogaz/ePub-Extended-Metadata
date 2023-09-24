@@ -230,7 +230,7 @@ def _write_extended_metadata(container, extended_metadata):
         idx = container.metadata.index(creator[-1])+1
         
         for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):
-            for meta in container.metadata.xpath(f'dc:contributor[@opf:role="{role}"]', namespaces=NAMESPACES):
+            for meta in container.metadata.xpath('dc:contributor[@opf:role="{role}"]'.format(role=role), namespaces=NAMESPACES):
                 container.metadata.remove(meta)
             for contrib in epub_extended_metadata[KEY.CONTRIBUTORS][role]:
                 element = etree.Element(etree.QName(NS_DC, 'contributor'))
@@ -248,14 +248,14 @@ def _write_extended_metadata(container, extended_metadata):
             id_s = contrib.attrib.get('id', None)
             if id_s:
                 #remove all marc code
-                for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}" and @property="role" and @scheme="marc:relators"]'.format(), namespaces=NAMESPACES):
+                for meta in container.metadata.xpath('opf:meta[@refines="#{id_s}" and @property="role" and @scheme="marc:relators"]'.format(id_s=id_s), namespaces=NAMESPACES):
                     container.metadata.remove(meta)
                 # if the contributor has others meta linked (except "file-as")
-                if not container.metadata.xpath(f'opf:meta[@refines="#{id_s}" and not(@property="file-as")]', namespaces=NAMESPACES):
+                if not container.metadata.xpath('opf:meta[@refines="#{id_s}" and not(@property="file-as")]'.format(id_s=id_s), namespaces=NAMESPACES):
                     # coutain if the contributor has no others meta linked (or only "file-as"), del the contributor
                     container.metadata.remove(contrib)
                     #and del the "file-as"
-                    for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}"]', namespaces=NAMESPACES):
+                    for meta in container.metadata.xpath('opf:meta[@refines="#{id_s}"]'.format(id_s=id_s), namespaces=NAMESPACES):
                         container.metadata.remove(meta)
             else:
                 #remove contributor without id

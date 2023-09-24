@@ -1,6 +1,11 @@
 # Changelog - ePub Extended Metadata
 
-## [0.10.1] - 2023/09/31
+## [0.10.2] - 2023/09/24
+
+### Bug fixes
+- fix a python2 imcopatibility
+
+## [0.10.1] - 2023/09/13
 
 ### Bug fixes
 - Don't update the config file when Calibre start
