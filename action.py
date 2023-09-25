@@ -76,23 +76,23 @@ class ePubExtendedMetadataAction(InterfaceAction):
         self.menu.clear()
         
         create_menu_action_unique(self, self.menu, _('&Embed Extended Metadata'), None,
-                                             triggered=self.embedExtendedMetadata,
+                                             triggered=self.embed_extended_metadata,
                                              unique_name='&Embed Extended Metadata')
         self.menu.addSeparator()
         
         create_menu_action_unique(self, self.menu, _('&Import Extended Metadata'), None,
-                                             triggered=self.importExtendedMetadata,
+                                             triggered=self.import_extended_metadata,
                                              unique_name='&Import Extended Metadata')
         self.menu.addSeparator()
         
         ## TODO
         ##
         ##create_menu_action_unique(self, self.menu, _('&Bulk avanced editor'), None,
-        ##                                     triggered=self.editBulkExtendedMetadata,
+        ##                                     triggered=self.edit_bulk_extended_metadata,
         ##                                     unique_name='&Bulk avanced editor')
         ##
         ##create_menu_action_unique(self, self.menu, _('&Avanced editor, book by book'), None,
-        ##                                     triggered=self.editBookExtendedMetadata,
+        ##                                     triggered=self.edit_book_extended_metadata,
         ##                                     unique_name='&Avanced editor, book by book')
         ##
         ##self.menu.addSeparator()
@@ -134,24 +134,24 @@ class ePubExtendedMetadataAction(InterfaceAction):
     
     
     def toolbar_triggered(self):
-        self.embedExtendedMetadata()
+        self.embed_extended_metadata()
     
-    def embedExtendedMetadata(self):
-        self.runExtendedMetadataProgressDialog({id:VALUE.EMBED for id in get_BookIds_selected(show_error=True)}) 
+    def embed_extended_metadata(self):
+        self.run_extended_metadata({id:VALUE.EMBED for id in get_BookIds_selected(show_error=True)}) 
         
-    def importExtendedMetadata(self):
-        self.runExtendedMetadataProgressDialog({id:VALUE.IMPORT for id in get_BookIds_selected(show_error=True)}) 
+    def import_extended_metadata(self):
+        self.run_extended_metadata({id:VALUE.IMPORT for id in get_BookIds_selected(show_error=True)}) 
     
-    def editBulkExtendedMetadata(self):
-        debug_print('editBulkExtendedMetadata')
-        
-    
-    def editBookExtendedMetadata(self):
-        debug_print('editBookExtendedMetadata')
+    def edit_bulk_extended_metadata(self):
+        debug_print('edit_bulk_extended_metadata')
         
     
+    def edit_book_extended_metadata(self):
+        debug_print('edit_book_extended_metadata')
+        
     
-    def runExtendedMetadataProgressDialog(self, book_ids):
+    
+    def run_extended_metadata(self, book_ids):
         ePubExtendedMetadataProgressDialog(book_ids)
 
 def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata={}):

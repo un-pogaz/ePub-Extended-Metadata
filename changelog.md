@@ -1,6 +1,6 @@
 # Changelog - ePub Extended Metadata
 
-## [0.10.2] - 2023/09/24
+## [0.10.2] - 2023/09/25
 
 ### Bug fixes
 - fix a python2 imcopatibility
