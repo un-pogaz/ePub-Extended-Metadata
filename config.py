@@ -7,50 +7,46 @@ __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import copy, time, os, shutil
+
 # python3 compatibility
 from six.moves import range
 from six import text_type as unicode
+from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from datetime import datetime
 from collections import defaultdict, OrderedDict
 from functools import partial
-from polyglot.builtins import iteritems, itervalues
+
+import copy, time, os, shutil
 
 try:
-    from qt.core import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
-                            QFormLayout, QAction, QDialog, QTableWidget, QScrollArea,
-                            QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
-                            QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
-                            QPushButton, QSpacerItem, QSizePolicy, QTabWidget)
+    from qt.core import (
+        Qt, QAbstractItemView, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QPushButton,
+        QScrollArea, QSizePolicy, QSpacerItem, QTabWidget, QTableWidget, QToolButton,
+        QVBoxLayout, QWidget,
+    )
 except ImportError:
-    from PyQt5.Qt import (Qt, QToolButton, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit,
-                            QFormLayout, QAction, QDialog, QTableWidget, QScrollArea,
-                            QTableWidgetItem, QAbstractItemView, QComboBox, QCheckBox,
-                            QGroupBox, QGridLayout, QRadioButton, QDialogButtonBox,
-                            QPushButton, QSpacerItem, QSizePolicy, QTabWidget)
+    from PyQt5.Qt import (
+        Qt, QAbstractItemView, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QPushButton,
+        QScrollArea, QSizePolicy, QSpacerItem, QTabWidget, QTableWidget, QToolButton,
+        QVBoxLayout, QWidget,
+    )
 
-from calibre import prints
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, warning_dialog
-from calibre.gui2.ui import get_gui
-from calibre.gui2.widgets2 import Dialog
 from calibre.ebooks.metadata import string_to_authors
 from calibre.library.field_metadata import FieldMetadata
 from polyglot.builtins import iteritems, itervalues
 from calibre.utils.icu import strcmp
 
-from .common_utils import debug_print, get_icon, PREFS_library, PREFS_dynamic, duplicate_entry
+from .common_utils import debug_print, get_icon, GUI, PREFS_library, PREFS_dynamic, duplicate_entry
 from .common_utils.widgets import ImageTitleLayout, ReadOnlyTableWidgetItem, KeyValueComboBox, CustomColumnComboBox
-
+from .common_utils.dialogs import KeyboardConfigDialogButton, LibraryPrefsViewerDialogButton
 
 from .marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION
-
-GUI = get_gui()
 
 
 class ICON:
@@ -303,14 +299,10 @@ class ConfigWidget(QWidget):
         # --- Keyboard shortcuts ---
         keyboard_layout = QHBoxLayout()
         layout.addLayout(keyboard_layout)
-        keyboard_shortcuts_button = QPushButton(_('Keyboard shortcuts')+'...', self)
-        keyboard_shortcuts_button.setToolTip(_('Edit the keyboard shortcuts associated with this plugin'))
-        keyboard_shortcuts_button.clicked.connect(self.edit_shortcuts)
-        keyboard_layout.addWidget(keyboard_shortcuts_button)
+        keyboard_layout.addWidget(KeyboardConfigDialogButton(self))
         
-        view_prefs_button = QPushButton(_('View library preferences')+'...', self)
-        view_prefs_button.setToolTip(_('View data stored in the library database for this plugin'))
-        view_prefs_button.clicked.connect(self.library_prefs)
+        view_prefs_button = LibraryPrefsViewerDialogButton(self)
+        view_prefs_button.library_prefs_changed.connect(self.library_prefs_changed)
         keyboard_layout.addWidget(view_prefs_button)
         
         keyboard_layout.insertStretch(-1)
@@ -327,7 +319,7 @@ class ConfigWidget(QWidget):
     def validate(self):
         valide = self.table.valide_contributors_columns()
         if not valide: warning_dialog(GUI, _('Duplicate values'),
-                _('The current parameters contain duplicate values.\nYour changes can\'t be saved and have been cancelled.'),
+                _("The current parameters contain duplicate values.\nYour changes can't be saved and have been cancelled."),
                 show=True, show_copy_button=False)
             
         return valide
@@ -346,14 +338,10 @@ class ConfigWidget(QWidget):
                 if poped:
                     PREFS[str(len(PREFS[KEY.CONTRIBUTORS])+1)] = poped
         
-        debug_print('Save settings:\n{0}\n'.format(PREFS))
+        debug_print('Save settings:', PREFS,'\n')
         plugin_check_enable_library()
     
-    def edit_shortcuts(self):
-        edit_keyboard_shortcuts(self.plugin_action)
-    
-    def library_prefs(self):
-        view_library_prefs()
+    def library_prefs_changed(self):
         self.table.populate_table(PREFS[KEY.CONTRIBUTORS])
         self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
         plugin_check_enable_library()
@@ -577,6 +565,5 @@ class ConfigReaderWidget(QWidget):
         prefs[KEY.KEEP_CALIBRE_MANUAL] = self.importManual.selected_key()
         
         PREFS.update(prefs)
-        debug_print('Save settings of import:\n{0}\n'.format(prefs))
+        debug_print('Save settings of import:', prefs,'\n')
         plugin_check_enable_library()
-    

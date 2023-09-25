@@ -7,6 +7,7 @@ __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
+
 try:
     load_translations()
 except NameError:

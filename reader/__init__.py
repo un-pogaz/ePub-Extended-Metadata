@@ -85,4 +85,3 @@ class MetadataReader(MetadataReaderPlugin):
     
     def save_settings(self, config_widget):
         config_widget.save_settings()
-

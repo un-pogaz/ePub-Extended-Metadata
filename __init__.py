@@ -8,7 +8,6 @@ __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
 
-
 try:
     load_translations()
 except NameError:
@@ -29,7 +28,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
     calibre utilities to run without needing to load the GUI libraries.
     '''
     name                    = 'ePub Extended Metadata'
-    description             = _('Read and write a wider range of metadata for ePub\'s files and associating them to columns in your libraries.')
+    description             = _("Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries.")
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
     version                 = (0, 10, 2)
@@ -87,7 +86,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
                 _initialized_plugins.append(p)
                 return p
             except Exception as err:
-                print('An error has occurred: '+ str(err))
+                print(ePubExtendedMetadata.PREFS_NAMESPACE, 'initialize():', 'An error has occurred:', err)
                 return None
         
         from .writer import MetadataWriter

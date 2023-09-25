@@ -7,25 +7,25 @@ __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import copy, time, os
+
 # python3 compatibility
 from six.moves import range
 from six import text_type as unicode
+from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from datetime import datetime
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from functools import partial
-from polyglot.builtins import iteritems, itervalues
+
+import copy, time, os
 
 from lxml import etree
 from lxml.etree import XMLSyntaxError
 
-from calibre import prints
 from calibre.ebooks.chardet import xml_to_unicode
 from calibre.ebooks.metadata import string_to_authors, author_to_author_sort, title_sort
 from calibre.ebooks.metadata.opf2 import OPF
@@ -33,7 +33,6 @@ from calibre.ebooks.metadata.utils import parse_opf, pretty_print_opf
 from calibre.ebooks.metadata.epub import get_zip_reader, EPubException, OCFException, ContainerException
 from calibre.ebooks.oeb.parse_utils import RECOVER_PARSER
 from calibre.utils.zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED, safe_replace
-from polyglot.builtins import iteritems, itervalues
 
 from .common_utils import debug_print
 from .config import KEY, FIELD
@@ -133,13 +132,12 @@ def write_extended_metadata(epub, extended_metadata):
     epub/opf can be a file path or a stream
     '''
     debug_print('write_extended_metadata()')
-    debug_print('extended_metadata', extended_metadata)
+    debug_print('extended_metadata:', extended_metadata)
     
     # Use a "stream" to read the OPF without any extracting
     with ContainerExtendedMetadata(epub, read_only=False) as container:
         _write_extended_metadata(container, extended_metadata)
         container.save_opf()
-    
 
 
 def _read_extended_metadata(container):
@@ -205,7 +203,7 @@ def _read_extended_metadata(container):
         # extended_metadata
         
     
-    debug_print('extended_metadata\n',extended_metadata)
+    debug_print('extended_metadata:', extended_metadata)
     
     return extended_metadata
 
@@ -296,6 +294,3 @@ def _write_extended_metadata(container, extended_metadata):
                 meta.attrib['scheme'] = 'marc:relators'
                 container.metadata.insert(idx, meta)
                 idx = idx+1
-        
-        
-        

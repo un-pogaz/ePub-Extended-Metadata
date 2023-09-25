@@ -7,39 +7,42 @@ __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-import copy, time, os
+
 # python3 compatibility
 from six.moves import range
 from six import text_type as unicode
+from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from datetime import datetime
 from collections import defaultdict, OrderedDict
 from functools import partial
-from polyglot.builtins import iteritems, itervalues
+
+import copy, time, os
 
 try:
-    from qt.core import QToolButton, QMenu, QProgressDialog, QTimer, QSize
+    from qt.core import (
+        QMenu, QToolButton,
+    )
 except ImportError:
-    from PyQt5.Qt import QToolButton, QMenu, QProgressDialog, QTimer, QSize
+    from PyQt5.Qt import (
+        QMenu, QToolButton,
+    )
 
-from calibre import prints
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
-from calibre.gui2.ui import get_gui
 
-from .config import ICON, DYNAMIC, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
-from .common_utils import debug_print, get_icon, PLUGIN_NAME, current_db, load_plugin_resources, calibre_version, has_restart_pending
+from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, load_plugin_resources, has_restart_pending
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.menus import create_menu_action_unique
 from .common_utils.dialogs import CustomExceptionErrorDialog, ProgressDialog
+
+from .config import ICON, DYNAMIC, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
 from .container_extended_metadata import read_extended_metadata, write_extended_metadata
 
-GUI = get_gui()
 
 class VALUE:
     EMBED = 'embed'
@@ -154,7 +157,7 @@ class ePubExtendedMetadataAction(InterfaceAction):
 def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata={}):
     field_change = []
     
-    print('len(check_user_metadata):'+str(len(check_user_metadata)))
+    debug_print('len(check_user_metadata):', len(check_user_metadata))
     
     if check_user_metadata:
         #check if the Metadata object accepts those added
@@ -245,7 +248,8 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         if self.wasCanceled():
             debug_print('ePub Extended Metadata Metadata was aborted.')
         elif self.exception_unhandled:
-            debug_print('ePub Extended Metadata Metadata was interupted. An exception has occurred:\n'+str(self.exception))
+            debug_print('ePub Extended Metadata Metadata was interupted. An exception has occurred:')
+            debug_print(self.exception)
             CustomExceptionErrorDialog(self.exception)
         
         if self.exception_read:
@@ -266,7 +270,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         
         
         if self.no_epub_count:
-            debug_print('{:d} books didn\'t have an ePub format.'.format(self.no_epub_count))
+            debug_print("{:d} books didn't have an ePub format.".format(self.no_epub_count))
         
         if self.import_count:
             debug_print('Extended Metadata read for {:d} books with a total of {:d} fields modify.'.format(self.import_count, self.import_field_count))
@@ -277,15 +281,13 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
             debug_print('Extended Metadata write for {:d} books.'.format(self.export_count))
         else:
             debug_print('No Extended Metadata write in selected books.')
-        
-            debug_print('ePub Extended Metadata execute in {:0.3f} seconds.\n'.format(self.time_execut))
+            debug_print('ePub Extended Metadata execute in {:0.3f} seconds.'.format(self.time_execut), '\n')
     
     def job_progress(self):
         
         debug_print('Launch ePub Extended Metadata for {:d} books.'.format(self.book_count))
-        debug_print(self.prefs,'\n')
-        
-        typeString = type('')
+        debug_print(self.prefs)
+        print()
         
         import_id = {}
         import_mi = {}
@@ -310,7 +312,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
             if path:
                 if extended_metadata == VALUE.IMPORT:
                     if book_id not in import_mi:
-                        debug_print('Read ePub Extended Metadata for', book_info,'\n')
+                        debug_print('Read ePub Extended Metadata for', book_info, '\n')
                         extended_metadata = read_extended_metadata(path)
                         #try:
                         import_id[book_id] = apply_extended_metadata(miA, self.prefs, extended_metadata, keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_MANUAL])
@@ -321,7 +323,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                         #    book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
                         #    self.exception_read.append( (id, book_info, err) )
                 else:
-                    debug_print('Write ePub Extended Metadata for', book_info+'\n')
+                    debug_print('Write ePub Extended Metadata for', book_info, '\n')
                     if extended_metadata == VALUE.EMBED:
                         extended_metadata = create_extended_metadata(miA, self.prefs)
                     
@@ -387,8 +389,7 @@ def write_metadata(stream, fmt, miA):
         write_extended_metadata(stream, extended_metadata)
     except:
         if report_error is None:
-            from calibre import prints
-            prints('Failed to set extended metadata for the', fmt.upper(), 'format of:', getattr(miA, 'title', ''), file=sys.stderr)
+            debug_print('Failed to set extended metadata for the', fmt.upper(), 'format of:', getattr(miA, 'title', ''), file=sys.stderr)
             traceback.print_exc()
         else:
             report_error(miA, fmt.upper(), traceback.format_exc())
