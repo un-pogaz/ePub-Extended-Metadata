@@ -38,7 +38,7 @@ from calibre.gui2.actions import InterfaceAction
 from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, load_plugin_resources, has_restart_pending
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.menus import create_menu_action_unique
-from .common_utils.dialogs import CustomExceptionErrorDialog, ProgressDialog
+from .common_utils.dialogs import custom_exception_dialog, ProgressDialog
 
 from .config import ICON, DYNAMIC, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
 from .container_extended_metadata import read_extended_metadata, write_extended_metadata
@@ -250,7 +250,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         elif self.exception_unhandled:
             debug_print('ePub Extended Metadata Metadata was interupted. An exception has occurred:')
             debug_print(self.exception)
-            CustomExceptionErrorDialog(self.exception)
+            custom_exception_dialog(self.exception)
         
         if self.exception_read:
             
