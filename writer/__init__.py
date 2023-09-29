@@ -12,12 +12,12 @@ __docformat__ = 'restructuredtext en'
 from calibre.customize import MetadataReaderPlugin, MetadataWriterPlugin
 
 
-_PLUGIN = None
+PLUGIN_CLASSE = None
 def get_plugin_attribut(name, default=None):
     """Retrieve a attribut on the main plugin class"""
     
-    global _PLUGIN
-    if not _PLUGIN:
+    global PLUGIN_CLASSE
+    if not PLUGIN_CLASSE:
         import importlib
         from polyglot.builtins import iteritems, itervalues
         from calibre.customize import Plugin
@@ -25,9 +25,9 @@ def get_plugin_attribut(name, default=None):
         plugin_classes = [ obj for obj in itervalues(importlib.import_module('.'.join(__name__.split('.')[:-1])).__dict__) if isinstance(obj, type) and issubclass(obj, Plugin) and obj.name != 'Trivial Plugin' ]
         
         plugin_classes.sort(key=lambda c:(getattr(c, '__module__', None) or '').count('.'))
-        _PLUGIN = plugin_classes[0]
+        PLUGIN_CLASSE = plugin_classes[0]
     
-    return getattr(_PLUGIN, name, default)
+    return getattr(PLUGIN_CLASSE, name, default)
 
 
 class MetadataWriter(MetadataWriterPlugin):
@@ -81,3 +81,6 @@ class MetadataWriter(MetadataWriterPlugin):
     def config_widget(self):
         from calibre.customize.ui import find_plugin
         return find_plugin(get_plugin_attribut('name')).config_widget()
+    
+    def save_settings(self, config_widget):
+        config_widget.save_settings()

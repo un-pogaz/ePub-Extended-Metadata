@@ -46,9 +46,6 @@ class ePubExtendedMetadata(InterfaceActionBase):
     #: The specified class must be defined in the specified module.
     actual_plugin           = __name__+'.action:ePubExtendedMetadataAction'
     
-    DEBUG_PRE = 'ePubExtendedMetadata'
-    PREFS_NAMESPACE = 'ePubExtendedMetadata'
-    
     
     def get_curent():
         from calibre.customize.ui import find_plugin
@@ -129,7 +126,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
         # from the command line
         if self.actual_plugin_:
             from .config import ConfigWidget
-            return ConfigWidget(self.actual_plugin_)
+            return ConfigWidget()
     
     def save_settings(self, config_widget):
         '''

@@ -94,9 +94,9 @@ class KEY:
     
     @staticmethod
     def find_plugin(key):
-        from .common_utils import _PLUGIN
+        from .common_utils import PLUGIN_CLASSE
         from calibre.customize.ui import find_plugin
-        return find_plugin(_PLUGIN.name_writer if key == KEY.AUTO_EMBED else _PLUGIN.name_reader) 
+        return find_plugin(PLUGIN_CLASSE.name_writer if key == KEY.AUTO_EMBED else PLUGIN_CLASSE.name_reader) 
     
     @staticmethod
     def enable_plugin(key):
@@ -200,10 +200,9 @@ def plugin_realy_enable(key):
         return False
 
 class ConfigWidget(QWidget):
-    def __init__(self, plugin_action):
+    def __init__(self):
         QWidget.__init__(self)
         
-        self.plugin_action = plugin_action
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
@@ -521,10 +520,9 @@ OPTION_AUTO = OrderedDict([
 
 
 class ConfigReaderWidget(QWidget):
-    def __init__(self, plugin_action):
+    def __init__(self):
         QWidget.__init__(self)
         
-        self.plugin_action = plugin_action
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         

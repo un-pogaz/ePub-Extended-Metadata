@@ -35,7 +35,7 @@ except ImportError:
 from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
 from calibre.gui2.actions import InterfaceAction
 
-from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, load_plugin_resources, has_restart_pending
+from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, has_restart_pending
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.menus import create_menu_action_unique
 from .common_utils.dialogs import custom_exception_dialog, ProgressDialog
@@ -62,9 +62,6 @@ class ePubExtendedMetadataAction(InterfaceAction):
     def genesis(self):
         self.is_library_selected = True
         self.menu = QMenu(GUI)
-        # Read the plugin icons and store for potential sharing with the config widget
-        load_plugin_resources(self.plugin_path)
-        
         self.rebuild_menus()
         
         # Assign our menu to this action and an icon
