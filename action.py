@@ -1,17 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-
-# python3 compatibility
-from six.moves import range
-from six import text_type as unicode
-from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
@@ -94,7 +87,7 @@ class ePubExtendedMetadataAction(InterfaceAction):
         ##
         ##self.menu.addSeparator()
         
-        create_menu_action_unique(self, self.menu, _('&Customize plugin...'), 'config.png',
+        create_menu_action_unique(self, self.menu, _('&Customize plugin…'), 'config.png',
                                              triggered=self.show_configuration,
                                              unique_name='&Customize plugin')
         
@@ -161,7 +154,7 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
         from .common_utils.columns import get_columns_from_dict, string_to_authors
         miA_columns = get_columns_from_dict(miA.get_all_user_metadata(True))
         miA_init_len = len(miA_columns)
-        for k,cc in iteritems(check_user_metadata):
+        for k,cc in check_user_metadata.items():
             if not (cc.is_composite or cc.is_csp):
                 if k not in miA_columns:
                     if cc.is_multiple:
@@ -185,16 +178,16 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
                     
                     if not cc.is_multiple and mc.is_multiple:
                         join = mc.is_multiple.list_to_ui or ', '
-                        values = join.joint(mc.metadata['#value#'])
+                        value = join.joint(mc.metadata['#value#'])
                         
                         cc.metadata['#value#'] = value
                         cc.metadata['#extra#'] = None
                         miA.set_user_metadata(k, cc.metadata)
     
     
-    for data, field in iteritems(prefs):
+    for data, field in prefs.items():
         if data == KEY.CONTRIBUTORS:
-            for role, field in iteritems(prefs[KEY.CONTRIBUTORS]):
+            for role, field in prefs[KEY.CONTRIBUTORS].items():
                 if field != FIELD.AUTHOR.NAME and role in extended_metadata[KEY.CONTRIBUTORS]:
                     new_value = extended_metadata[KEY.CONTRIBUTORS][role]
                     old_value = miA.get(field)
@@ -208,10 +201,10 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
 
 def create_extended_metadata(miA, prefs):
     extended_metadata = {}
-    for data, field in iteritems(prefs):
+    for data, field in prefs.items():
         if data == KEY.CONTRIBUTORS:
             extended_metadata[KEY.CONTRIBUTORS] = {}
-            for role, field in iteritems(prefs[KEY.CONTRIBUTORS]):
+            for role, field in prefs[KEY.CONTRIBUTORS].items():
                 extended_metadata[KEY.CONTRIBUTORS][role] = miA.get(field, default=[])
         if data == KEY.CREATORS:
             debug_print('KEY.CREATORS',KEY.CREATORS)
@@ -240,7 +233,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
     def end_progress(self):
         
         #info debug
-        debug_print('ePub Extended Metadata launched for {:d} books.'.format(self.book_count))
+        debug_print('ePub Extended Metadata launched for {self.book_count} books.')
         
         if self.wasCanceled():
             debug_print('ePub Extended Metadata Metadata was aborted.')
@@ -251,7 +244,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         
         if self.exception_read:
             
-            det_msg= '\n'.join('Book {:s} |> {:}'.format(book_info, e.__class__.__name__ +': '+ str(e)) for id, book_info, e in self.exception_read)
+            det_msg= '\n'.join((f'Book {book_info} |> '+ e.__class__.__name__ +': '+ str(e)) for id, book_info, e in self.exception_read)
             
             warning_dialog(GUI, _('Exceptions during the reading of Extended Metadata'),
                         _('{:d} exceptions have occurred during the reading of Extended Metadata.\nSome books may not have been updated.').format(len(self.exception_read)),
@@ -259,7 +252,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         
         if self.exception_write:
             
-            det_msg= '\n'.join('Book {:s} |> {:}'.format(book_info, e.__class__.__name__ +': '+ str(e)) for id, book_info, e in self.exception_write)
+            det_msg= '\n'.join((f'Book {book_info} |> '+ e.__class__.__name__ +': '+ str(e)) for id, book_info, e in self.exception_write)
             
             warning_dialog(GUI, _('Exceptions during the writing of Extended Metadata'),
                         _('{:d} exceptions have occurred during the writing of Extended Metadata.\nSome books may not have been updated.').format(len(self.exception_write)),
@@ -267,22 +260,22 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         
         
         if self.no_epub_count:
-            debug_print("{:d} books didn't have an ePub format.".format(self.no_epub_count))
+            debug_print(f"{self.no_epub_count} books didn't have an ePub format.")
         
         if self.import_count:
-            debug_print('Extended Metadata read for {:d} books with a total of {:d} fields modify.'.format(self.import_count, self.import_field_count))
+            debug_print(f'Extended Metadata read for {self.import_count} books with a total of {self.import_field_count} fields modify.')
         else:
             debug_print('No Extended Metadata read from selected books.')
         
         if self.export_count:
-            debug_print('Extended Metadata write for {:d} books.'.format(self.export_count))
+            debug_print(f'Extended Metadata write for {self.export_count} books.')
         else:
             debug_print('No Extended Metadata write in selected books.')
-            debug_print('ePub Extended Metadata execute in {:0.3f} seconds.'.format(self.time_execut), '\n')
+            debug_print(f'ePub Extended Metadata execute in {self.time_execut:0.3f} seconds.', '\n')
     
     def job_progress(self):
         
-        debug_print('Launch ePub Extended Metadata for {:d} books.'.format(self.book_count))
+        debug_print(f'Launch ePub Extended Metadata for {self.book_count} books.')
         debug_print(self.prefs)
         print()
         
@@ -292,7 +285,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         export_id = []
         no_epub_id = []
         
-        for book_id, extended_metadata in iteritems(self.book_ids):
+        for book_id, extended_metadata in self.book_ids.items():
             #update Progress
             num = self.increment()
             
@@ -340,14 +333,14 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         
         
         
-        for id, miA in iteritems(import_mi):
+        for id, miA in import_mi.items():
             self.dbAPI.set_metadata(book_id, miA)
         
         self.no_epub_count = len(no_epub_id)
         self.export_count = len(export_id)
         self.import_count = len(import_id)
         self.import_field_count = 0
-        for v in itervalues(import_id):
+        for v in import_id.values():
             self.import_field_count += len(v)
         
         lst_id = list(import_id.keys()) + export_id

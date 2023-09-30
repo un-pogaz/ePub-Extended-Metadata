@@ -1,17 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-
-# python3 compatibility
-from six.moves import range
-from six import text_type as unicode
-from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
@@ -39,7 +32,6 @@ except ImportError:
 from calibre.gui2 import error_dialog, question_dialog, info_dialog, warning_dialog
 from calibre.ebooks.metadata import string_to_authors
 from calibre.library.field_metadata import FieldMetadata
-from polyglot.builtins import iteritems, itervalues
 from calibre.utils.icu import strcmp
 
 from .common_utils import debug_print, get_icon, GUI, PREFS_library, PREFS_dynamic, duplicate_entry
@@ -62,7 +54,7 @@ class FIELD:
         ROLE = 'aut'
         NAME = 'authors'
         LOCAL = FieldMetadata()._tb_cats['authors']['name']
-        COLUMN = '{:s} ({:s})'.format(NAME, LOCAL)
+        COLUMN = f'{NAME} ({LOCAL})'
 
 class KEY:
     OPTION_CHAR = '_'
@@ -126,14 +118,14 @@ class KEY:
         current_columns = KEY.get_current_columns().keys()
         link = DYNAMIC[KEY.LINK_AUTHOR]
         
-        prefs = {k:v for k, v in iteritems(prefs) if not k.startswith(KEY.OPTION_CHAR)}
+        prefs = {k:v for k, v in prefs.items() if not k.startswith(KEY.OPTION_CHAR)}
         
         if KEY.CONTRIBUTORS not in prefs or not prefs[KEY.CONTRIBUTORS]:
             prefs[KEY.CONTRIBUTORS] = {}
         
-        for k,v in iteritems(copy.copy(prefs)):
+        for k,v in copy.copy(prefs).items():
             if k == KEY.CONTRIBUTORS:
-                for k,v in iteritems(copy.copy(prefs[KEY.CONTRIBUTORS])):
+                for k,v in copy.copy(prefs[KEY.CONTRIBUTORS]).items():
                     if not k or k not in CONTRIBUTORS_ROLES or not v or v not in current_columns:
                         prefs[KEY.CONTRIBUTORS].pop(k, None)
             elif not v or v not in current_columns:
@@ -152,11 +144,11 @@ class KEY:
     @staticmethod
     def get_used_columns():
         from .common_utils.columns import get_columns_where, get_columns_from_dict
-        treated_column = [v for k,v in iteritems(PREFS) if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, unicode)] + [c for c in itervalues(PREFS[KEY.CONTRIBUTORS]) if isinstance(c, unicode)]
+        treated_column = [v for k,v in PREFS.items() if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, str)] + [c for c in PREFS[KEY.CONTRIBUTORS].values() if isinstance(c, str)]
         def predicate(column):
             return column.is_custom and column.name in treated_column
         
-        return {v.name:v.metadata for v in itervalues(get_columns_where(predicate=predicate))}
+        return {v.name:v.metadata for v in get_columns_where(predicate=predicate).values()}
 
 
 PREFS = PREFS_library()
@@ -401,7 +393,7 @@ class ContributorTableWidget(QTableWidget):
                         contributors_pair_list[role] = column
         
         self.setRowCount(len(contributors_pair_list))
-        for row, contributors_pair in enumerate(iteritems(contributors_pair_list), 0):
+        for row, contributors_pair in enumerate(contributors_pair_list.items(), 0):
             self.populate_table_row(row, contributors_pair)
         
         self.selectRow(0)

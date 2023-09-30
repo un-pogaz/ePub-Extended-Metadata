@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.10.3] - date
+
+### Changed
+- Drop Python 2 / Calibre 4 comatibility, only 5 and above
+
 ## [0.10.2] - 2023/09/25
 
 ### Bug fixes

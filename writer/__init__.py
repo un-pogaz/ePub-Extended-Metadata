@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
@@ -19,10 +17,9 @@ def get_plugin_attribut(name, default=None):
     global PLUGIN_CLASSE
     if not PLUGIN_CLASSE:
         import importlib
-        from polyglot.builtins import iteritems, itervalues
         from calibre.customize import Plugin
         #Yes, it's very long for a one line. It's seems crazy, but it's fun and it works
-        plugin_classes = [ obj for obj in itervalues(importlib.import_module('.'.join(__name__.split('.')[:-1])).__dict__) if isinstance(obj, type) and issubclass(obj, Plugin) and obj.name != 'Trivial Plugin' ]
+        plugin_classes = [ obj for obj in importlib.import_module('.'.join(__name__.split('.')[:-1])).__dict__.values() if isinstance(obj, type) and issubclass(obj, Plugin) and obj.name != 'Trivial Plugin' ]
         
         plugin_classes.sort(key=lambda c:(getattr(c, '__module__', None) or '').count('.'))
         PLUGIN_CLASSE = plugin_classes[0]

@@ -1,17 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 __docformat__ = 'restructuredtext en'
 
-
-# python3 compatibility
-from six.moves import range
-from six import text_type as unicode
-from polyglot.builtins import iteritems, itervalues
 
 try:
     load_translations()
@@ -50,7 +43,7 @@ class ParseError(ValueError):
     def __init__(self, name, err):
         self.name = name
         self.err = err
-        ValueError.__init__(self, 'Failed to parse: {:s} with error: {:s}'.format(name, err))
+        ValueError.__init__(self, f'Failed to parse: {name} with error: {err}')
 
 class OPFException(EPubException):
     pass
@@ -180,7 +173,7 @@ def _read_extended_metadata(container):
     if container.version[0] == 3:
         for contrib in container.metadata.xpath('dc:contributor[@id]', namespaces=NAMESPACES):
             id = contrib.attrib['id']
-            roles = container.metadata.xpath('opf:meta[@refines="#{:s}" and @property="role" and @scheme="marc:relators"]'.format(id), namespaces=NAMESPACES)
+            roles = container.metadata.xpath(f'opf:meta[@refines="#{id}" and @property="role" and @scheme="marc:relators"]', namespaces=NAMESPACES)
             
             role = 'oth'
             if roles:
@@ -215,9 +208,9 @@ def _write_extended_metadata(container, extended_metadata):
     # merge old extended metadata and the new
     epub_extended_metadata = _read_extended_metadata(container)
     
-    for data, value in iteritems(extended_metadata):
+    for data, value in extended_metadata.items():
         if data == KEY.CONTRIBUTORS:
-            for role, value in iteritems(extended_metadata[KEY.CONTRIBUTORS]):
+            for role, value in extended_metadata[KEY.CONTRIBUTORS].items():
                 epub_extended_metadata[KEY.CONTRIBUTORS][role] = value
         else:
             epub_extended_metadata[data] = value
@@ -228,7 +221,7 @@ def _write_extended_metadata(container, extended_metadata):
         idx = container.metadata.index(creator[-1])+1
         
         for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):
-            for meta in container.metadata.xpath('dc:contributor[@opf:role="{role}"]'.format(role=role), namespaces=NAMESPACES):
+            for meta in container.metadata.xpath(f'dc:contributor[@opf:role="{role}"]', namespaces=NAMESPACES):
                 container.metadata.remove(meta)
             for contrib in epub_extended_metadata[KEY.CONTRIBUTORS][role]:
                 element = etree.Element(etree.QName(NS_DC, 'contributor'))
@@ -246,14 +239,14 @@ def _write_extended_metadata(container, extended_metadata):
             id_s = contrib.attrib.get('id', None)
             if id_s:
                 #remove all marc code
-                for meta in container.metadata.xpath('opf:meta[@refines="#{id_s}" and @property="role" and @scheme="marc:relators"]'.format(id_s=id_s), namespaces=NAMESPACES):
+                for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}" and @property="role" and @scheme="marc:relators"]', namespaces=NAMESPACES):
                     container.metadata.remove(meta)
                 # if the contributor has others meta linked (except "file-as")
-                if not container.metadata.xpath('opf:meta[@refines="#{id_s}" and not(@property="file-as")]'.format(id_s=id_s), namespaces=NAMESPACES):
+                if not container.metadata.xpath(f'opf:meta[@refines="#{id_s}" and not(@property="file-as")]', namespaces=NAMESPACES):
                     # coutain if the contributor has no others meta linked (or only "file-as"), del the contributor
                     container.metadata.remove(contrib)
                     #and del the "file-as"
-                    for meta in container.metadata.xpath('opf:meta[@refines="#{id_s}"]'.format(id_s=id_s), namespaces=NAMESPACES):
+                    for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}"]', namespaces=NAMESPACES):
                         container.metadata.remove(meta)
             else:
                 #remove contributor without id
@@ -267,7 +260,7 @@ def _write_extended_metadata(container, extended_metadata):
             for contrib in epub_extended_metadata[KEY.CONTRIBUTORS][role]:
                 element = etree.Element(etree.QName(NS_DC, 'contributor'))
                 element.text = contrib
-                id_s = role+'{:02d}'.format(id_n)
+                id_s = role+f'{id_n:02d}'
                 element.attrib['id'] = id_s
                 container.metadata.insert(idx, element)
                 idx = idx+1

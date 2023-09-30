@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import (unicode_literals, division, absolute_import,
-                        print_function)
 
 __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
@@ -31,8 +29,8 @@ class ePubExtendedMetadata(InterfaceActionBase):
     description             = _("Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries.")
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
-    version                 = (0, 10, 2)
-    minimum_calibre_version = (4, 0, 0)
+    version                 = (0, 10, 3)
+    minimum_calibre_version = (5, 0, 0)
     
     name_reader              = name + ' {Reader}'
     name_writer              = name + ' {Writer}'
