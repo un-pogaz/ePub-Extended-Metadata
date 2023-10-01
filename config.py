@@ -13,8 +13,9 @@ except NameError:
 
 from collections import defaultdict, OrderedDict
 from functools import partial
+from typing import Any
 
-import copy, time, os, shutil
+import copy
 
 try:
     from qt.core import (
@@ -143,7 +144,7 @@ class KEY:
     
     @staticmethod
     def get_used_columns():
-        from .common_utils.columns import get_columns_where, get_columns_from_dict
+        from .common_utils.columns import get_columns_where
         treated_column = [v for k,v in PREFS.items() if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, str)] + [c for c in PREFS[KEY.CONTRIBUTORS].values() if isinstance(c, str)]
         def predicate(column):
             return column.is_custom and column.name in treated_column
@@ -198,7 +199,7 @@ class ConfigWidget(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Extended Metadata options'))
+        title_layout = ImageTitleLayout(ICON.PLUGIN, _('ePub Extended Metadata options'))
         layout.addLayout(title_layout)
         
         tabs = QTabWidget(self)
@@ -224,6 +225,7 @@ class ConfigWidget(QWidget):
         add_button = QToolButton(self)
         add_button.setToolTip(_('Add a Column/Contributor pair'))
         add_button.setIcon(get_icon('plus.png'))
+        
         button_layout.addWidget(add_button)
         button_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
         
@@ -231,7 +233,6 @@ class ConfigWidget(QWidget):
         delete_button.setToolTip(_('Delete Column/Contributor pair'))
         delete_button.setIcon(get_icon('minus.png'))
         button_layout.addWidget(delete_button)
-        button_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
         
         add_button.clicked.connect(self.table.add_row)
         delete_button.clicked.connect(self.table.delete_rows)
@@ -292,7 +293,7 @@ class ConfigWidget(QWidget):
         layout.addLayout(keyboard_layout)
         keyboard_layout.addWidget(KeyboardConfigDialogButton(self))
         
-        view_prefs_button = LibraryPrefsViewerDialogButton(self)
+        view_prefs_button = LibraryPrefsViewerDialogButton()
         view_prefs_button.library_prefs_changed.connect(self.library_prefs_changed)
         keyboard_layout.addWidget(view_prefs_button)
         
@@ -402,8 +403,8 @@ class ContributorTableWidget(QTableWidget):
         self.blockSignals(True)
         
         contributors_pair = contributors_pair or ('','')
-        self.setCellWidget(row, self._columnContrib, ContributorsComboBox(self, contributors_pair[0]))
-        self.setCellWidget(row, self._columnColumn, DuplicColumnComboBox(self, contributors_pair[1]))
+        self.setCellWidget(row, self._columnContrib, ContributorsComboBox(contributors_pair[0], self))
+        self.setCellWidget(row, self._columnColumn, DuplicColumnComboBox(contributors_pair[1], self))
         self.setItem(row, self._columnSpace, ReadOnlyTableWidgetItem(''))
         
         self.resizeColumnsToContents()
@@ -463,7 +464,7 @@ class ContributorTableWidget(QTableWidget):
 
 class ContributorsComboBox(KeyValueComboBox):
     def __init__(self, table, selected_contributors):
-        KeyValueComboBox.__init__(self, table, CONTRIBUTORS_ROLES, selected_contributors, values_ToolTip=CONTRIBUTORS_DESCRIPTION)
+        KeyValueComboBox.__init__(self, values=CONTRIBUTORS_ROLES, selected_key=selected_contributors, values_ToolTip=CONTRIBUTORS_DESCRIPTION, parent=table)
         self.table = table
         self.currentIndexChanged.connect(self.test_contributors_changed)
     
@@ -481,8 +482,8 @@ class ContributorsComboBox(KeyValueComboBox):
 
 class DuplicColumnComboBox(CustomColumnComboBox):
     
-    def __init__(self, table, selected_column):
-        CustomColumnComboBox.__init__(self, table, KEY.get_names(), selected_column, initial_items=[''])
+    def __init__(self, selected_column, table):
+        CustomColumnComboBox.__init__(self, KEY.get_names(), selected_column, initial_items=[''], parent=table)
         self.table = table
         self.currentIndexChanged.connect(self.test_column_changed)
     
@@ -518,7 +519,7 @@ class ConfigReaderWidget(QWidget):
         layout = QVBoxLayout(self)
         self.setLayout(layout)
         
-        title_layout = ImageTitleLayout(self, ICON.PLUGIN, _('ePub Extended Metadata import options'))
+        title_layout = ImageTitleLayout(ICON.PLUGIN, _('ePub Extended Metadata import options'))
         layout.addLayout(title_layout)
         head = QLabel(_('Set here the specifics options to read and automatic addition of metadata.'))
         head.setWordWrap(True)

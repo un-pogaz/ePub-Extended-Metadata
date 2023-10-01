@@ -1,6 +1,6 @@
 # Changelog - ePub Extended Metadata
 
-## [0.10.3] - date
+## [0.11.0] - date
 
 ### Changed
 - Drop Python 2 / Calibre 4 comatibility, only 5 and above

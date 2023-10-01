@@ -13,8 +13,9 @@ except NameError:
 
 from collections import defaultdict, OrderedDict
 from functools import partial
+from typing import Any
 
-import copy, time, os
+import os
 
 from lxml import etree
 from lxml.etree import XMLSyntaxError

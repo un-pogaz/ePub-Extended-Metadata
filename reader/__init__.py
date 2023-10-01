@@ -63,7 +63,7 @@ class MetadataReader(MetadataReaderPlugin):
         
         if find_plugin(get_plugin_attribut('name')):
             if hasattr(stream, 'seek'): stream.seek(0)
-            from calibre_plugins.epub_extended_metadata.action import read_metadata
+            from ..action import read_metadata
             return read_metadata(stream, type, mi)
         else:
             return mi

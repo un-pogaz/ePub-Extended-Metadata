@@ -13,8 +13,9 @@ except NameError:
 
 from collections import defaultdict, OrderedDict
 from functools import partial
+from typing import Any, Dict, List
 
-import copy, time, os
+import os.path
 
 try:
     from qt.core import (
@@ -66,13 +67,13 @@ class ePubExtendedMetadataAction(InterfaceAction):
         self.menu.clear()
         
         create_menu_action_unique(self, self.menu, _('&Embed Extended Metadata'), None,
-                                             triggered=self.embed_extended_metadata,
-                                             unique_name='&Embed Extended Metadata')
+                                        triggered=self.embed_extended_metadata,
+                                        unique_name='&Embed Extended Metadata')
         self.menu.addSeparator()
         
         create_menu_action_unique(self, self.menu, _('&Import Extended Metadata'), None,
-                                             triggered=self.import_extended_metadata,
-                                             unique_name='&Import Extended Metadata')
+                                        triggered=self.import_extended_metadata,
+                                        unique_name='&Import Extended Metadata')
         self.menu.addSeparator()
         
         ## TODO
@@ -88,8 +89,9 @@ class ePubExtendedMetadataAction(InterfaceAction):
         ##self.menu.addSeparator()
         
         create_menu_action_unique(self, self.menu, _('&Customize plugin…'), 'config.png',
-                                             triggered=self.show_configuration,
-                                             unique_name='&Customize plugin')
+                                        triggered=self.show_configuration,
+                                        unique_name='&Customize plugin',
+                                        shortcut=False)
         
         GUI.keyboard.finalize()
     
@@ -134,17 +136,15 @@ class ePubExtendedMetadataAction(InterfaceAction):
     
     def edit_bulk_extended_metadata(self):
         debug_print('edit_bulk_extended_metadata')
-        
     
     def edit_book_extended_metadata(self):
         debug_print('edit_book_extended_metadata')
-        
     
     
     def run_extended_metadata(self, book_ids):
         ePubExtendedMetadataProgressDialog(book_ids)
 
-def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata={}):
+def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata={}) -> List[str]:
     field_change = []
     
     debug_print('len(check_user_metadata):', len(check_user_metadata))
@@ -199,7 +199,7 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
     
     return field_change
 
-def create_extended_metadata(miA, prefs):
+def create_extended_metadata(miA, prefs) -> Dict[str, Any]:
     extended_metadata = {}
     for data, field in prefs.items():
         if data == KEY.CONTRIBUTORS:
