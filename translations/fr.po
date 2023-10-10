@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2023-09-30 08:06+0200\n"
-"PO-Revision-Date: 2023-09-30 08:06+0200\n"
+"POT-Creation-Date: 2023-10-08 13:51+0200\n"
+"PO-Revision-Date: 2023-10-08 13:51+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural -Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -30,19 +30,19 @@ msgstr "Lire un plus large éventail de métadonnées à partir du fichier ePub.
 msgid "Write a wider range of metadata in the ePub file."
 msgstr "Ecrit un plus large éventail de métadonnées à partir du fichier ePub."
 
-#: action.py:49
+#: action.py:50
 msgid "Edit the Extended Metadata of the ePub files"
 msgstr "Modifier les métadonnées étendues des fichiers ePub"
 
-#: action.py:68
+#: action.py:69
 msgid "&Embed Extended Metadata"
 msgstr "&Intégrer les métadonnées étendues"
 
-#: action.py:73
+#: action.py:74
 msgid "&Import Extended Metadata"
 msgstr "&Importer les métadonnées étendues"
 
-#: action.py:90
+#: action.py:91
 msgid "&Customize plugin…"
 msgstr "&Personnaliser l'extension…"
 
@@ -70,252 +70,272 @@ msgstr ""
 "{:d} des exceptions sont survenues pendant l'écritures des métadonnées étendues.\n"
 "Certains livres peuvent ne pas avoir été mis à jour."
 
-#: common_utils/__init__.py:289
+#: common_utils/__init__.py:407
 msgid "You cannot configure this plugin before calibre is restarted."
 msgstr "Vous ne pouvez pas configurer ce plugin avant le redémarrage de Calibre."
 
-#: common_utils/dialogs.py:45 common_utils/dialogs.py:71
+#: common_utils/dialogs.py:52 common_utils/dialogs.py:82
 msgid "Keyboard shortcuts"
 msgstr "Raccourcis clavier"
 
-#: common_utils/dialogs.py:72
+#: common_utils/dialogs.py:83
 msgid "Edit the keyboard shortcuts associated with this plugin"
 msgstr "Modifier les raccourcis clavier associés à cette extension"
 
-#: common_utils/dialogs.py:87
+#: common_utils/dialogs.py:99
 msgid "Preferences for:"
 msgstr "Préférences pour :"
 
-#: common_utils/dialogs.py:105
-msgid "Clear"
-msgstr "Effacer"
-
-#: common_utils/dialogs.py:107
+#: common_utils/dialogs.py:122
 msgid "Clear all settings for this plugin"
 msgstr "Effacer tous les paramètres de ce plugin"
 
-#: common_utils/dialogs.py:149
+#: common_utils/dialogs.py:164
 msgid "The changes cannot be applied."
 msgstr "Les modifications ne peuvent pas être appliquées."
 
-#: common_utils/dialogs.py:153
+#: common_utils/dialogs.py:168
 msgid "Are you sure you want to change your settings in this library for this plugin?"
 msgstr "Êtes-vous sûr de vouloir modifier vos paramètres dans cette bibliothèque pour ce plugin ?"
 
-#: common_utils/dialogs.py:154 common_utils/dialogs.py:166
+#: common_utils/dialogs.py:169 common_utils/dialogs.py:181
 msgid "Any settings in other libraries or stored in a JSON file in your calibre plugins folder will not be touched."
 msgstr "Les paramètres présents dans d'autres bibliothèques ou stockés dans un fichier JSON dans le dossier des plugins de Calibre ne seront pas modifiés."
 
-#: common_utils/dialogs.py:165
+#: common_utils/dialogs.py:180
 msgid "Are you sure you want to clear your settings in this library for this plugin?"
 msgstr "Êtes-vous sûr de vouloir effacer vos paramètres dans cette bibliothèque pour ce plugin ?"
 
-#: common_utils/dialogs.py:186
+#: common_utils/dialogs.py:201
 msgid "View library preferences"
 msgstr "Afficher les préférences de la bibliothèque"
 
-#: common_utils/dialogs.py:187
+#: common_utils/dialogs.py:202
 msgid "View data stored in the library database for this plugin"
 msgstr "Afficher les données stockées dans la base de données de la bibliothèque pour ce plugin"
 
-#: common_utils/dialogs.py:264
+#: common_utils/dialogs.py:232
 msgid "Cancel"
 msgstr "Annuler"
 
-#: common_utils/dialogs.py:274
+#: common_utils/dialogs.py:242
 #, python-brace-format
 msgid "{PLUGIN_NAME} progress"
 msgstr "Progression de {PLUGIN_NAME}"
 
-#: common_utils/dialogs.py:330
+#: common_utils/dialogs.py:298
 msgid "Book {:d} of {:d}"
 msgstr "Livre {:d} sur {:d}"
 
-#: common_utils/dialogs.py:361
+#: common_utils/dialogs.py:333
 msgid "Copy to clipboard"
 msgstr "Copier dans le presse-papiers"
 
-#: common_utils/dialogs.py:381
+#: common_utils/dialogs.py:352
 msgid "Add New Image"
 msgstr "Ajouter une nouvelle image"
 
-#: common_utils/dialogs.py:384
+#: common_utils/dialogs.py:360
 msgid "&Select image source"
 msgstr "&Sélectionner la source de l'image"
 
-#: common_utils/dialogs.py:387
+#: common_utils/dialogs.py:363
 msgid "From &web domain favicon"
 msgstr "Depuis favicon de site &web"
 
-#: common_utils/dialogs.py:394
+#: common_utils/dialogs.py:370
 msgid "From .png &file"
 msgstr "Depuis un &fichier .png"
 
-#: common_utils/dialogs.py:407
+#: common_utils/dialogs.py:383
 msgid "&Save as filename:"
 msgstr "&Enregitrement comme nom de fichier :"
 
-#: common_utils/dialogs.py:431
+#: common_utils/dialogs.py:404
 msgid "Select a .png file for the menu icon"
 msgstr "Sélectionner un fichier .png pour l'icône du menu"
 
-#: common_utils/dialogs.py:437 common_utils/dialogs.py:446
-#: common_utils/dialogs.py:449 common_utils/dialogs.py:464
-#: common_utils/dialogs.py:471 common_utils/dialogs.py:473
-#: common_utils/dialogs.py:475
+#: common_utils/dialogs.py:410 common_utils/dialogs.py:419
+#: common_utils/dialogs.py:422 common_utils/dialogs.py:437
+#: common_utils/dialogs.py:443 common_utils/dialogs.py:445
+#: common_utils/dialogs.py:447
 msgid "Cannot import image"
 msgstr "Impossible d'importer l'image"
 
-#: common_utils/dialogs.py:437 common_utils/dialogs.py:473
+#: common_utils/dialogs.py:410 common_utils/dialogs.py:445
 msgid "Source image must be a .png file."
 msgstr "L'image source doit être un fichier .png."
 
-#: common_utils/dialogs.py:446
+#: common_utils/dialogs.py:419
 msgid "You must specify a filename to save as."
 msgstr "Vous devez spécifier un nom de fichier pour l'enregistrer."
 
-#: common_utils/dialogs.py:449
+#: common_utils/dialogs.py:422
 msgid "The save as filename should consist of a filename only."
 msgstr "L'enregitrement en tant que nom de fichier doit consister uniquement en un nom de fichier."
 
-#: common_utils/dialogs.py:454 config.py:428
+#: common_utils/dialogs.py:427 config.py:429
 msgid "Are you sure?"
 msgstr "Êtes-vous sûr ?"
 
-#: common_utils/dialogs.py:454
+#: common_utils/dialogs.py:427
 msgid "An image with this name already exists - overwrite it?"
 msgstr "Une image portant ce nom existe déjà, l'écraser ?"
 
-#: common_utils/dialogs.py:464
+#: common_utils/dialogs.py:437
 msgid "You must specify a web domain url"
 msgstr "Vous devez spécifier une url de site web"
 
-#: common_utils/dialogs.py:471
+#: common_utils/dialogs.py:443
 msgid "You must specify a source file."
 msgstr "Vous devez spécifier un fichier source."
 
-#: common_utils/dialogs.py:475
+#: common_utils/dialogs.py:447
 msgid "Source image does not exist!"
 msgstr "L'image source n'existe pas !"
 
-#: common_utils/dialogs.py:505
+#: common_utils/dialogs.py:477
 #, python-brace-format
 msgid "The {PLUGIN_NAME} plugin has encounter a unhandled exception."
 msgstr "Le plugin {PLUGIN_NAME} a rencontré une exception non gérée."
 
-#: common_utils/dialogs.py:514
+#: common_utils/dialogs.py:486
 msgid "Unhandled exception"
 msgstr "Exception non gérée"
 
-#: common_utils/librarys.py:51
+#: common_utils/librarys.py:48
 msgid "Could not to launch {:s}"
 msgstr "Impossible de lancer {:s}"
 
-#: common_utils/librarys.py:65
+#: common_utils/librarys.py:62
 msgid "No book selected"
 msgstr "Aucun livre sélectionné"
 
-#: common_utils/librarys.py:70
+#: common_utils/librarys.py:67
 msgid "No book in the library"
 msgstr "Pas de livres dans bibliothèque"
 
-#: common_utils/librarys.py:75 common_utils/librarys.py:81
+#: common_utils/librarys.py:72 common_utils/librarys.py:78
 msgid "No book in the virtual library"
 msgstr "Pas de livres dans la bibliothèque virtuel"
 
-#: common_utils/librarys.py:86
+#: common_utils/librarys.py:83
 msgid "No book in the current search"
 msgstr "Pas de livres dans la recherche actuelle"
 
-#: common_utils/widgets.py:62
+#: common_utils/templates.py:57
+msgid "Unknown"
+msgstr "Inconue"
+
+#: common_utils/templates.py:64
+msgid "Template Error"
+msgstr "Erreur de modèle"
+
+#: common_utils/templates.py:65
+msgid "Running the template returned an error:"
+msgstr "L'exécution du modèle a renvoyé une erreur :"
+
+#: common_utils/templates.py:77
+msgid "Enter a template to test using data from the selected book"
+msgstr "Saisissez un modèle à tester en utilisant les données du livre sélectionné"
+
+#: common_utils/templates.py:84
+msgid "Template editor"
+msgstr "Éditeur de modèle"
+
+#: common_utils/templates.py:105 common_utils/templates.py:106
+msgid "Open the template editor"
+msgstr "Ouvrir l'éditeur de modèle"
+
+#: common_utils/widgets.py:66
 msgid "Restart required"
 msgstr "Redémarrage nécessaire"
 
-#: common_utils/widgets.py:63
+#: common_utils/widgets.py:67
 msgid "Title image not found - you must restart Calibre before using this plugin!"
 msgstr "L'image d'icone n'a pas était trouvée - vous devriez mieux redémarrer Calibre avant d'utiliser ce plugin !"
 
-#: common_utils/widgets.py:112
+#: common_utils/widgets.py:122
 msgid "Undefined"
 msgstr "Non défini"
 
-#: common_utils/widgets.py:300
+#: common_utils/widgets.py:270
 msgid "Subset of values associate to the books"
 msgstr "Sous-ensemble de valeurs associées aux livres"
 
-#: common_utils/widgets.py:301
+#: common_utils/widgets.py:271
 msgid "No books"
 msgstr "Aucun livre"
 
-#: common_utils/widgets.py:302
+#: common_utils/widgets.py:272
 msgid "{:d} books (no values)"
 msgstr "{:d} livres (pas de valeurs)"
 
-#: common_utils/widgets.py:303
+#: common_utils/widgets.py:273
 msgid "{:d} books"
 msgstr "{:d} livres"
 
-#: common_utils/widgets.py:417
+#: common_utils/widgets.py:396
 msgid "No notes"
 msgstr "Aucune notes"
 
-#: common_utils/widgets.py:462
+#: common_utils/widgets.py:442
 msgid "Add New Image…"
 msgstr "Ajouter une nouvelle image…"
 
-#: config.py:201
+#: config.py:202
 msgid "ePub Extended Metadata options"
 msgstr "ePub Extended Metadata options"
 
-#: config.py:215 marc_relators.py:93
+#: config.py:216 marc_relators.py:93
 msgid "Contributor"
 msgstr "Contributeur"
 
-#: config.py:225
+#: config.py:226
 msgid "Add a Column/Contributor pair"
 msgstr "Ajouter une paire Colonne/Contributeur"
 
-#: config.py:231
+#: config.py:233
 msgid "Delete Column/Contributor pair"
 msgstr "Supprimer la paire Colonne/Contributeur"
 
-#: config.py:243
+#: config.py:244
 msgid "Embed \"{:s}\" column"
 msgstr "Intégrer la colonne « {:s} »"
 
-#: config.py:244
+#: config.py:245
 msgid "Embed the \"{:s}\" column as a Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column."
 msgstr "Intégrer la colonne « {:s} » comme des métadonnée de contributeurs. Cette option est en écriture seule, l'action d'importation ne modifiera pas la colonne Calibre {:s}."
 
-#: config.py:264
+#: config.py:265
 msgid "ePub3 metadata"
 msgstr "Métadonnées ePub3"
 
-#: config.py:280
+#: config.py:281
 msgid "Automatic import"
 msgstr "Importation automatique"
 
-#: config.py:281
+#: config.py:282
 msgid "Allows to automatically import the extended metadata when adding a new book to the library"
 msgstr "Permet d'importer automatiquement les métadonnées étendues lors de l'ajout d'un nouveau livre à la bibliothèque"
 
-#: config.py:284
+#: config.py:285
 msgid "Automatic embed"
 msgstr "Intégration automatique"
 
-#: config.py:285
+#: config.py:286
 msgid "Allows to to automatically embed the extended metadata at the same time as the default Calibre action"
 msgstr "Permet d'intégrer automatiquement les métadonnées étendues en même temps que l'action par défaut de Calibre"
 
-#: config.py:301
+#: config.py:302
 msgid "Edit import options"
 msgstr "Modifier les options d'importation"
 
-#: config.py:312
+#: config.py:313
 msgid "Duplicate values"
 msgstr "Valeurs en double"
 
-#: config.py:313
+#: config.py:314
 msgid ""
 "The current parameters contain duplicate values.\n"
 "Your changes can't be saved and have been cancelled."
@@ -323,31 +343,31 @@ msgstr ""
 "Les paramètres actuels contiennent des valeurs en double.\n"
 "Vos modifications ne peuvent pas être enregistrées et ont été annulées."
 
-#: config.py:353
+#: config.py:354
 msgid "This feature has been incorrectly initialized. Restart Calibre to fix this."
 msgstr "Cette fonctionnalité a été initialisée de manière incorrecte. Redémarrez Calibre pour résoudre ce problème."
 
-#: config.py:366
+#: config.py:367
 msgid "Contributor type"
 msgstr "Type de Contributeur"
 
-#: config.py:366
+#: config.py:367
 msgid "Column"
 msgstr "Colonne"
 
-#: config.py:425
+#: config.py:426
 msgid "Are you sure you want to delete this Column/Contributor pair?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette paire Colonne/Contributeur ?"
 
-#: config.py:427
+#: config.py:428
 msgid "Are you sure you want to delete the selected {:d} Column/Contributor pairs?"
 msgstr "Etes-vous sûr de vouloir supprimer les paires de Colonnes/Contributeurs {:d} sélectionnées ? Colonne/Contributeur sélectionnés ?"
 
-#: config.py:477
+#: config.py:478
 msgid "Duplicate Contributors type"
 msgstr "Type de Contributeur en double"
 
-#: config.py:478
+#: config.py:479
 msgid ""
 "A Contributor was duplicated!\n"
 "Change the settings so that each contributor is present only once, otherwise the settings can not be saved.\n"
@@ -359,11 +379,11 @@ msgstr ""
 "\n"
 "Type en double :"
 
-#: config.py:496
+#: config.py:497
 msgid "Duplicate Custom column"
 msgstr "Colonne personnalisée en double"
 
-#: config.py:497
+#: config.py:498
 msgid ""
 "A Custom column was duplicated!\n"
 "Change the settings so that each Custom column is present only once, otherwise the settings can not be saved.\n"
@@ -375,47 +395,47 @@ msgstr ""
 "\n"
 "Type en double :"
 
-#: config.py:504
+#: config.py:505
 msgid "Keep Calibre metadata, fill only the empty fields"
 msgstr "Conserver les métadonnées Calibre, ne remplir que les champs vides"
 
-#: config.py:505
+#: config.py:506
 msgid "Overwrites Calibre metadata, considers that the book always reason"
 msgstr "Écrase les métadonnées Calibre, considère que le livre a toujours raison"
 
-#: config.py:509
+#: config.py:510
 msgid "Keep Calibre embed metadata that could exist in the book"
 msgstr "Conservez les métadonnées intégrées par Calibre qui pourraient exister dans le livre"
 
-#: config.py:510
+#: config.py:511
 msgid "Overwrites Calibre embed metadata, give priority to original metadata"
 msgstr "Écrase les métadonnées intégrées par Calibre, donne la priorité aux métadonnées originales"
 
-#: config.py:521
+#: config.py:522
 msgid "ePub Extended Metadata import options"
 msgstr "ePub Extended Metadata options d'importation"
 
-#: config.py:523
+#: config.py:524
 msgid "Set here the specifics options to read and automatic addition of metadata."
 msgstr "Définissez ici les options spécifiques pour la lecture et l'ajout automatique des métadonnées."
 
-#: config.py:527
+#: config.py:528
 msgid "Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata and the one already recorded by Calibre."
 msgstr "Choisissez le comportement à adopter en cas de conflit entre les métadonnées lues par ePub Extended Metadata et celles déjà enregistrées par Calibre."
 
-#: config.py:533
+#: config.py:534
 msgid "When importing manually:"
 msgstr "Lors d'une importation manuelle :"
 
-#: config.py:534
+#: config.py:535
 msgid "The manual import is executed by clicking on \"Import Extended Metadata\" in the menu of 'ePub Extended Metadata'"
 msgstr "L'importation manuelle est exécutée en cliquant sur « Importer les métadonnées étendues » dans le menu de \"ePub Extended Metadata\"."
 
-#: config.py:541
+#: config.py:542
 msgid "During automatic import:"
 msgstr "Pendant l'importation automatique :"
 
-#: config.py:542
+#: config.py:543
 msgid "The auto import is executed when Calibre add a book to the library"
 msgstr "L'importation automatique est exécutée lorsque Calibre ajoute un livre à la bibliothèque"
 

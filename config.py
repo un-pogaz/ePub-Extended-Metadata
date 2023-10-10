@@ -115,7 +115,7 @@ class KEY:
     @staticmethod
     def get_current_prefs():
         from .common_utils.columns import get_columns_from_dict
-        prefs = DYNAMIC.deepcopy_dict()
+        prefs = DYNAMIC.copy()
         current_columns = KEY.get_current_columns().keys()
         link = DYNAMIC[KEY.LINK_AUTHOR]
         
@@ -178,7 +178,7 @@ def plugin_check_enable_library():
         KEY.disable_plugin(KEY.AUTO_EMBED)
     
     with DYNAMIC:
-        DYNAMIC.update(PREFS.deepcopy_dict())
+        DYNAMIC.update(PREFS.copy())
         DYNAMIC[KEY.SHARED_COLUMNS] = KEY.get_used_columns()
 
 def plugin_realy_enable(key):
@@ -251,7 +251,7 @@ class ConfigWidget(QWidget):
         #self.creatorsAsAuthors.setChecked(PREFS[KEY.CREATORS_AS_AUTHOR])
         #contributor_option.addWidget(self.creatorsAsAuthors)
         
-        contributor_option.addStretch(1)
+        contributor_option.addStretch(-1)
         
         
         # ePub 3 tab
@@ -270,7 +270,7 @@ class ConfigWidget(QWidget):
         
         
         
-        scroll_layout.addStretch(1)
+        scroll_layout.addStretch(-1)
         
         # Global options
         option_layout = QHBoxLayout()
@@ -291,7 +291,7 @@ class ConfigWidget(QWidget):
         # --- Keyboard shortcuts ---
         keyboard_layout = QHBoxLayout()
         layout.addLayout(keyboard_layout)
-        keyboard_layout.addWidget(KeyboardConfigDialogButton(self))
+        keyboard_layout.addWidget(KeyboardConfigDialogButton(parent=self))
         
         view_prefs_button = LibraryPrefsViewerDialogButton()
         view_prefs_button.library_prefs_changed.connect(self.library_prefs_changed)
@@ -455,7 +455,7 @@ class ContributorTableWidget(QTableWidget):
         contributors_columns = {}
         for row in range(self.rowCount()):
             k = self.cellWidget(row, self._columnContrib).selected_key()
-            v = self.cellWidget(row, self._columnColumn).get_selected_column()
+            v = self.cellWidget(row, self._columnColumn).selected_name()
             
             if k or v:
                 contributors_columns[k if k else str(row)] = v if v else ''
@@ -463,8 +463,8 @@ class ContributorTableWidget(QTableWidget):
         return contributors_columns
 
 class ContributorsComboBox(KeyValueComboBox):
-    def __init__(self, table, selected_contributors):
-        KeyValueComboBox.__init__(self, values=CONTRIBUTORS_ROLES, selected_key=selected_contributors, values_ToolTip=CONTRIBUTORS_DESCRIPTION, parent=table)
+    def __init__(self, selected_contributors, table):
+        KeyValueComboBox.__init__(self, CONTRIBUTORS_ROLES, selected_contributors, CONTRIBUTORS_DESCRIPTION, parent=table)
         self.table = table
         self.currentIndexChanged.connect(self.test_contributors_changed)
     
@@ -483,7 +483,7 @@ class ContributorsComboBox(KeyValueComboBox):
 class DuplicColumnComboBox(CustomColumnComboBox):
     
     def __init__(self, selected_column, table):
-        CustomColumnComboBox.__init__(self, KEY.get_names(), selected_column, initial_items=[''], parent=table)
+        CustomColumnComboBox.__init__(self, KEY.get_names(), selected_column, parent=table)
         self.table = table
         self.currentIndexChanged.connect(self.test_column_changed)
     
@@ -535,7 +535,7 @@ class ConfigReaderWidget(QWidget):
         importManual_ToolTip = _('The manual import is executed by clicking on "Import Extended Metadata" in the menu of \'ePub Extended Metadata\'')
         importManual_Label.setToolTip(importManual_ToolTip)
         layout.addWidget(importManual_Label)
-        self.importManual = KeyValueComboBox(self, OPTION_MANUAL, PREFS[KEY.KEEP_CALIBRE_MANUAL])
+        self.importManual = KeyValueComboBox(OPTION_MANUAL, PREFS[KEY.KEEP_CALIBRE_MANUAL], parent=self)
         self.importManual.setToolTip(importManual_ToolTip)
         layout.addWidget(self.importManual)
         
@@ -543,7 +543,7 @@ class ConfigReaderWidget(QWidget):
         importAuto_ToolTip = _('The auto import is executed when Calibre add a book to the library')
         importAuto_Label.setToolTip(importAuto_ToolTip)
         layout.addWidget(importAuto_Label)
-        self.importAuto = KeyValueComboBox(self, OPTION_AUTO, PREFS[KEY.KEEP_CALIBRE_AUTO])
+        self.importAuto = KeyValueComboBox(OPTION_AUTO, PREFS[KEY.KEEP_CALIBRE_AUTO], parent=self)
         self.importAuto.setToolTip(importAuto_ToolTip)
         layout.addWidget(self.importAuto)
         
