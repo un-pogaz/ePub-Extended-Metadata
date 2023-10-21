@@ -6,5 +6,7 @@ __pycache__/
 --*/
 zz*
 *.lnk
+*.url
 *.mo
+.vscode/settings.json
 MobileRead_post.bbcode
