@@ -33,7 +33,7 @@ Idea lauch here: https://www.mobileread.com/forums/showthread.php?t=344482
 
 **Installation**
 
-Open *Preferences -> Plugins -> Get new plugins* and install the "Comments Cleaner" plugin.
+Open *Preferences -> Plugins -> Get new plugins* and install the "ePub Extended Metadata" plugin.
 You may also download the attached zip file and install the plugin manually, then restart calibre as described in the [Introduction to plugins thread](https://www.mobileread.com/forums/showthread.php?t=118680")
 
 The plugin works for Calibre 5 and later.
