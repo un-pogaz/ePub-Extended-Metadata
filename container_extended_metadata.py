@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 __license__   = 'GPL v3'
 __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
-__docformat__ = 'restructuredtext en'
 
 
 try:
@@ -54,7 +52,7 @@ class OPFParseError(OPFException, ParseError):
         ValueError.__init__(self, name, err)
 
 
-class ContainerExtendedMetadata(object):
+class ContainerExtendedMetadata:
     '''
     epub can be a file path or a stream
     '''
