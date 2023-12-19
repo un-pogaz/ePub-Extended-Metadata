@@ -21,6 +21,7 @@ Of course, other metadata not set in your plugin are kept.
 
 1. the setting of "ePub Extended Metadata" is done by *Library*.
 2. "ePub Extended Metadata" came with 2 companion plugin "ePub Extended Metadata {Reader}" and "ePub Extended Metadata {Writer}" that are auto-installed, so do not be surprised to see them appear, it means the plugin has been properly installed.
+3. The plugin use custom colums "Comma separated text, like tags", with the option "Contains names" checked to make the value separated by a Ampersand & (like Authors)
 
 
 **Credits:**
