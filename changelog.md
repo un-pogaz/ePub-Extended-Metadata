@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.11.1] - 2024/01/27
+
+### Bug fixes
+- Fix wrong text display when customizing keyboard shortcut
+
 ## [0.11.0] - 2023/11/17
 
 ### Changed
