@@ -46,20 +46,16 @@ class ePubExtendedMetadataAction(InterfaceAction):
     name = PLUGIN_NAME
     # Create our top-level menu/toolbar action (text, icon_path, tooltip, keyboard shortcut)
     action_spec = (PLUGIN_NAME, None, _('Edit the Extended Metadata of the ePub files'), None)
-    #popup_type = QToolButton.MenuButtonPopup
     popup_type = QToolButton.InstantPopup
     action_type = 'current'
     dont_add_to = frozenset(['context-menu-device'])
     
     def genesis(self):
-        self.is_library_selected = True
         self.menu = QMenu(GUI)
-        self.rebuild_menus()
-        
-        # Assign our menu to this action and an icon
         self.qaction.setMenu(self.menu)
         self.qaction.setIcon(get_icon(ICON.PLUGIN))
         #self.qaction.triggered.connect(self.toolbar_triggered)
+        self.rebuild_menus()
     
     def rebuild_menus(self):
         self.menu.clear()
