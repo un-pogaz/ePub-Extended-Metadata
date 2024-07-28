@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.11.3] - 2024/07/28
+
+### Bug fixes
+- Fix only one book updated when import Extended Metadata
+
 ## [0.11.2] - 2024/02/19
 
 ### Bug fixes

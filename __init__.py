@@ -27,7 +27,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
     description             = _("Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries.")
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
-    version                 = (0, 11, 2)
+    version                 = (0, 11, 3)
     minimum_calibre_version = (5, 0, 0)
     
     name_reader              = name + ' {Reader}'

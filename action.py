@@ -326,7 +326,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         
         
         for id, miA in import_mi.items():
-            self.dbAPI.set_metadata(book_id, miA)
+            self.dbAPI.set_metadata(id, miA)
         
         self.no_epub_count = len(no_epub_id)
         self.export_count = len(export_id)
