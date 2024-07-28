@@ -24,7 +24,7 @@ except ImportError:
         QMenu, QToolButton,
     )
 
-from calibre.gui2 import error_dialog, warning_dialog, question_dialog, info_dialog
+from calibre.gui2 import warning_dialog
 from calibre.gui2.actions import InterfaceAction
 
 from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, has_restart_pending
@@ -141,8 +141,6 @@ class ePubExtendedMetadataAction(InterfaceAction):
 def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata={}) -> List[str]:
     field_change = []
     
-    debug_print('len(check_user_metadata):', len(check_user_metadata))
-    
     if check_user_metadata:
         #check if the Metadata object accepts those added
         from .common_utils.columns import get_columns_from_dict, string_to_authors
@@ -227,7 +225,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
     def end_progress(self):
         
         #info debug
-        debug_print('ePub Extended Metadata launched for {self.book_count} books.')
+        debug_print(f'ePub Extended Metadata launched for {self.book_count} books.')
         
         if self.wasCanceled():
             debug_print('ePub Extended Metadata Metadata was aborted.')
