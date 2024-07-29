@@ -143,7 +143,8 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
     
     if check_user_metadata:
         #check if the Metadata object accepts those added
-        from .common_utils.columns import get_columns_from_dict, string_to_authors
+        from .common_utils.columns import get_columns_from_dict
+        from calibre.ebooks.metadata import string_to_authors
         miA_columns = get_columns_from_dict(miA.get_all_user_metadata(True))
         miA_init_len = len(miA_columns)
         for k,cc in check_user_metadata.items():

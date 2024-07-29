@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.11.4] - 2024/07/29
+
+### Bug fixes
+- Fix error for importing Authors-like values
+
 ## [0.11.3] - 2024/07/28
 
 ### Bug fixes
