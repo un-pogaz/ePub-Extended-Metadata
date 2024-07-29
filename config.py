@@ -28,8 +28,7 @@ except ImportError:
         QVBoxLayout, QWidget,
     )
 
-from calibre.gui2 import error_dialog, question_dialog, info_dialog, warning_dialog
-from calibre.ebooks.metadata import string_to_authors
+from calibre.gui2 import question_dialog, warning_dialog
 from calibre.library.field_metadata import FieldMetadata
 from calibre.utils.icu import strcmp
 
