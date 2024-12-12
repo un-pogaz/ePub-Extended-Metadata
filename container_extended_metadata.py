@@ -7,7 +7,7 @@ __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 try:
     load_translations()
 except NameError:
-    pass # load_translations() added in calibre 1.9
+    pass  # load_translations() added in calibre 1.9
 
 import os
 
@@ -45,9 +45,9 @@ class OPFParseError(OPFException, ParseError):
 
 
 class ContainerExtendedMetadata:
-    '''
+    """
     epub can be a file path or a stream
-    '''
+    """
     def __init__(self, epub, read_only=False):
         # Load ZIP
         self.ZIP = None
@@ -100,9 +100,9 @@ class ContainerExtendedMetadata:
 
 
 def read_extended_metadata(epub):
-    '''
+    """
     epub/opf can be a file path or a stream
-    '''
+    """
     extended_metadata = {}
     
     # Use a "stream" to read the OPF without any extracting
@@ -112,9 +112,9 @@ def read_extended_metadata(epub):
     return extended_metadata
 
 def write_extended_metadata(epub, extended_metadata):
-    '''
+    """
     epub/opf can be a file path or a stream
-    '''
+    """
     debug_print('write_extended_metadata()')
     debug_print('extended_metadata:', extended_metadata)
     
@@ -129,11 +129,11 @@ def _read_extended_metadata(container):
     extended_metadata[KEY.CREATORS] = creators = []
     extended_metadata[KEY.CONTRIBUTORS] = contributors = {}
     
-    extended_metadata[KEY.SERIES] = series = {}
+    extended_metadata[KEY.SERIES] = {}
     
-    extended_metadata[KEY.SERIES] = series = {}
+    extended_metadata[KEY.SERIES] = {}
     
-    extended_metadata[KEY.COLLECTIONS] = collections = {}
+    extended_metadata[KEY.COLLECTIONS] = {}
     if not container.opf:
         return extended_metadata
     
@@ -155,7 +155,7 @@ def _read_extended_metadata(container):
         for child in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
             tbl = child.xpath('@opf:role', namespaces=NAMESPACES)
             role = tbl[0] if tbl else 'oth'
-            if not role in contributors:
+            if role not in contributors:
                 contributors[role] = []
             for author in string_to_authors(child.text):
                 contributors[role].append(author)
@@ -164,7 +164,8 @@ def _read_extended_metadata(container):
     if container.version[0] == 3:
         for contrib in container.metadata.xpath('dc:contributor[@id]', namespaces=NAMESPACES):
             id = contrib.attrib['id']
-            roles = container.metadata.xpath(f'opf:meta[@refines="#{id}" and @property="role" and @scheme="marc:relators"]', namespaces=NAMESPACES)
+            xpath = f'opf:meta[@refines="#{id}" and @property="role" and @scheme="marc:relators"]'
+            roles = container.metadata.xpath(xpath, namespaces=NAMESPACES)
             
             role = 'oth'
             if roles:
@@ -230,10 +231,12 @@ def _write_extended_metadata(container, extended_metadata):
             id_s = contrib.attrib.get('id', None)
             if id_s:
                 #remove all marc code
-                for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}" and @property="role" and @scheme="marc:relators"]', namespaces=NAMESPACES):
+                xpath = f'opf:meta[@refines="#{id_s}" and @property="role" and @scheme="marc:relators"]'
+                for meta in container.metadata.xpath(xpath, namespaces=NAMESPACES):
                     container.metadata.remove(meta)
                 # if the contributor has others meta linked (except "file-as")
-                if not container.metadata.xpath(f'opf:meta[@refines="#{id_s}" and not(@property="file-as")]', namespaces=NAMESPACES):
+                xpath = f'opf:meta[@refines="#{id_s}" and not(@property="file-as")]'
+                if not container.metadata.xpath(xpath, namespaces=NAMESPACES):
                     # coutain if the contributor has no others meta linked (or only "file-as"), del the contributor
                     container.metadata.remove(contrib)
                     #and del the "file-as"

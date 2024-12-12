@@ -7,14 +7,14 @@ __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 try:
     load_translations()
 except NameError:
-    pass # load_translations() added in calibre 1.9
+    pass  # load_translations() added in calibre 1.9
 
 # The class that all Interface Action plugin wrappers must inherit from
 from calibre.customize import InterfaceActionBase
 
 
 class ePubExtendedMetadata(InterfaceActionBase):
-    '''
+    """
     This class is a simple wrapper that provides information about the actual
     plugin class. The actual interface plugin class is called InterfacePlugin
     and is defined in the ui.py file, as specified in the actual_plugin field
@@ -22,9 +22,10 @@ class ePubExtendedMetadata(InterfaceActionBase):
     
     The reason for having two classes is that it allows the command line
     calibre utilities to run without needing to load the GUI libraries.
-    '''
+    """
     name                    = 'ePub Extended Metadata'
-    description             = _("Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries.")
+    description             = _("Read and write a wider range of metadata for ePub's files"
+                                "and associating them to columns in your libraries.")
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
     version                 = (0, 11, 4)
@@ -49,7 +50,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
     
     
     def initialize(self):
-        '''
+        """
         Called once when calibre plugins are initialized.  Plugins are
         re-initialized every time a new plugin is added. Also note that if the
         plugin is run in a worker process, such as for adding books, then the
@@ -60,7 +61,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
         available as ``self.plugin_path``.
         
         Note that ``self.site_customization`` is **not** available at this point.
-        '''
+        """
         
         from calibre.customize.ui import _initialized_plugins, initialize_plugin
         
@@ -68,7 +69,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
         
         def append_plugin(plugin):
             try:
-                if installation_type != None:
+                if installation_type is not None:
                     p = initialize_plugin(plugin, self.plugin_path, installation_type)
                 else:
                     p = initialize_plugin(plugin, self.plugin_path)
@@ -87,15 +88,15 @@ class ePubExtendedMetadata(InterfaceActionBase):
     
     
     def is_customizable(self):
-        '''
+        """
         This method must return True to enable customization via
         Preferences->Plugins
-        '''
+        """
         return True
     
     
     def config_widget(self):
-        '''
+        """
         Implement this method and :meth:`save_settings` in your plugin to
         use a custom configuration dialog.
         
@@ -111,7 +112,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
         
         The base class implementation of this method raises NotImplementedError
         so by default no user configuration is possible.
-        '''
+        """
         # It is important to put this import statement here rather than at the
         # top of the module as importing the config class will also cause the
         # GUI libraries to be loaded, which we do not want when using calibre
@@ -121,11 +122,11 @@ class ePubExtendedMetadata(InterfaceActionBase):
             return ConfigWidget()
     
     def save_settings(self, config_widget):
-        '''
+        """
         Save the settings specified by the user with config_widget.
         
         :param config_widget: The widget returned by :meth:`config_widget`.
-        '''
+        """
         config_widget.save_settings()
 
 

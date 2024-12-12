@@ -2,6 +2,7 @@
 requires-python = ">=3.8"
 
 [tool.ruff]
+exclude = ["common_utils/"]
 line-length = 120
 target-version = "py38"
 builtins = ['_', 'I']
@@ -12,9 +13,11 @@ select = ['E', 'F', 'I', 'W']
 
 [tool.ruff.lint.per-file-ignores]
 "columns.py" = ['E501']
+"marc_relators.py" = ['E501']
 
 [tool.ruff.format]
 quote-style = 'single'
+exclude = ["marc_relators.py"]
 
 [tool.ruff.lint.isort]
 detect-same-package = true

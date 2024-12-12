@@ -7,7 +7,7 @@ __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 try:
     load_translations()
 except NameError:
-    pass # load_translations() added in calibre 1.9
+    pass  # load_translations() added in calibre 1.9
 
 import copy
 from collections import OrderedDict
@@ -66,9 +66,9 @@ class ICON:
 
 
 class FIELD:
-    '''
-    contains the information to associate the data to a field 
-    '''
+    """
+    contains the information to associate the data to a field
+    """
     class AUTHOR:
         ROLE = 'aut'
         NAME = 'authors'
@@ -108,27 +108,26 @@ class KEY:
         from calibre.customize.ui import find_plugin
         
         from .common_utils import PLUGIN_CLASSE
-        return find_plugin(PLUGIN_CLASSE.name_writer if key == KEY.AUTO_EMBED else PLUGIN_CLASSE.name_reader) 
+        return find_plugin(PLUGIN_CLASSE.name_writer if key == KEY.AUTO_EMBED else PLUGIN_CLASSE.name_reader)
     
     @staticmethod
     def enable_plugin(key):
         from calibre.customize.ui import enable_plugin
         p = KEY.find_plugin(key)
-        if p: enable_plugin(p.name)
+        if p:
+            enable_plugin(p.name)
     
     @staticmethod
     def disable_plugin(key):
         from calibre.customize.ui import disable_plugin
         p = KEY.find_plugin(key)
-        if p: disable_plugin(p.name)
+        if p:
+            disable_plugin(p.name)
     
     
     @staticmethod
     def get_current_columns():
         from .common_utils.columns import get_columns_from_dict
-        d = DYNAMIC[KEY.SHARED_COLUMNS]
-        d = get_columns_from_dict(DYNAMIC[KEY.SHARED_COLUMNS])
-        
         return get_columns_from_dict(DYNAMIC[KEY.SHARED_COLUMNS])
     
     @staticmethod
@@ -163,7 +162,9 @@ class KEY:
     @staticmethod
     def get_used_columns():
         from .common_utils.columns import get_columns_where
-        treated_column = [v for k,v in PREFS.items() if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, str)] + [c for c in PREFS[KEY.CONTRIBUTORS].values() if isinstance(c, str)]
+        treated_column = []
+        treated_column.extend([v for k,v in PREFS.items() if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, str)])
+        treated_column.extend([c for c in PREFS[KEY.CONTRIBUTORS].values() if isinstance(c, str)])
         def predicate(column):
             return column.is_custom and column.name in treated_column
         
@@ -260,12 +261,21 @@ class ConfigWidget(QWidget):
         contributor_layout.addLayout(contributor_option)
         
         self.linkAuthors = QCheckBox(_('Embed "{:s}" column').format(FIELD.AUTHOR.COLUMN), self)
-        self.linkAuthors.setToolTip(_('Embed the "{:s}" column as a Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column.').format(FIELD.AUTHOR.COLUMN, FIELD.AUTHOR.LOCAL))
+        self.linkAuthors.setToolTip(
+            _('Embed the "{:s}" column as a Contributors metadata.'
+            'This a write-only option, the import action will not change the Calibre {:s} column.').format(
+                FIELD.AUTHOR.COLUMN, FIELD.AUTHOR.LOCAL,
+            )
+        )
         self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
         contributor_option.addWidget(self.linkAuthors)
         
         #self.creatorsAsAuthors = QCheckBox(_('Import all Creators as authors'), self)
-        #self.creatorsAsAuthors.setToolTip(_('Import all Creators as {:s} in "{:s}" column.').format(FIELD.AUTHOR.LOCAL, FIELD.AUTHOR.COLUMN))
+        #self.creatorsAsAuthors.setToolTip(
+        #    _('Import all Creators as {:s} in "{:s}" column.').format(
+        #       FIELD.AUTHOR.LOCAL, FIELD.AUTHOR.COLUMN
+        #    )
+        #)
         #self.creatorsAsAuthors.setChecked(PREFS[KEY.CREATORS_AS_AUTHOR])
         #contributor_option.addWidget(self.creatorsAsAuthors)
         
@@ -297,11 +307,15 @@ class ConfigWidget(QWidget):
         option_layout.insertStretch(-1)
         
         self.reader_button = QPushButton(_('Automatic import'))
-        self.reader_button.setToolTip(_('Allows to automatically import the extended metadata when adding a new book to the library'))
+        self.reader_button.setToolTip(
+            _('Allows to automatically import the extended metadata when adding a new book to the library')
+        )
         button_plugin_initialized(self.reader_button, KEY.AUTO_IMPORT)
         option_layout.addWidget(self.reader_button)
         self.writer_button = QPushButton(_('Automatic embed'))
-        self.writer_button.setToolTip(_('Allows to to automatically embed the extended metadata at the same time as the default Calibre action'))
+        self.writer_button.setToolTip(
+            _('Allows to to automatically embed the extended metadata at the same time as the default Calibre action')
+        )
         button_plugin_initialized(self.writer_button, KEY.AUTO_EMBED)
         option_layout.addWidget(self.writer_button)
         
@@ -328,9 +342,12 @@ class ConfigWidget(QWidget):
     
     def validate(self):
         valide = self.table.valide_contributors_columns()
-        if not valide: warning_dialog(GUI, _('Duplicate values'),
-                _("The current parameters contain duplicate values.\nYour changes can't be saved and have been cancelled."),
-                show=True, show_copy_button=False)
+        if not valide:
+            warning_dialog(GUI,
+                _('Duplicate values'),
+            _("The current parameters contain duplicate values.\nYour changes can't be saved and have been cancelled."),
+                show=True, show_copy_button=False,
+            )
             
         return valide
     
@@ -460,8 +477,9 @@ class ContributorTableWidget(QTableWidget):
     
     
     def _duplicate_entrys(self, column):
-        de = duplicate_entry([ self.cellWidget(row, column).currentText() for row in range(self.rowCount()) ])
-        if '' in de: de.remove('')
+        de = duplicate_entry([self.cellWidget(row, column).currentText() for row in range(self.rowCount())])
+        if '' in de:
+            de.remove('')
         return de
     
     def valide_contributors_columns(self):
@@ -482,7 +500,12 @@ class ContributorTableWidget(QTableWidget):
 
 class ContributorsComboBox(KeyValueComboBox):
     def __init__(self, selected_contributors, table):
-        KeyValueComboBox.__init__(self, CONTRIBUTORS_ROLES, selected_contributors, CONTRIBUTORS_DESCRIPTION, parent=table)
+        KeyValueComboBox.__init__(self,
+            CONTRIBUTORS_ROLES,
+            selected_contributors,
+            CONTRIBUTORS_DESCRIPTION,
+            parent=table,
+        )
         self.table = table
         self.currentIndexChanged.connect(self.test_contributors_changed)
     
@@ -494,7 +517,9 @@ class ContributorsComboBox(KeyValueComboBox):
         de = self.table._duplicate_entrys(self.table._columnContrib)
         if de and de.count(self.currentText()):
             warning_dialog(self, _('Duplicate Contributors type'),
-                _('A Contributor was duplicated!\nChange the settings so that each contributor is present only once, otherwise the settings can not be saved.\n\nDuplicate type:')
+                _('A Contributor was duplicated!\n'
+                'Change the settings so that each contributor is present only once, '
+                'otherwise the settings can not be saved.\n\nDuplicate type:')
                 + '\n' + '\n'.join(de),
                 show=True, show_copy_button=False)
 
@@ -513,7 +538,9 @@ class DuplicColumnComboBox(CustomColumnComboBox):
         de = self.table._duplicate_entrys(self.table._columnColumn)
         if de and de.count(self.currentText()):
             warning_dialog(self, _('Duplicate Custom column'),
-                _('A Custom column was duplicated!\nChange the settings so that each Custom column is present only once, otherwise the settings can not be saved.\n\nDuplicate column:')
+                _('A Custom column was duplicated!\n'
+                'Change the settings so that each Custom column is present only once, '
+                'otherwise the settings can not be saved.\n\nDuplicate column:')
                 + '\n' + '\n'.join(de),
                 show=True, show_copy_button=False)
 
@@ -543,14 +570,17 @@ class ConfigReaderWidget(QWidget):
         head.setWordWrap(True)
         layout.addWidget(head)
         
-        conflict = QLabel(_('Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata and the one already recorded by Calibre.'))
+        conflict = QLabel(_('Choose the behavior to adopt in case of conflict between the metadata read'
+                            'by ePub Extended Metadata and the one already recorded by Calibre.')
+        )
         conflict.setWordWrap(True)
         layout.addWidget(conflict)
         
         layout.addWidget(QLabel(''))
         
         importManual_Label = QLabel(_('When importing manually:'))
-        importManual_ToolTip = _('The manual import is executed by clicking on "Import Extended Metadata" in the menu of \'ePub Extended Metadata\'')
+        importManual_ToolTip = _('The manual import is executed by clicking on "Import Extended Metadata" '
+                                 'in the menu of \'ePub Extended Metadata\'')
         importManual_Label.setToolTip(importManual_ToolTip)
         layout.addWidget(importManual_Label)
         self.importManual = KeyValueComboBox(OPTION_MANUAL, PREFS[KEY.KEEP_CALIBRE_MANUAL], parent=self)

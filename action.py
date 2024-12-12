@@ -7,7 +7,7 @@ __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 try:
     load_translations()
 except NameError:
-    pass # load_translations() added in calibre 1.9
+    pass  # load_translations() added in calibre 1.9
 
 import os.path
 from typing import Any, Dict, List
@@ -89,15 +89,15 @@ class ePubExtendedMetadataAction(InterfaceAction):
         plugin_check_enable_library()
     
     def gui_layout_complete(self):
-        '''
+        """
         Called once per action when the layout of the main GUI is
         completed. If your action needs to make changes to the layout, they
         should be done here, rather than in :meth:`initialization_complete`.
-        '''
+        """
         plugin_check_enable_library()
     
     def shutting_down(self):
-        '''
+        """
         Called once per plugin when the main GUI is in the process of shutting
         down. Release any used resources, but try not to block the shutdown for
         long periods of time.
@@ -105,7 +105,7 @@ class ePubExtendedMetadataAction(InterfaceAction):
         :return: False to halt the shutdown. You are responsible for telling
                  the user why the shutdown was halted.
         
-        '''
+        """
         plugin_realy_enable(KEY.AUTO_IMPORT)
         plugin_realy_enable(KEY.AUTO_EMBED)
         return True
@@ -115,10 +115,10 @@ class ePubExtendedMetadataAction(InterfaceAction):
         self.embed_extended_metadata()
     
     def embed_extended_metadata(self):
-        self.run_extended_metadata({id:VALUE.EMBED for id in get_BookIds_selected(show_error=True)}) 
+        self.run_extended_metadata({id:VALUE.EMBED for id in get_BookIds_selected(show_error=True)})
         
     def import_extended_metadata(self):
-        self.run_extended_metadata({id:VALUE.IMPORT for id in get_BookIds_selected(show_error=True)}) 
+        self.run_extended_metadata({id:VALUE.IMPORT for id in get_BookIds_selected(show_error=True)})
     
     def edit_bulk_extended_metadata(self):
         debug_print('edit_bulk_extended_metadata')
@@ -139,7 +139,6 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
         
         from .common_utils.columns import get_columns_from_dict
         miA_columns = get_columns_from_dict(miA.get_all_user_metadata(True))
-        miA_init_len = len(miA_columns)
         for k,cc in check_user_metadata.items():
             if not (cc.is_composite or cc.is_csp):
                 if k not in miA_columns:
@@ -229,27 +228,39 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
             custom_exception_dialog(self.exception)
         
         if self.exception_read:
-            
-            det_msg= '\n'.join((f'Book {book_info} |> '+ e.__class__.__name__ +': '+ str(e)) for id, book_info, e in self.exception_read)
+            lst = []
+            for id, book_info, e in self.exception_read:
+                lst.append(f'Book {book_info} |> '+ e.__class__.__name__ +': '+ str(e))
+            det_msg= '\n'.join(lst)
             
             warning_dialog(GUI, _('Exceptions during the reading of Extended Metadata'),
-                        _('{:d} exceptions have occurred during the reading of Extended Metadata.\nSome books may not have been updated.').format(len(self.exception_read)),
-                            det_msg='-- ePub Extended Metadata: reading exceptions --\n\n'+det_msg, show=True, show_copy_button=True)
+                _('{:d} exceptions have occurred during the reading of Extended Metadata.\n'
+                'Some books may not have been updated.').format(len(self.exception_read)),
+                det_msg='-- ePub Extended Metadata: reading exceptions --\n\n'+det_msg,
+                show=True, show_copy_button=True,
+            )
         
         if self.exception_write:
-            
-            det_msg= '\n'.join((f'Book {book_info} |> '+ e.__class__.__name__ +': '+ str(e)) for id, book_info, e in self.exception_write)
+            lst = []
+            for id, book_info, e in self.exception_write:
+                lst.append(f'Book {book_info} |> '+ e.__class__.__name__ +': '+ str(e))
+            det_msg= '\n'.join(lst)
             
             warning_dialog(GUI, _('Exceptions during the writing of Extended Metadata'),
-                        _('{:d} exceptions have occurred during the writing of Extended Metadata.\nSome books may not have been updated.').format(len(self.exception_write)),
-                            det_msg='-- ePub Extended Metadata: writing exceptions --\n\n'+det_msg, show=True, show_copy_button=True)
-        
+                _('{:d} exceptions have occurred during the writing of Extended Metadata.\n'
+                'Some books may not have been updated.').format(len(self.exception_write)),
+                det_msg='-- ePub Extended Metadata: writing exceptions --\n\n'+det_msg,
+                show=True, show_copy_button=True,
+            )
         
         if self.no_epub_count:
             debug_print(f"{self.no_epub_count} books didn't have an ePub format.")
         
         if self.import_count:
-            debug_print(f'Extended Metadata read for {self.import_count} books with a total of {self.import_field_count} fields modify.')
+            debug_print(
+                f'Extended Metadata read for {self.import_count} books'
+                f'with a total of {self.import_field_count} fields modify.'
+            )
         else:
             debug_print('No Extended Metadata read from selected books.')
         
@@ -280,7 +291,15 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
             
             ###
             miA = self.dbAPI.get_metadata(book_id, get_cover=False, get_user_categories=False)
-            book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+') [book: '+str(num)+'/'+str(self.book_count)+']{id: '+str(book_id)+'}'
+            
+            # book_info = "title" (author & author) [book: num/book_count]{id: book_id}
+            book_info = '"{title}" ({authors}) [book: {num}/{book_count}]{{id: {book_id}}}'.format(
+                title=miA.get('title'),
+                authors=' & '.join(miA.get('authors')),
+                num=num,
+                book_count=self.book_count,
+                book_id=book_id,
+            )
             
             fmt = 'EPUB'
             path = self.dbAPI.format_abspath(book_id, fmt)
@@ -291,7 +310,12 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                         debug_print('Read ePub Extended Metadata for', book_info, '\n')
                         extended_metadata = read_extended_metadata(path)
                         #try:
-                        import_id[book_id] = apply_extended_metadata(miA, self.prefs, extended_metadata, keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_MANUAL])
+                        import_id[book_id] = apply_extended_metadata(
+                            miA,
+                            self.prefs,
+                            extended_metadata,
+                            keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_MANUAL],
+                        )
                         if import_id[book_id]:
                             import_mi[book_id] = miA
                         #except Exception as err:
@@ -309,7 +333,13 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                     new_size = os.path.getsize(path)
                     if new_size is not None:
                         fname = self.dbAPI.fields['formats'].format_fname(book_id, fmt.upper())
-                        max_size = self.dbAPI.fields['formats'].table.update_fmt(book_id, fmt.upper(), fname, new_size, self.dbAPI.backend)
+                        max_size = self.dbAPI.fields['formats'].table.update_fmt(
+                            book_id,
+                            fmt.upper(),
+                            fname,
+                            new_size,
+                            self.dbAPI.backend,
+                        )
                         self.dbAPI.fields['size'].table.update_sizes({book_id:max_size})
                     
                     #except Exception as err:
@@ -368,7 +398,11 @@ def write_metadata(stream, fmt, miA):
         write_extended_metadata(stream, extended_metadata)
     except:
         if report_error is None:
-            debug_print('Failed to set extended metadata for the', fmt.upper(), 'format of:', getattr(miA, 'title', ''), file=sys.stderr)
+            debug_print(
+                'Failed to set extended metadata for the', fmt.upper(),
+                'format of:', getattr(miA, 'title', ''),
+                file=sys.stderr,
+            )
             traceback.print_exc()
         else:
             report_error(miA, fmt.upper(), traceback.format_exc())
