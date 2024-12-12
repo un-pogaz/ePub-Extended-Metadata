@@ -1,0 +1,28 @@
+[project]
+requires-python = ">=3.8"
+
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+builtins = ['_', 'I']
+
+[tool.ruff.lint]
+ignore = ['E741', 'E402', 'E722', 'W293']
+select = ['E', 'F', 'I', 'W']
+
+[tool.ruff.lint.per-file-ignores]
+"columns.py" = ['E501']
+
+[tool.ruff.format]
+quote-style = 'single'
+
+[tool.ruff.lint.isort]
+detect-same-package = true
+known-first-party = ["calibre", "calibre_extensions", "polyglot"]
+known-third-party = ["qt"]
+relative-imports-order = "closest-to-furthest"
+split-on-trailing-comma = false
+section-order = ["__python__", "future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+"__python__" = ["__python__"]
