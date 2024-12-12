@@ -5,8 +5,7 @@ __copyright__ = '2021, un_pogaz <un.pogaz@gmail.com>'
 
 
 # The class that all Interface Action plugin wrappers must inherit from
-from calibre.customize import MetadataReaderPlugin, MetadataWriterPlugin
-
+from calibre.customize import MetadataWriterPlugin
 
 PLUGIN_CLASSE = None
 def get_plugin_attribut(name, default=None):
@@ -15,6 +14,7 @@ def get_plugin_attribut(name, default=None):
     global PLUGIN_CLASSE
     if not PLUGIN_CLASSE:
         import importlib
+        
         from calibre.customize import Plugin
         #Yes, it's very long for a one line. It's seems crazy, but it's fun and it works
         plugin_classes = [ obj for obj in importlib.import_module('.'.join(__name__.split('.')[:-1])).__dict__.values() if isinstance(obj, type) and issubclass(obj, Plugin) and obj.name != 'Trivial Plugin' ]
@@ -51,7 +51,7 @@ class MetadataWriter(MetadataWriterPlugin):
         :param mi: A :class:`calibre.ebooks.metadata.book.Metadata` object
         '''
         from calibre.customize.builtins import EPUBMetadataWriter
-        from calibre.customize.ui import find_plugin, apply_null_metadata, force_identifiers, config
+        from calibre.customize.ui import apply_null_metadata, config, find_plugin, force_identifiers
         
         # Use the Calibre EPUBMetadataWriter
         if hasattr(stream, 'seek'): stream.seek(0)

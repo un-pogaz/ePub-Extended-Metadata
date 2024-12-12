@@ -62,11 +62,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
         Note that ``self.site_customization`` is **not** available at this point.
         '''
         
-        import os
-        from calibre.utils.config import plugin_dir
-        from calibre.utils.zipfile import ZipFile
-        
-        from calibre.customize.ui import initialize_plugin, _initialized_plugins, config, find_plugin, load_plugin
+        from calibre.customize.ui import _initialized_plugins, initialize_plugin
         
         installation_type = getattr(self, 'installation_type', None)
         
@@ -82,8 +78,8 @@ class ePubExtendedMetadata(InterfaceActionBase):
                 print(ePubExtendedMetadata.PREFS_NAMESPACE, 'initialize():', 'An error has occurred:', err)
                 return None
         
-        from .writer import MetadataWriter
         from .reader import MetadataReader
+        from .writer import MetadataWriter
         
         append_plugin(MetadataWriter)
         append_plugin(MetadataReader)

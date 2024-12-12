@@ -9,26 +9,18 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from collections import defaultdict, OrderedDict
-from functools import partial
-from typing import Any
-
 import os
 
 from lxml import etree
-from lxml.etree import XMLSyntaxError
 
-from calibre.ebooks.chardet import xml_to_unicode
-from calibre.ebooks.metadata import string_to_authors, author_to_author_sort, title_sort
+from calibre.ebooks.metadata import author_to_author_sort, string_to_authors
+from calibre.ebooks.metadata.epub import EPubException, get_zip_reader
 from calibre.ebooks.metadata.opf2 import OPF
-from calibre.ebooks.metadata.utils import parse_opf, pretty_print_opf
-from calibre.ebooks.metadata.epub import get_zip_reader, EPubException, OCFException, ContainerException
-from calibre.ebooks.oeb.parse_utils import RECOVER_PARSER
-from calibre.utils.zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED, safe_replace
+from calibre.ebooks.metadata.utils import pretty_print_opf
+from calibre.utils.zipfile import ZIP_DEFLATED, ZipFile, safe_replace
 
 from .common_utils import debug_print
-from .config import KEY, FIELD
-
+from .config import KEY
 
 NS_OCF = 'urn:oasis:names:tc:opendocument:xmlns:container'
 NS_OPF = 'http://www.idpf.org/2007/opf'

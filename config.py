@@ -9,34 +9,55 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from collections import defaultdict, OrderedDict
-from functools import partial
-from typing import Any
-
 import copy
+from collections import OrderedDict
+from functools import partial
 
 try:
     from qt.core import (
-        Qt, QAbstractItemView, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QPushButton,
-        QScrollArea, QSizePolicy, QSpacerItem, QTabWidget, QTableWidget, QToolButton,
-        QVBoxLayout, QWidget,
+        QAbstractItemView,
+        QCheckBox,
+        QGridLayout,
+        QHBoxLayout,
+        QLabel,
+        QPushButton,
+        QScrollArea,
+        QSizePolicy,
+        QSpacerItem,
+        Qt,
+        QTableWidget,
+        QTabWidget,
+        QToolButton,
+        QVBoxLayout,
+        QWidget,
     )
 except ImportError:
     from PyQt5.Qt import (
-        Qt, QAbstractItemView, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QPushButton,
-        QScrollArea, QSizePolicy, QSpacerItem, QTabWidget, QTableWidget, QToolButton,
-        QVBoxLayout, QWidget,
+        QAbstractItemView,
+        QCheckBox,
+        QGridLayout,
+        QHBoxLayout,
+        QLabel,
+        QPushButton,
+        QScrollArea,
+        QSizePolicy,
+        QSpacerItem,
+        Qt,
+        QTableWidget,
+        QTabWidget,
+        QToolButton,
+        QVBoxLayout,
+        QWidget,
     )
 
 from calibre.gui2 import question_dialog, warning_dialog
 from calibre.library.field_metadata import FieldMetadata
 from calibre.utils.icu import strcmp
 
-from .common_utils import debug_print, get_icon, GUI, PREFS_library, PREFS_dynamic, duplicate_entry
-from .common_utils.widgets import ImageTitleLayout, ReadOnlyTableWidgetItem, KeyValueComboBox, CustomColumnComboBox
+from .common_utils import GUI, PREFS_dynamic, PREFS_library, debug_print, duplicate_entry, get_icon
 from .common_utils.dialogs import KeyboardConfigDialogButton, LibraryPrefsViewerDialogButton
-
-from .marc_relators import CONTRIBUTORS_ROLES, CONTRIBUTORS_DESCRIPTION
+from .common_utils.widgets import CustomColumnComboBox, ImageTitleLayout, KeyValueComboBox, ReadOnlyTableWidgetItem
+from .marc_relators import CONTRIBUTORS_DESCRIPTION, CONTRIBUTORS_ROLES
 
 
 class ICON:
@@ -84,8 +105,9 @@ class KEY:
     
     @staticmethod
     def find_plugin(key):
-        from .common_utils import PLUGIN_CLASSE
         from calibre.customize.ui import find_plugin
+        
+        from .common_utils import PLUGIN_CLASSE
         return find_plugin(PLUGIN_CLASSE.name_writer if key == KEY.AUTO_EMBED else PLUGIN_CLASSE.name_reader) 
     
     @staticmethod
@@ -111,7 +133,6 @@ class KEY:
     
     @staticmethod
     def get_current_prefs():
-        from .common_utils.columns import get_columns_from_dict
         prefs = DYNAMIC.copy()
         current_columns = KEY.get_current_columns().keys()
         link = DYNAMIC[KEY.LINK_AUTHOR]

@@ -9,30 +9,22 @@ try:
 except NameError:
     pass # load_translations() added in calibre 1.9
 
-from collections import defaultdict, OrderedDict
-from functools import partial
+import os.path
 from typing import Any, Dict, List
 
-import os.path
-
 try:
-    from qt.core import (
-        QMenu, QToolButton,
-    )
+    from qt.core import QMenu, QToolButton
 except ImportError:
-    from PyQt5.Qt import (
-        QMenu, QToolButton,
-    )
+    from PyQt5.Qt import QMenu, QToolButton
 
 from calibre.gui2 import warning_dialog
 from calibre.gui2.actions import InterfaceAction
 
-from .common_utils import debug_print, get_icon, GUI, PLUGIN_NAME, has_restart_pending
+from .common_utils import GUI, PLUGIN_NAME, debug_print, get_icon, has_restart_pending
+from .common_utils.dialogs import ProgressDialog, custom_exception_dialog
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.menus import create_menu_action_unique
-from .common_utils.dialogs import custom_exception_dialog, ProgressDialog
-
-from .config import ICON, DYNAMIC, FIELD, KEY, plugin_check_enable_library, plugin_realy_enable
+from .config import DYNAMIC, FIELD, ICON, KEY, plugin_check_enable_library, plugin_realy_enable
 from .container_extended_metadata import read_extended_metadata, write_extended_metadata
 
 
@@ -143,8 +135,9 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
     
     if check_user_metadata:
         #check if the Metadata object accepts those added
-        from .common_utils.columns import get_columns_from_dict
         from calibre.ebooks.metadata import string_to_authors
+        
+        from .common_utils.columns import get_columns_from_dict
         miA_columns = get_columns_from_dict(miA.get_all_user_metadata(True))
         miA_init_len = len(miA_columns)
         for k,cc in check_user_metadata.items():
@@ -356,11 +349,14 @@ def read_metadata(stream, fmt, miA):
 # ePubExtendedMetadata.MetadataWriter
 #   set_metadata(stream, mi, type)
 def write_metadata(stream, fmt, miA):
-    import sys, traceback
+    import sys
+    import traceback
+    
+    from calibre.customize.builtins import ActionEmbed
+    
     #---------------
     # Write Extended Metadata
     from calibre.customize.ui import find_plugin
-    from calibre.customize.builtins import ActionEmbed
     i, book_ids, pd, only_fmts, errors = find_plugin(ActionEmbed.name).actual_plugin_.job_data
     
     def report_error(mi, fmt, tb):
