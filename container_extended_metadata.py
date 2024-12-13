@@ -230,7 +230,7 @@ def _write_extended_metadata(container, extended_metadata):
         for contrib in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
             id_s = contrib.attrib.get('id', None)
             if id_s:
-                #remove all marc code
+                # remove all marc code
                 xpath = f'opf:meta[@refines="#{id_s}" and @property="role" and @scheme="marc:relators"]'
                 for meta in container.metadata.xpath(xpath, namespaces=NAMESPACES):
                     container.metadata.remove(meta)
@@ -239,11 +239,11 @@ def _write_extended_metadata(container, extended_metadata):
                 if not container.metadata.xpath(xpath, namespaces=NAMESPACES):
                     # coutain if the contributor has no others meta linked (or only "file-as"), del the contributor
                     container.metadata.remove(contrib)
-                    #and del the "file-as"
+                    # and del the "file-as"
                     for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}"]', namespaces=NAMESPACES):
                         container.metadata.remove(meta)
             else:
-                #remove contributor without id
+                # remove contributor without id
                 container.metadata.remove(contrib)
         
         role_id = {}

@@ -24,7 +24,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
     calibre utilities to run without needing to load the GUI libraries.
     """
     name                    = 'ePub Extended Metadata'
-    description             = _("Read and write a wider range of metadata for ePub's files"
+    description             = _("Read and write a wider range of metadata for ePub's files "
                                 "and associating them to columns in your libraries.")
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
@@ -38,9 +38,9 @@ class ePubExtendedMetadata(InterfaceActionBase):
     description_reader              = _('Read a wider range of metadata from the ePub file.') + description_companion
     description_writer              = _('Write a wider range of metadata in the ePub file.') + description_companion
     
-    #: This field defines the GUI plugin class that contains all the code
-    #: that actually does something. Its format is module_path:class_name
-    #: The specified class must be defined in the specified module.
+    # This field defines the GUI plugin class that contains all the code
+    # that actually does something. Its format is module_path:class_name
+    # The specified class must be defined in the specified module.
     actual_plugin           = __name__+'.action:ePubExtendedMetadataAction'
     
     

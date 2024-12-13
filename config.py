@@ -262,7 +262,7 @@ class ConfigWidget(QWidget):
         
         self.linkAuthors = QCheckBox(_('Embed "{:s}" column').format(FIELD.AUTHOR.COLUMN), self)
         self.linkAuthors.setToolTip(
-            _('Embed the "{:s}" column as a Contributors metadata.'
+            _('Embed the "{:s}" column as a Contributors metadata. '
             'This a write-only option, the import action will not change the Calibre {:s} column.').format(
                 FIELD.AUTHOR.COLUMN, FIELD.AUTHOR.LOCAL,
             )
@@ -570,7 +570,7 @@ class ConfigReaderWidget(QWidget):
         head.setWordWrap(True)
         layout.addWidget(head)
         
-        conflict = QLabel(_('Choose the behavior to adopt in case of conflict between the metadata read'
+        conflict = QLabel(_('Choose the behavior to adopt in case of conflict between the metadata read '
                             'by ePub Extended Metadata and the one already recorded by Calibre.')
         )
         conflict.setWordWrap(True)

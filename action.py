@@ -134,7 +134,7 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
     field_change = []
     
     if check_user_metadata:
-        #check if the Metadata object accepts those added
+        # check if the Metadata object accepts those added
         from calibre.ebooks.metadata import string_to_authors
         
         from .common_utils.columns import get_columns_from_dict
@@ -217,7 +217,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
     
     def end_progress(self):
         
-        #info debug
+        # info debug
         debug_print(f'ePub Extended Metadata launched for {self.book_count} books.')
         
         if self.wasCanceled():
@@ -283,7 +283,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         no_epub_id = []
         
         for book_id, extended_metadata in self.book_ids.items():
-            #update Progress
+            # update Progress
             num = self.increment()
             
             if self.wasCanceled():
@@ -319,8 +319,10 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                         if import_id[book_id]:
                             import_mi[book_id] = miA
                         #except Exception as err:
-                        #    #title (author & author)
-                        #    book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
+                        #   # title (author & author)
+                        #   book_info = '"{title}" ({authors})'.format(
+                        #       title=miA.get('title'), authors=' & '.join(miA.get('authors')),
+                        #   )
                         #    self.exception_read.append( (id, book_info, err) )
                 else:
                     debug_print('Write ePub Extended Metadata for', book_info, '\n')
@@ -343,8 +345,10 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                         self.dbAPI.fields['size'].table.update_sizes({book_id:max_size})
                     
                     #except Exception as err:
-                    #    #title (author & author)
-                    #    book_info = '"'+miA.get('title')+'" ('+' & '.join(miA.get('authors'))+')'
+                    #   # title (author & author)
+                    #   book_info = '"{title}" ({authors})'.format(
+                    #       title=miA.get('title'), authors=' & '.join(miA.get('authors')),
+                    #   )
                     #    self.exception_write.append( (id, book_info, err) )
         
         
@@ -369,7 +373,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
 
 #   get_metadata(stream, type)
 def read_metadata(stream, fmt, miA):
-    #---------------
+    # ---------------
     # Read Extended Metadata
     extended_metadata = read_extended_metadata(stream)
     apply_extended_metadata(miA, KEY.get_current_prefs(), extended_metadata,
@@ -384,7 +388,7 @@ def write_metadata(stream, fmt, miA):
     
     from calibre.customize.builtins import ActionEmbed
     
-    #---------------
+    # ---------------
     # Write Extended Metadata
     from calibre.customize.ui import find_plugin
     i, book_ids, pd, only_fmts, errors = find_plugin(ActionEmbed.name).actual_plugin_.job_data

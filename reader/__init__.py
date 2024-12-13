@@ -16,7 +16,7 @@ def get_plugin_attribut(name: str, default=None):
         import importlib
         
         from calibre.customize import Plugin
-        #Yes, it's very long for a one line. It's seems crazy, but it's fun and it works
+        
         plugin_classes = []
         for obj in importlib.import_module('.'.join(__name__.split('.')[:-1])).__dict__.values():
             if isinstance(obj, type) and issubclass(obj, Plugin) and obj.name != 'Trivial Plugin':
@@ -32,8 +32,8 @@ class MetadataReader(MetadataReaderPlugin):
     """
     A plugin that implements reading metadata from a set of file types.
     """
-    #: Set of file types for which this plugin should be run.
-    #: For example: ``{'lit', 'mobi', 'prc'}``
+    # Set of file types for which this plugin should be run.
+    # For example: ``{'lit', 'mobi', 'prc'}``
     file_types = get_plugin_attribut('file_types')
     
     name                    = get_plugin_attribut('name_reader')
