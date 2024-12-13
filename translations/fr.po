@@ -203,6 +203,22 @@ msgstr "Le plugin {PLUGIN_NAME} a rencontré une exception non gérée."
 msgid "Unhandled exception"
 msgstr "Exception non gérée"
 
+#: common_utils/dialogs.py:500
+msgid "Select a ZIP archive file to import…"
+msgstr "Sélectionnez un fichier d'archive ZIP à importer…"
+
+#: common_utils/dialogs.py:511
+msgid "Save ZIP archive file as…"
+msgstr "Enregistrer l'archive ZIP sous…"
+
+#: common_utils/dialogs.py:523
+msgid "Select a JSON file to import…"
+msgstr "Sélectionnez un fichier JSON à importer…"
+
+#: common_utils/dialogs.py:534
+msgid "Save the JSON file as…"
+msgstr "Enregistrer le fichier JSON sous…"
+
 #: common_utils/librarys.py:48
 msgid "Could not to launch {:s}"
 msgstr "Impossible de lancer {:s}"

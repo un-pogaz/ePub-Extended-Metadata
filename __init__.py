@@ -44,11 +44,6 @@ class ePubExtendedMetadata(InterfaceActionBase):
     actual_plugin           = __name__+'.action:ePubExtendedMetadataAction'
     
     
-    def get_curent():
-        from calibre.customize.ui import find_plugin
-        return find_plugin(ePubExtendedMetadata.name)
-    
-    
     def initialize(self):
         """
         Called once when calibre plugins are initialized.  Plugins are
@@ -63,28 +58,48 @@ class ePubExtendedMetadata(InterfaceActionBase):
         Note that ``self.site_customization`` is **not** available at this point.
         """
         
-        from calibre.customize.ui import _initialized_plugins, initialize_plugin
-        
-        installation_type = getattr(self, 'installation_type', None)
-        
-        def append_plugin(plugin):
-            try:
-                if installation_type is not None:
-                    p = initialize_plugin(plugin, self.plugin_path, installation_type)
-                else:
-                    p = initialize_plugin(plugin, self.plugin_path)
-                _initialized_plugins.append(p)
-                return p
-            except Exception as err:
-                print(ePubExtendedMetadata.PREFS_NAMESPACE, 'initialize():', 'An error has occurred:', err)
-                return None
-        
         from .reader import MetadataReader
         from .writer import MetadataWriter
         
-        append_plugin(MetadataWriter)
-        append_plugin(MetadataReader)
+        self.initialize_embedded_plugin(MetadataWriter, name=self.name_reader, description=self.description_reader)
+        self.initialize_embedded_plugin(MetadataReader, name=self.name_writer, description=self.description_writer)
+    
+    def initialize_embedded_plugin(self, plugin, name: str=None, description: str=None):
+        """
+        A Calibre plugin can normally only contain one Plugin class.
+        In our case, this would be the file type class.
+        However, we want to load the GUI plugin, too, so we have to trick
+        Calibre into believing that there's actually a 2nd plugin.
+        """
         
+        from calibre.customize.ui import _initialized_plugins, initialize_plugin
+        
+        for p in _initialized_plugins:
+            if isinstance(p, plugin):
+                return p
+        
+        plugin.name = name or str(plugin.__name__)
+        plugin.description = description or self.description
+        
+        plugin.version = self.version
+        plugin.minimum_calibre_version = self.minimum_calibre_version
+        plugin.supported_platforms = self.supported_platforms
+        plugin.author = self.author
+        
+        plugin.file_types = getattr(self, 'file_types', None)
+        
+        installation_type = getattr(self, 'installation_type', None)
+        
+        try:
+            if installation_type is not None:
+                p = initialize_plugin(plugin, self.plugin_path, installation_type)
+            else:
+                p = initialize_plugin(plugin, self.plugin_path)
+            _initialized_plugins.append(p)
+            return p
+        except Exception as err:
+            print(f'{self.name}: Error during the initialize of the embedded plugin "{plugin.name}":\n{err}\n')
+            return None
     
     
     def is_customizable(self):

@@ -200,6 +200,22 @@ msgstr ""
 msgid "Unhandled exception"
 msgstr ""
 
+#: common_utils/dialogs.py:500
+msgid "Select a ZIP archive file to import…"
+msgstr ""
+
+#: common_utils/dialogs.py:511
+msgid "Save ZIP archive file as…"
+msgstr ""
+
+#: common_utils/dialogs.py:523
+msgid "Select a JSON file to import…"
+msgstr ""
+
+#: common_utils/dialogs.py:534
+msgid "Save the JSON file as…"
+msgstr ""
+
 #: common_utils/librarys.py:48
 msgid "Could not to launch {:s}"
 msgstr ""
