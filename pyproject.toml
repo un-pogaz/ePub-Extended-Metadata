@@ -1,27 +1,47 @@
 [project]
+name = "ePub Extended Metadata"
 requires-python = ">=3.8"
 
 [tool.ruff]
 exclude = ["common_utils/"]
 line-length = 120
 target-version = "py38"
-builtins = ['_', 'I']
+builtins = ['_', 'I', 'P']
+preview = true
 
 [tool.ruff.lint]
-ignore = ['E741', 'E402', 'E722', 'W293']
-select = ['E', 'F', 'I', 'W']
+explicit-preview-rules = true
+ignore = [
+    'E741', 'E402', 'E722', 'W293',
+    'UP012', 'UP030', 'UP032', 'C413', 'C420', 'PIE790', 'ISC003',
+    'RUF001', 'RUF002', 'RUF003', 'RUF005', 'RUF012', 'RUF013', 'RUF015', 'RUF100',
+    'F841',  # because in preview, unused tuple unpacking variable that not use dummy syntax (prefix '_' underscore)
+             # raise error 'unused-variable', sigh (https://github.com/astral-sh/ruff/issues/8884)
+]
+select = [
+    'E', 'F', 'I', 'W', 'INT',
+    'Q', 'UP', 'YTT', 'C4', 'COM818', 'PIE', 'RET501', 'ISC',
+    'RUF',  # nota: RUF can flag many unsolicited errors
+    # preview rules
+    'RUF051', 'RUF056',  # useless dict operation
+    'RUF055',  # unnecessary regex
+    'RUF039',  # always use raw-string for regex
+    'E302', 'E303', 'E304', 'E305', 'W391',  # blank-line standard
+    'E111', 'E112', 'E113', 'E117',  # code indentation
+    'E114', 'E115', 'E116', 'E261', 'E262', 'E265',  # comment formating
+    'E201', 'E202', 'E211', 'E251', 'E275', # + partial: 'E203', 'E222', 'E241', 'E271', 'E272' # various whitespace
+]
+unfixable = ['ISC001']
 
 [tool.ruff.lint.per-file-ignores]
-"columns.py" = ['E501']
 "marc_relators.py" = ['E501']
 
 [tool.ruff.format]
 quote-style = 'single'
-exclude = ["marc_relators.py"]
 
 [tool.ruff.lint.isort]
 detect-same-package = true
-known-first-party = ["calibre", "calibre_extensions", "polyglot"]
+known-first-party = ["calibre", "calibre_extensions", "calibre_plugins", "polyglot"]
 known-third-party = ["qt"]
 relative-imports-order = "closest-to-furthest"
 split-on-trailing-comma = false
@@ -29,3 +49,12 @@ section-order = ["__python__", "future", "standard-library", "third-party", "fir
 
 [tool.ruff.lint.isort.sections]
 "__python__" = ["__python__"]
+
+[tool.ruff.lint.flake8-comprehensions]
+allow-dict-calls-with-keyword-arguments = true
+
+[tool.ruff.lint.flake8-quotes]
+avoid-escape = true
+docstring-quotes = 'single'
+inline-quotes = 'single'
+multiline-quotes = 'single'

@@ -36,8 +36,10 @@ class ParseError(ValueError):
         self.err = err
         ValueError.__init__(self, f'Failed to parse: {name} with error: {err}')
 
+
 class OPFException(EPubException):
     pass
+
 
 class OPFParseError(OPFException, ParseError):
     def __init__(self, name, err):
@@ -45,9 +47,9 @@ class OPFParseError(OPFException, ParseError):
 
 
 class ContainerExtendedMetadata:
-    """
+    '''
     epub can be a file path or a stream
-    """
+    '''
     def __init__(self, epub, read_only=False):
         # Load ZIP
         self.ZIP = None
@@ -64,13 +66,14 @@ class ContainerExtendedMetadata:
         
         self._metadata = self.opf.metadata
     
-    
     @property
     def opf(self):
         return self._opf
+    
     @property
     def metadata(self):
         return self._metadata
+    
     @property
     def version(self):
         return self._version
@@ -98,11 +101,10 @@ class ContainerExtendedMetadata:
         self.ZIP.close()
 
 
-
 def read_extended_metadata(epub):
-    """
+    '''
     epub/opf can be a file path or a stream
-    """
+    '''
     extended_metadata = {}
     
     # Use a "stream" to read the OPF without any extracting
@@ -111,10 +113,11 @@ def read_extended_metadata(epub):
     
     return extended_metadata
 
+
 def write_extended_metadata(epub, extended_metadata):
-    """
+    '''
     epub/opf can be a file path or a stream
-    """
+    '''
     debug_print('write_extended_metadata()')
     debug_print('extended_metadata:', extended_metadata)
     
@@ -160,7 +163,6 @@ def _read_extended_metadata(container):
             for author in string_to_authors(child.text):
                 contributors[role].append(author)
     
-    
     if container.version[0] == 3:
         for contrib in container.metadata.xpath('dc:contributor[@id]', namespaces=NAMESPACES):
             id = contrib.attrib['id']
@@ -186,7 +188,6 @@ def _read_extended_metadata(container):
                 contributors[role].append(author)
         
         # extended_metadata
-        
     
     debug_print('extended_metadata:', extended_metadata)
     
@@ -206,7 +207,6 @@ def _write_extended_metadata(container, extended_metadata):
                 epub_extended_metadata[KEY.CONTRIBUTORS][role] = value
         else:
             epub_extended_metadata[data] = value
-    
     
     if container.version[0] == 2:
         creator = container.metadata.xpath('dc:creator', namespaces=NAMESPACES)

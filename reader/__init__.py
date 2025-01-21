@@ -9,13 +9,13 @@ from calibre.customize import MetadataReaderPlugin
 
 
 class MetadataReader(MetadataReaderPlugin):
-    """
+    '''
     A plugin that implements reading metadata from a set of file types.
-    """
+    '''
     # plugin attributs are set during the initialization in ePubExtendedMetadata
     
     def get_metadata(self, stream, type):
-        """
+        '''
         Return metadata for the file represented by stream (a file like object
         that supports reading). Raise an exception when there is an error
         with the input data.
@@ -23,7 +23,7 @@ class MetadataReader(MetadataReaderPlugin):
         :param type: The type of file. Guaranteed to be one of the entries
             in :attr:`file_types`.
         :return: A :class:`calibre.ebooks.metadata.book.Metadata` object
-        """
+        '''
         from calibre.customize.builtins import EPUBMetadataReader
         from calibre.customize.ui import find_plugin, quick_metadata
         
@@ -45,10 +45,10 @@ class MetadataReader(MetadataReaderPlugin):
             return mi
     
     def is_customizable(self):
-        """
+        '''
         This method must return True to enable customization via
         Preferences->Plugins
-        """
+        '''
         return True
     
     def config_widget(self):

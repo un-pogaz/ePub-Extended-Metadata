@@ -46,7 +46,7 @@ class ePubExtendedMetadataAction(InterfaceAction):
         self.menu = QMenu(GUI)
         self.qaction.setMenu(self.menu)
         self.qaction.setIcon(get_icon(ICON.PLUGIN))
-        #self.qaction.triggered.connect(self.toolbar_triggered)
+        # self.qaction.triggered.connect(self.toolbar_triggered)
         self.rebuild_menus()
     
     def rebuild_menus(self):
@@ -64,15 +64,15 @@ class ePubExtendedMetadataAction(InterfaceAction):
         
         ## TODO
         ##
-        ##create_menu_action_unique(self, self.menu, _('&Bulk avanced editor'), None,
+        ## create_menu_action_unique(self, self.menu, _('&Bulk avanced editor'), None,
         ##                                     triggered=self.edit_bulk_extended_metadata,
         ##                                     unique_name='&Bulk avanced editor')
         ##
-        ##create_menu_action_unique(self, self.menu, _('&Avanced editor, book by book'), None,
+        ## create_menu_action_unique(self, self.menu, _('&Avanced editor, book by book'), None,
         ##                                     triggered=self.edit_book_extended_metadata,
         ##                                     unique_name='&Avanced editor, book by book')
         ##
-        ##self.menu.addSeparator()
+        ## self.menu.addSeparator()
         
         create_menu_action_unique(self, self.menu, _('&Customize plugin…'), 'config.png',
                                         triggered=self.show_configuration,
@@ -89,15 +89,15 @@ class ePubExtendedMetadataAction(InterfaceAction):
         plugin_check_enable_library()
     
     def gui_layout_complete(self):
-        """
+        '''
         Called once per action when the layout of the main GUI is
         completed. If your action needs to make changes to the layout, they
         should be done here, rather than in :meth:`initialization_complete`.
-        """
+        '''
         plugin_check_enable_library()
     
     def shutting_down(self):
-        """
+        '''
         Called once per plugin when the main GUI is in the process of shutting
         down. Release any used resources, but try not to block the shutdown for
         long periods of time.
@@ -105,11 +105,10 @@ class ePubExtendedMetadataAction(InterfaceAction):
         :return: False to halt the shutdown. You are responsible for telling
                  the user why the shutdown was halted.
         
-        """
+        '''
         plugin_realy_enable(KEY.AUTO_IMPORT)
         plugin_realy_enable(KEY.AUTO_EMBED)
         return True
-    
     
     def toolbar_triggered(self):
         self.embed_extended_metadata()
@@ -126,9 +125,9 @@ class ePubExtendedMetadataAction(InterfaceAction):
     def edit_book_extended_metadata(self):
         debug_print('edit_book_extended_metadata')
     
-    
     def run_extended_metadata(self, book_ids):
         ePubExtendedMetadataProgressDialog(book_ids)
+
 
 def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, check_user_metadata={}) -> List[str]:
     field_change = []
@@ -169,7 +168,6 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
                         cc.metadata['#extra#'] = None
                         miA.set_user_metadata(k, cc.metadata)
     
-    
     for data, field in prefs.items():
         if data == KEY.CONTRIBUTORS:
             for role, field in prefs[KEY.CONTRIBUTORS].items():
@@ -183,6 +181,7 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
             debug_print('KEY.CREATORS',KEY.CREATORS)
     
     return field_change
+
 
 def create_extended_metadata(miA, prefs) -> Dict[str, Any]:
     extended_metadata = {}
@@ -309,7 +308,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                     if book_id not in import_mi:
                         debug_print('Read ePub Extended Metadata for', book_info, '\n')
                         extended_metadata = read_extended_metadata(path)
-                        #try:
+                        # try:
                         import_id[book_id] = apply_extended_metadata(
                             miA,
                             self.prefs,
@@ -318,18 +317,18 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                         )
                         if import_id[book_id]:
                             import_mi[book_id] = miA
-                        #except Exception as err:
-                        #   # title (author & author)
-                        #   book_info = '"{title}" ({authors})'.format(
-                        #       title=miA.get('title'), authors=' & '.join(miA.get('authors')),
-                        #   )
-                        #    self.exception_read.append( (id, book_info, err) )
+                        # except Exception as err:
+                        #     # title (author & author)
+                        #     book_info = '"{title}" ({authors})'.format(
+                        #         title=miA.get('title'), authors=' & '.join(miA.get('authors')),
+                        #     )
+                        #      self.exception_read.append( (id, book_info, err) )
                 else:
                     debug_print('Write ePub Extended Metadata for', book_info, '\n')
                     if extended_metadata == VALUE.EMBED:
                         extended_metadata = create_extended_metadata(miA, self.prefs)
                     
-                    #try:
+                    # try:
                     write_extended_metadata(path, extended_metadata)
                     export_id.append(book_id)
                     new_size = os.path.getsize(path)
@@ -344,14 +343,12 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                         )
                         self.dbAPI.fields['size'].table.update_sizes({book_id:max_size})
                     
-                    #except Exception as err:
-                    #   # title (author & author)
-                    #   book_info = '"{title}" ({authors})'.format(
-                    #       title=miA.get('title'), authors=' & '.join(miA.get('authors')),
-                    #   )
-                    #    self.exception_write.append( (id, book_info, err) )
-        
-        
+                    # except Exception as err:
+                    #    # title (author & author)
+                    #    book_info = '"{title}" ({authors})'.format(
+                    #        title=miA.get('title'), authors=' & '.join(miA.get('authors')),
+                    #    )
+                    #     self.exception_write.append( (id, book_info, err) )
         
         for id, miA in import_mi.items():
             self.dbAPI.set_metadata(id, miA)
@@ -379,6 +376,7 @@ def read_metadata(stream, fmt, miA):
     apply_extended_metadata(miA, KEY.get_current_prefs(), extended_metadata,
                         keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_AUTO], check_user_metadata=KEY.get_current_columns())
     return miA
+
 
 # ePubExtendedMetadata.MetadataWriter
 #   set_metadata(stream, mi, type)

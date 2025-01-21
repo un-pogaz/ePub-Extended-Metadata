@@ -66,14 +66,15 @@ class ICON:
 
 
 class FIELD:
-    """
+    '''
     contains the information to associate the data to a field
-    """
+    '''
     class AUTHOR:
         ROLE = 'aut'
         NAME = 'authors'
         LOCAL = FieldMetadata()._tb_cats['authors']['name']
         COLUMN = f'{NAME} ({LOCAL})'
+
 
 class KEY:
     OPTION_CHAR = '_'
@@ -102,7 +103,6 @@ class KEY:
     SERIES = 'series'
     COLLECTIONS = 'collections'
     
-    
     @staticmethod
     def find_plugin(key):
         from calibre.customize.ui import find_plugin
@@ -123,7 +123,6 @@ class KEY:
         p = KEY.find_plugin(key)
         if p:
             disable_plugin(p.name)
-    
     
     @staticmethod
     def get_current_columns():
@@ -153,7 +152,6 @@ class KEY:
             prefs[KEY.CONTRIBUTORS][FIELD.AUTHOR.ROLE] = FIELD.AUTHOR.NAME
         return prefs
     
-    
     @staticmethod
     def get_names():
         from .common_utils.columns import get_names
@@ -165,6 +163,7 @@ class KEY:
         treated_column = []
         treated_column.extend([v for k,v in PREFS.items() if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, str)])
         treated_column.extend([c for c in PREFS[KEY.CONTRIBUTORS].values() if isinstance(c, str)])
+        
         def predicate(column):
             return column.is_custom and column.name in treated_column
         
@@ -185,6 +184,7 @@ DYNAMIC = PREFS_dynamic()
 DYNAMIC.defaults = copy.deepcopy(PREFS.defaults)
 DYNAMIC.defaults[KEY.SHARED_COLUMNS] = {}
 
+
 def plugin_check_enable_library():
     if PREFS[KEY.AUTO_IMPORT]:
         KEY.enable_plugin(KEY.AUTO_IMPORT)
@@ -200,6 +200,7 @@ def plugin_check_enable_library():
         DYNAMIC.update(PREFS.copy())
         DYNAMIC[KEY.SHARED_COLUMNS] = KEY.get_used_columns()
 
+
 def plugin_realy_enable(key):
     from calibre.customize.ui import is_disabled
     p = KEY.find_plugin(key)
@@ -210,6 +211,7 @@ def plugin_realy_enable(key):
         return enable
     else:
         return False
+
 
 class ConfigWidget(QWidget):
     def __init__(self):
@@ -223,7 +225,6 @@ class ConfigWidget(QWidget):
         
         tabs = QTabWidget(self)
         layout.addWidget(tabs)
-        
         
         # Add a horizontal layout containing the table and the buttons next to it
         contributor_layout = QVBoxLayout()
@@ -256,7 +257,6 @@ class ConfigWidget(QWidget):
         add_button.clicked.connect(self.table.add_row)
         delete_button.clicked.connect(self.table.delete_rows)
         
-        
         contributor_option = QHBoxLayout()
         contributor_layout.addLayout(contributor_option)
         
@@ -270,17 +270,16 @@ class ConfigWidget(QWidget):
         self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
         contributor_option.addWidget(self.linkAuthors)
         
-        #self.creatorsAsAuthors = QCheckBox(_('Import all Creators as authors'), self)
-        #self.creatorsAsAuthors.setToolTip(
-        #    _('Import all Creators as {:s} in "{:s}" column.').format(
-        #       FIELD.AUTHOR.LOCAL, FIELD.AUTHOR.COLUMN
-        #    )
-        #)
-        #self.creatorsAsAuthors.setChecked(PREFS[KEY.CREATORS_AS_AUTHOR])
-        #contributor_option.addWidget(self.creatorsAsAuthors)
+        # self.creatorsAsAuthors = QCheckBox(_('Import all Creators as authors'), self)
+        # self.creatorsAsAuthors.setToolTip(
+        #     _('Import all Creators as {:s} in "{:s}" column.').format(
+        #        FIELD.AUTHOR.LOCAL, FIELD.AUTHOR.COLUMN
+        #     )
+        # )
+        # self.creatorsAsAuthors.setChecked(PREFS[KEY.CREATORS_AS_AUTHOR])
+        # contributor_option.addWidget(self.creatorsAsAuthors)
         
         contributor_option.addStretch(-1)
-        
         
         # ePub 3 tab
         
@@ -295,8 +294,6 @@ class ConfigWidget(QWidget):
         epub3_layout = QGridLayout()
         scroll_layout.addLayout(epub3_layout)
         epub3_layout.addWidget(QLabel('Work in progres', self), 0, 0, 1, 1)
-        
-        
         
         scroll_layout.addStretch(-1)
         
@@ -319,7 +316,6 @@ class ConfigWidget(QWidget):
         button_plugin_initialized(self.writer_button, KEY.AUTO_EMBED)
         option_layout.addWidget(self.writer_button)
         
-        
         # --- Keyboard shortcuts ---
         keyboard_layout = QHBoxLayout()
         layout.addLayout(keyboard_layout)
@@ -338,7 +334,6 @@ class ConfigWidget(QWidget):
         else:
             import_option.setEnabled(False)
         keyboard_layout.addWidget(import_option)
-        
     
     def validate(self):
         valide = self.table.valide_contributors_columns()
@@ -355,7 +350,7 @@ class ConfigWidget(QWidget):
         with PREFS:
             PREFS[KEY.CONTRIBUTORS] = self.table.get_contributors_columns()
             PREFS[KEY.LINK_AUTHOR] = self.linkAuthors.checkState() == Qt.Checked
-            #PREFS[KEY.CREATORS_AS_AUTHOR] = self.creatorsAsAuthors.checkState() == Qt.Checked
+            # PREFS[KEY.CREATORS_AS_AUTHOR] = self.creatorsAsAuthors.checkState() == Qt.Checked
             PREFS[KEY.AUTO_IMPORT] = self.reader_button.pluginEnable
             PREFS[KEY.AUTO_EMBED] = self.writer_button.pluginEnable
             PREFS[KEY.FIRST_CONFIG] = False
@@ -388,9 +383,11 @@ def button_plugin_initialized(button, key):
         button.setEnabled(False)
         button.setToolTip(_('This feature has been incorrectly initialized. Restart Calibre to fix this.'))
 
+
 def button_plugin_clicked(button, key):
     button.pluginEnable = not button.pluginEnable
     button_plugin_icon(button)
+
 
 def button_plugin_icon(button):
     if button.pluginEnable:
@@ -400,6 +397,8 @@ def button_plugin_icon(button):
 
 
 COL_COLUMNS = [_('Contributor type'), _('Column'), '']
+
+
 class ContributorTableWidget(QTableWidget):
     _columnContrib = 0
     _columnColumn = 1
@@ -475,7 +474,6 @@ class ContributorTableWidget(QTableWidget):
         self.selectRow(row)
         self.scrollToItem(self.currentItem())
     
-    
     def _duplicate_entrys(self, column):
         de = duplicate_entry([self.cellWidget(row, column).currentText() for row in range(self.rowCount())])
         if '' in de:
@@ -485,7 +483,7 @@ class ContributorTableWidget(QTableWidget):
     def valide_contributors_columns(self):
         aa = self._duplicate_entrys(self._columnContrib)
         cc = self._duplicate_entrys(self._columnColumn)
-        return not(aa or cc)
+        return not (aa or cc)
     
     def get_contributors_columns(self):
         contributors_columns = {}
@@ -497,6 +495,7 @@ class ContributorTableWidget(QTableWidget):
                 contributors_columns[k if k else str(row)] = v if v else ''
         
         return contributors_columns
+
 
 class ContributorsComboBox(KeyValueComboBox):
     def __init__(self, selected_contributors, table):
@@ -523,6 +522,7 @@ class ContributorsComboBox(KeyValueComboBox):
                 + '\n' + '\n'.join(de),
                 show=True, show_copy_button=False)
 
+
 class DuplicColumnComboBox(CustomColumnComboBox):
     
     def __init__(self, selected_column, table):
@@ -543,7 +543,6 @@ class DuplicColumnComboBox(CustomColumnComboBox):
                 'otherwise the settings can not be saved.\n\nDuplicate column:')
                 + '\n' + '\n'.join(de),
                 show=True, show_copy_button=False)
-
 
 
 OPTION_MANUAL = OrderedDict([
@@ -580,7 +579,7 @@ class ConfigReaderWidget(QWidget):
         
         importManual_Label = QLabel(_('When importing manually:'))
         importManual_ToolTip = _('The manual import is executed by clicking on "Import Extended Metadata" '
-                                 'in the menu of \'ePub Extended Metadata\'')
+                                 "in the menu of 'ePub Extended Metadata'")
         importManual_Label.setToolTip(importManual_ToolTip)
         layout.addWidget(importManual_Label)
         self.importManual = KeyValueComboBox(OPTION_MANUAL, PREFS[KEY.KEEP_CALIBRE_MANUAL], parent=self)
@@ -596,7 +595,6 @@ class ConfigReaderWidget(QWidget):
         layout.addWidget(self.importAuto)
         
         layout.insertStretch(-1)
-    
     
     def save_settings(self):
         prefs = {}

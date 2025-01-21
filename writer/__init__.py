@@ -9,13 +9,13 @@ from calibre.customize import MetadataWriterPlugin
 
 
 class MetadataWriter(MetadataWriterPlugin):
-    """
+    '''
     A plugin that implements reading metadata from a set of file types.
-    """
+    '''
     # plugin attributs are set during the initialization in ePubExtendedMetadata
     
     def set_metadata(self, stream, mi, type):
-        """
+        '''
         Set metadata for the file represented by stream (a file like object
         that supports reading). Raise an exception when there is an error
         with the input data.
@@ -23,7 +23,7 @@ class MetadataWriter(MetadataWriterPlugin):
         :param type: The type of file. Guaranteed to be one of the entries
             in :attr:`file_types`.
         :param mi: A :class:`calibre.ebooks.metadata.book.Metadata` object
-        """
+        '''
         from calibre.customize.builtins import EPUBMetadataWriter
         from calibre.customize.ui import apply_null_metadata, config, find_plugin, force_identifiers
         
@@ -45,10 +45,10 @@ class MetadataWriter(MetadataWriterPlugin):
             write_metadata(stream, type, mi)
     
     def is_customizable(self):
-        """
+        '''
         This method must return True to enable customization via
         Preferences->Plugins
-        """
+        '''
         return True
     
     def config_widget(self):
