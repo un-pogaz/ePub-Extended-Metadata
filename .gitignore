@@ -4,10 +4,10 @@
 
 __pycache__/
 .ruff_cache/
+.vscode/
 --*/
 zz*
 *.lnk
 *.url
 *.mo
-.vscode/settings.json
 MobileRead_post.bbcode
