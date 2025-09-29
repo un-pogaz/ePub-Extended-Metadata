@@ -1,6 +1,8 @@
 # Changelog - ePub Extended Metadata
 
 ## [0.11.5] - 2025/09/29
+
+### Bug fixes
 - fix fatal freeze on linux
 
 ## [0.11.4] - 2024/07/29
