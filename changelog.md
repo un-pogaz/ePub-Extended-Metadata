@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.11.6] - 2025/10/09
+
+### Bug fixes
+- fix edge case for malformed comments custom columns
+
 ## [0.11.5] - 2025/09/29
 
 ### Bug fixes
