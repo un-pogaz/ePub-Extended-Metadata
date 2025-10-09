@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.11.7] - 2025/10/09
+
+### Bug fixes
+- fix previous patch
+
 ## [0.11.6] - 2025/10/09
 
 ### Bug fixes
