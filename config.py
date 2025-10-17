@@ -133,7 +133,6 @@ class KEY:
     def get_current_prefs():
         prefs = DYNAMIC.copy()
         current_columns = KEY.get_current_columns().keys()
-        link = DYNAMIC[KEY.LINK_AUTHOR]
         
         prefs = {k:v for k, v in prefs.items() if not k.startswith(KEY.OPTION_CHAR)}
         
@@ -148,7 +147,7 @@ class KEY:
             elif not v or v not in current_columns:
                 prefs.pop(k, None)
         
-        if link:
+        if DYNAMIC[KEY.LINK_AUTHOR]:
             prefs[KEY.CONTRIBUTORS][FIELD.AUTHOR.ROLE] = FIELD.AUTHOR.NAME
         return prefs
     
@@ -336,15 +335,27 @@ class ConfigWidget(QWidget):
         keyboard_layout.addWidget(import_option)
     
     def validate(self):
-        valide = self.table.valide_contributors_columns()
-        if not valide:
-            warning_dialog(GUI,
+        error = None
+        if self.linkAuthors.checkState() == Qt.Checked and self.table.get_contributors_columns().get(FIELD.AUTHOR.ROLE):
+            error = (
+                _('Incompatible options'),
+                _('You can\'t use the option <i>{0:s}</i> at the same time that a explicit contributor/column pairs that use the type "{1:s}".')  # noqa: E501
+                .format(self.linkAuthors.text(), CONTRIBUTORS_ROLES[FIELD.AUTHOR.ROLE]),
+            )
+        if not self.table.valide_contributors_columns():
+            error = (
                 _('Duplicate values'),
-            _("The current parameters contain duplicate values.\nYour changes can't be saved and have been cancelled."),
+                _('The current parameters contain duplicate values.'),
+            )
+        
+        if error:
+            warning_dialog(GUI,
+                error[0],
+                error[1] + '<br>' +_("Your changes can't be saved and have been cancelled."),
                 show=True, show_copy_button=False,
             )
-            
-        return valide
+            return False
+        return True
     
     def save_settings(self):
         with PREFS:
@@ -354,11 +365,6 @@ class ConfigWidget(QWidget):
             PREFS[KEY.AUTO_IMPORT] = self.reader_button.pluginEnable
             PREFS[KEY.AUTO_EMBED] = self.writer_button.pluginEnable
             PREFS[KEY.FIRST_CONFIG] = False
-            
-            if PREFS[KEY.LINK_AUTHOR]:
-                poped = PREFS[KEY.CONTRIBUTORS].pop(FIELD.AUTHOR.ROLE, None)
-                if poped:
-                    PREFS[str(len(PREFS[KEY.CONTRIBUTORS])+1)] = poped
         
         debug_print('Save settings:', PREFS,'\n')
         plugin_check_enable_library()
