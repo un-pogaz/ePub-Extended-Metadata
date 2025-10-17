@@ -166,12 +166,13 @@ def _read_extended_metadata(container):
             xpath = f'opf:meta[@refines="#{id}" and @property="role" and @scheme="marc:relators"]'
             roles = container.metadata.xpath(xpath, namespaces=NAMESPACES)
             
-            role = 'oth'
-            if roles:
-                role = roles[-1].text
+            roles = [r.text.strip() or 'oth' for r in roles]
+            if not roles:
+                roles = ['oth']
             
             for author in string_to_authors(contrib.text):
-                contributors[role].append(author)
+                for role in roles:
+                    contributors[role].append(author)
         
         role = 'oth'
         for contrib in container.metadata.xpath('dc:contributor[not(@id)]', namespaces=NAMESPACES):
