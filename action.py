@@ -25,7 +25,7 @@ from .common_utils.dialogs import ProgressDialog, custom_exception_dialog
 from .common_utils.librarys import get_BookIds_selected
 from .common_utils.menus import create_menu_action_unique
 from .config import DYNAMIC, FIELD, ICON, KEY, plugin_check_enable_library, plugin_realy_enable
-from .container_extended_metadata import read_extended_metadata, write_extended_metadata
+from .container_extended_metadata import default_extended_metadata, read_extended_metadata, write_extended_metadata
 
 
 class VALUE:
@@ -182,8 +182,9 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
 
 
 def create_extended_metadata(miA, prefs) -> Dict[str, Any]:
-    extended_metadata = {}
-    extended_metadata[KEY.CONTRIBUTORS] = contributors = {}
+    extended_metadata = default_extended_metadata()
+    contributors = extended_metadata[KEY.CONTRIBUTORS]
+    
     for role, field in prefs.get(KEY.CONTRIBUTORS, {}).items():
         contributors[role] = miA.get(field, default=[])
     
@@ -275,7 +276,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         export_id = []
         no_epub_id = []
         
-        for book_id, extended_metadata in self.book_ids.items():
+        for book_id, action_type in self.book_ids.items():
             # update Progress
             num = self.increment()
             
@@ -298,7 +299,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
             path = self.dbAPI.format_abspath(book_id, fmt)
             
             if path:
-                if extended_metadata == VALUE.IMPORT:
+                if action_type == VALUE.IMPORT:
                     if book_id not in import_mi:
                         debug_print('Read ePub Extended Metadata for', book_info, '\n')
                         extended_metadata = read_extended_metadata(path)
@@ -319,7 +320,7 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                         #      self.exception_read.append( (id, book_info, err) )
                 else:
                     debug_print('Write ePub Extended Metadata for', book_info, '\n')
-                    if extended_metadata == VALUE.EMBED:
+                    if action_type == VALUE.EMBED:
                         extended_metadata = create_extended_metadata(miA, self.prefs)
                     
                     # try:

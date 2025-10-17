@@ -102,11 +102,20 @@ class ContainerExtendedMetadata:
         self.ZIP.close()
 
 
+def default_extended_metadata():
+    rslt = {}
+    rslt[KEY.CREATORS] = []
+    rslt[KEY.CONTRIBUTORS] = defaultdict(list)
+    rslt[KEY.SERIES] = {}
+    rslt[KEY.COLLECTIONS] = {}
+    return rslt
+
+
 def read_extended_metadata(epub):
     '''
     epub/opf can be a file path or a stream
     '''
-    extended_metadata = {}
+    extended_metadata = default_extended_metadata()
     
     # Use a "stream" to read the OPF without any extracting
     with ContainerExtendedMetadata(epub, read_only=True) as container:
@@ -129,12 +138,8 @@ def write_extended_metadata(epub, extended_metadata):
 
 
 def _read_extended_metadata(container):
-    extended_metadata = {}
-    extended_metadata[KEY.CREATORS] = creators = []
-    extended_metadata[KEY.CONTRIBUTORS] = contributors = defaultdict(list)
-    
-    extended_metadata[KEY.SERIES] = {}
-    extended_metadata[KEY.COLLECTIONS] = {}
+    extended_metadata = default_extended_metadata()
+    contributors = extended_metadata[KEY.CONTRIBUTORS]
     
     if not container.opf:
         return extended_metadata
