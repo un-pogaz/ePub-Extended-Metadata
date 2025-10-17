@@ -1,5 +1,15 @@
 # Changelog - ePub Extended Metadata
 
+## [0.12.0] - 2025/10/17
+
+### Changed
+- Prevent to use 'Embed "authors (Authors)" column' at the same time that a a explicit contributor/column pairs that use the type "Authors"
+  - Previously, it silently disable it
+- Improve parsing and reading of "dc:creator" tags
+
+### Bug fixes
+- fix: support multipe "marc:relators" for a single "dc:contributor" tag
+
 ## [0.11.7] - 2025/10/09
 
 ### Bug fixes
