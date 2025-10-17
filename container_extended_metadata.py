@@ -10,6 +10,7 @@ except NameError:
     pass  # load_translations() added in calibre 1.9
 
 import os
+from collections import defaultdict
 
 from lxml import etree
 
@@ -130,13 +131,11 @@ def write_extended_metadata(epub, extended_metadata):
 def _read_extended_metadata(container):
     extended_metadata = {}
     extended_metadata[KEY.CREATORS] = creators = []
-    extended_metadata[KEY.CONTRIBUTORS] = contributors = {}
+    extended_metadata[KEY.CONTRIBUTORS] = contributors = defaultdict(list)
     
     extended_metadata[KEY.SERIES] = {}
-    
-    extended_metadata[KEY.SERIES] = {}
-    
     extended_metadata[KEY.COLLECTIONS] = {}
+    
     if not container.opf:
         return extended_metadata
     
@@ -158,8 +157,6 @@ def _read_extended_metadata(container):
         for child in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
             tbl = child.xpath('@opf:role', namespaces=NAMESPACES)
             role = tbl[0] if tbl else 'oth'
-            if role not in contributors:
-                contributors[role] = []
             for author in string_to_authors(child.text):
                 contributors[role].append(author)
     
@@ -173,17 +170,11 @@ def _read_extended_metadata(container):
             if roles:
                 role = roles[-1].text
             
-            if role not in contributors:
-                contributors[role] = []
-            
             for author in string_to_authors(contrib.text):
                 contributors[role].append(author)
         
         role = 'oth'
         for contrib in container.metadata.xpath('dc:contributor[not(@id)]', namespaces=NAMESPACES):
-            if role not in contributors:
-                contributors[role] = []
-            
             for author in string_to_authors(contrib.text):
                 contributors[role].append(author)
         
@@ -228,7 +219,7 @@ def _write_extended_metadata(container, extended_metadata):
         idx = container.metadata.index(creator[-1])+1
         
         for contrib in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
-            id_s = contrib.attrib.get('id', None)
+            id_s = contrib.attrib.get('id')
             if id_s:
                 # remove all marc code
                 xpath = f'opf:meta[@refines="#{id_s}" and @property="role" and @scheme="marc:relators"]'
