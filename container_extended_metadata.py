@@ -180,15 +180,11 @@ def _write_extended_metadata(container, extended_metadata):
     if not container.opf:
         return False
     
-    # merge old extended metadata and the new
     epub_extended_metadata = _read_extended_metadata(container)
     
-    for data, value in extended_metadata.items():
-        if data == KEY.CONTRIBUTORS:
-            for role, value in extended_metadata[KEY.CONTRIBUTORS].items():
-                epub_extended_metadata[KEY.CONTRIBUTORS][role] = value
-        else:
-            epub_extended_metadata[data] = value
+    # merge source metadata and the new
+    for role, value in extended_metadata[KEY.CONTRIBUTORS].items():
+        epub_extended_metadata[KEY.CONTRIBUTORS][role] = value
     
     creators = container.metadata.xpath('dc:creator', namespaces=NAMESPACES)
     idx = container.metadata.index(creators[-1])+1
