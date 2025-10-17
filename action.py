@@ -168,30 +168,24 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
                         cc.metadata['#extra#'] = None
                         miA.set_user_metadata(k, cc.metadata)
     
-    for data, field in prefs.items():
-        if data == KEY.CONTRIBUTORS:
-            for role, field in prefs[KEY.CONTRIBUTORS].items():
-                if field != FIELD.AUTHOR.NAME and role in extended_metadata[KEY.CONTRIBUTORS]:
-                    new_value = extended_metadata[KEY.CONTRIBUTORS][role]
-                    old_value = miA.get(field)
-                    if not (old_value and keep_calibre):
-                        miA.set(field, new_value)
-                        field_change.append(field)
-        if data == KEY.CREATORS:
-            debug_print('KEY.CREATORS',KEY.CREATORS)
+    contributors = extended_metadata[KEY.CONTRIBUTORS]
+    for role, field in prefs.get(KEY.CONTRIBUTORS, {}).items():
+        if field == FIELD.AUTHOR.NAME or role not in contributors:
+            continue
+        new_value = contributors[role]
+        old_value = miA.get(field)
+        if not (old_value and keep_calibre):
+            miA.set(field, new_value)
+            field_change.append(field)
     
     return field_change
 
 
 def create_extended_metadata(miA, prefs) -> Dict[str, Any]:
     extended_metadata = {}
-    for data, field in prefs.items():
-        if data == KEY.CONTRIBUTORS:
-            extended_metadata[KEY.CONTRIBUTORS] = {}
-            for role, field in prefs[KEY.CONTRIBUTORS].items():
-                extended_metadata[KEY.CONTRIBUTORS][role] = miA.get(field, default=[])
-        if data == KEY.CREATORS:
-            debug_print('KEY.CREATORS',KEY.CREATORS)
+    extended_metadata[KEY.CONTRIBUTORS] = contributors = {}
+    for role, field in prefs.get(KEY.CONTRIBUTORS, {}).items():
+        contributors[role] = miA.get(field, default=[])
     
     return extended_metadata
 
