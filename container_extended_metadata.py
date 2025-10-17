@@ -139,47 +139,37 @@ def _read_extended_metadata(container):
     if not container.opf:
         return extended_metadata
     
+    tag_role = (
+        ('dc:creator', 'aut'),
+        ('dc:contributor', 'oth'),
+    )
     if container.version[0] == 2:
-        for child in container.metadata.xpath('dc:creator', namespaces=NAMESPACES):
-            tbl = child.xpath('@opf:role', namespaces=NAMESPACES)
-            role = tbl[0] if tbl else 'aut'
-            
-            authors = string_to_authors(child.text)
-            
-            if len(authors) == 1:
-                tbl = child.xpath('@opf:file-as', namespaces=NAMESPACES)
-                author_sort = tbl[0] if tbl else author_to_author_sort(authors[0])
-                creators.append((authors[0], role, author_sort))
-            else:
-                for author in authors:
-                    creators.append((author, role, author_to_author_sort(author)))
-        
-        for child in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
-            tbl = child.xpath('@opf:role', namespaces=NAMESPACES)
-            role = tbl[0] if tbl else 'oth'
-            for author in string_to_authors(child.text):
-                contributors[role].append(author)
+        for tag, drole in tag_role:
+            for child in container.metadata.xpath(tag, namespaces=NAMESPACES):
+                tbl = child.xpath('@opf:role', namespaces=NAMESPACES)
+                role = tbl[0] if tbl else drole
+                role = role.strip() or drole
+                for author in string_to_authors(child.text):
+                    contributors[role].append(author)
     
     if container.version[0] == 3:
-        for contrib in container.metadata.xpath('dc:contributor[@id]', namespaces=NAMESPACES):
-            id = contrib.attrib['id']
-            xpath = f'opf:meta[@refines="#{id}" and @property="role" and @scheme="marc:relators"]'
-            roles = container.metadata.xpath(xpath, namespaces=NAMESPACES)
+        for tag, drole in tag_role:
+            for child in container.metadata.xpath(f'{tag}[@id]', namespaces=NAMESPACES):
+                id = child.attrib['id']
+                xpath = f'opf:meta[@refines="#{id}" and @property="role" and @scheme="marc:relators"]'
+                roles = container.metadata.xpath(xpath, namespaces=NAMESPACES)
+                
+                roles = [r.text.strip() or drole for r in roles]
+                if not roles:
+                    roles = [drole]
+                
+                for author in string_to_authors(child.text):
+                    for role in roles:
+                        contributors[role].append(author)
             
-            roles = [r.text.strip() or 'oth' for r in roles]
-            if not roles:
-                roles = ['oth']
-            
-            for author in string_to_authors(contrib.text):
-                for role in roles:
-                    contributors[role].append(author)
-        
-        role = 'oth'
-        for contrib in container.metadata.xpath('dc:contributor[not(@id)]', namespaces=NAMESPACES):
-            for author in string_to_authors(contrib.text):
-                contributors[role].append(author)
-        
-        # extended_metadata
+            for child in container.metadata.xpath(f'{tag}[not(@id)]', namespaces=NAMESPACES):
+                for author in string_to_authors(child.text):
+                    contributors[drole].append(author)
     
     debug_print('extended_metadata:', extended_metadata)
     
