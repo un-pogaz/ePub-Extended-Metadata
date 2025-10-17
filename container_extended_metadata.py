@@ -200,10 +200,9 @@ def _write_extended_metadata(container, extended_metadata):
         else:
             epub_extended_metadata[data] = value
     
+    creators = container.metadata.xpath('dc:creator', namespaces=NAMESPACES)
+    idx = container.metadata.index(creators[-1])+1
     if container.version[0] == 2:
-        creator = container.metadata.xpath('dc:creator', namespaces=NAMESPACES)
-        idx = container.metadata.index(creator[-1])+1
-        
         for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):
             for meta in container.metadata.xpath(f'dc:contributor[@opf:role="{role}"]', namespaces=NAMESPACES):
                 container.metadata.remove(meta)
@@ -216,9 +215,6 @@ def _write_extended_metadata(container, extended_metadata):
                 idx = idx+1
     
     if container.version[0] == 3:
-        creator = container.metadata.xpath('dc:creator', namespaces=NAMESPACES)
-        idx = container.metadata.index(creator[-1])+1
-        
         for contrib in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
             id_s = contrib.attrib.get('id')
             if id_s:
@@ -229,7 +225,7 @@ def _write_extended_metadata(container, extended_metadata):
                 # if the contributor has others meta linked (except "file-as")
                 xpath = f'opf:meta[@refines="#{id_s}" and not(@property="file-as")]'
                 if not container.metadata.xpath(xpath, namespaces=NAMESPACES):
-                    # coutain if the contributor has no others meta linked (or only "file-as"), del the contributor
+                    # if the contributor has no others meta linked (or only "file-as"), del the contributor
                     container.metadata.remove(contrib)
                     # and del the "file-as"
                     for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}"]', namespaces=NAMESPACES):
