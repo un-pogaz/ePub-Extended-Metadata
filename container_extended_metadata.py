@@ -17,11 +17,20 @@ from lxml import etree
 from calibre.ebooks.metadata import author_to_author_sort, string_to_authors
 from calibre.ebooks.metadata.epub import EPubException, get_zip_reader
 from calibre.ebooks.metadata.opf2 import OPF
+from calibre.ebooks.metadata.opf3 import (
+    find_main_title,
+    find_subtitle,
+    normalize_whitespace,
+    properties_for_id,
+    read_prefixes,
+    read_refines,
+    read_title,
+)
 from calibre.ebooks.metadata.utils import pretty_print_opf
 from calibre.utils.zipfile import ZIP_DEFLATED, ZipFile, safe_replace
 
 from .common_utils import debug_print
-from .config import KEY
+from .config import FIELD, KEY
 
 NS_OCF = 'urn:oasis:names:tc:opendocument:xmlns:container'
 NS_OPF = 'http://www.idpf.org/2007/opf'
@@ -64,16 +73,18 @@ class ContainerExtendedMetadata:
         import math
         d, i = math.modf(self.opf.package_version)
         self._version = (int(i), int(d))
-        
-        self._metadata = self.opf.metadata
     
     @property
     def opf(self):
         return self._opf
     
     @property
+    def root(self):
+        return self._opf.root
+    
+    @property
     def metadata(self):
-        return self._metadata
+        return self.opf.metadata
     
     @property
     def version(self):
@@ -106,9 +117,17 @@ def default_extended_metadata():
     rslt = {}
     rslt[KEY.CREATORS] = []
     rslt[KEY.CONTRIBUTORS] = defaultdict(list)
-    rslt[KEY.SERIES] = {}
-    rslt[KEY.COLLECTIONS] = {}
+    rslt[KEY.TITLES] = {}
     return rslt
+
+
+def find_title_role(root, refines, role):
+    for title in root.xpath('./opf:metadata/dc:title', namespaces=NAMESPACES):
+        if not title.text or not title.text.strip():
+            continue
+        props = properties_for_id(title.get('id'), refines)
+        if props.get('title-type') == role:
+            return title
 
 
 def read_extended_metadata(epub):
@@ -140,6 +159,7 @@ def write_extended_metadata(epub, extended_metadata):
 def _read_extended_metadata(container):
     extended_metadata = default_extended_metadata()
     contributors = extended_metadata[KEY.CONTRIBUTORS]
+    titles = extended_metadata[KEY.TITLES]
     
     if not container.opf:
         return extended_metadata
@@ -175,6 +195,23 @@ def _read_extended_metadata(container):
             for child in container.metadata.xpath(f'{tag}[not(@id)]', namespaces=NAMESPACES):
                 for author in string_to_authors(child.text):
                     contributors[drole].append(author)
+        
+        ## titles
+        prefixes, refines = read_prefixes(container.root), read_refines(container.root)
+        def to_text(node):
+            if node is None:
+                return None
+            return normalize_whitespace(node.text.strip())
+        
+        xpath = 'opf:meta[@refines and @property="title-type"]'
+        roles = container.metadata.xpath(xpath, namespaces=NAMESPACES)
+        roles = {r.text.strip() or drole for r in roles}
+        for role in roles:
+            titles[role] = to_text(find_title_role(container.root, refines, role))
+        
+        titles[FIELD.TITLES.MAIN] = to_text(find_main_title(container.root, refines))
+        titles[FIELD.TITLES.SUBTITLE] = to_text(find_subtitle(container.root, refines))
+        titles[FIELD.TITLES.READ] = read_title(container.root, prefixes, refines)
     
     debug_print('extended_metadata:', extended_metadata)
     

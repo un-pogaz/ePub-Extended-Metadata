@@ -76,6 +76,8 @@ class FIELD:
         COLUMN = f'{NAME} ({LOCAL})'
     
     class TITLES:
+        READ = ':read:'
+        MAIN = 'main'
         SUBTITLE = 'subtitle'
         SHORT = 'short'
         EDITION = 'edition'

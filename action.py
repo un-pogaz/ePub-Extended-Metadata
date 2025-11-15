@@ -178,6 +178,23 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
             miA.set(field, new_value)
             field_change.append(field)
     
+    titles = extended_metadata[KEY.TITLES]
+    # overwrite the calibre behavior that merge subtitle into main-title
+    # iff a subtitle field is defined
+    if prefs.get(KEY.TITLES, {}).get(FIELD.TITLES.SUBTITLE):
+        if miA.get('title') == titles[FIELD.TITLES.READ]:
+            miA.set('title', titles[FIELD.TITLES.MAIN])
+            field_change.append('title')
+    
+    for role, field in prefs.get(KEY.TITLES, {}).items():
+        if role not in titles:
+            continue
+        new_value = titles[role]
+        old_value = miA.get(field)
+        if not (old_value and keep_calibre):
+            miA.set(field, new_value)
+            field_change.append(field)
+    
     return field_change
 
 
