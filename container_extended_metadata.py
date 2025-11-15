@@ -228,9 +228,14 @@ def _write_extended_metadata(container, extended_metadata):
     for role, value in extended_metadata[KEY.CONTRIBUTORS].items():
         epub_extended_metadata[KEY.CONTRIBUTORS][role] = value
     
-    creators = container.metadata.xpath('dc:creator', namespaces=NAMESPACES)
-    idx = container.metadata.index(creators[-1])+1
+    def get_index(tag):
+        tags = container.metadata.xpath(f'dc:{tag}', namespaces=NAMESPACES)
+        if tags:
+            return container.metadata.index(tags[-1])+1
+        return 0
+    
     if container.version[0] == 2:
+        idx = get_index('creator')
         for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):
             for meta in container.metadata.xpath(f'dc:contributor[@opf:role="{role}"]', namespaces=NAMESPACES):
                 container.metadata.remove(meta)
@@ -243,6 +248,7 @@ def _write_extended_metadata(container, extended_metadata):
                 idx = idx+1
     
     if container.version[0] == 3:
+        idx = get_index('creator')
         for contrib in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
             id_s = contrib.attrib.get('id')
             if id_s:
