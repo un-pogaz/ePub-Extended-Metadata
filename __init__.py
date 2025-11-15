@@ -33,7 +33,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
     
     name_reader              = name + ' {Reader}'
     name_writer              = name + ' {Writer}'
-    file_types = {'epub'}
+    file_types = {'epub', 'kepub'}
     description_companion           = '\n' +_('This is an companion (and embeded) plugin of "{:s}".').format(name)
     description_reader              = _('Read a wider range of metadata from the ePub file.') + description_companion
     description_writer              = _('Write a wider range of metadata in the ePub file.') + description_companion

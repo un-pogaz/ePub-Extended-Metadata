@@ -299,6 +299,52 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
         export_id = []
         no_epub_id = []
         
+        def perform_import(book_id, book_info, miA, fmt, path):
+            if book_id not in import_mi:
+                debug_print('Read ePub Extended Metadata for', book_info, '\n')
+                extended_metadata = read_extended_metadata(path)
+                # try:
+                import_id[book_id] = apply_extended_metadata(
+                    miA,
+                    self.prefs,
+                    extended_metadata,
+                    keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_MANUAL],
+                )
+                if import_id[book_id]:
+                    import_mi[book_id] = miA
+                # except Exception as err:
+                #     # title (author & author)
+                #     book_info = '"{title}" ({authors})'.format(
+                #         title=miA.get('title'), authors=' & '.join(miA.get('authors')),
+                #     )
+                #      self.exception_read.append( (id, book_info, err) )
+        
+        def perform_embed(book_id, book_info, miA, fmt, path):
+            debug_print('Write ePub Extended Metadata for', book_info, '\n')
+            
+            # try:
+            extended_metadata = create_extended_metadata(miA, self.prefs)
+            write_extended_metadata(path, extended_metadata)
+            export_id.append(book_id)
+            new_size = os.path.getsize(path)
+            if new_size is not None:
+                fname = self.dbAPI.fields['formats'].format_fname(book_id, fmt.upper())
+                max_size = self.dbAPI.fields['formats'].table.update_fmt(
+                    book_id,
+                    fmt.upper(),
+                    fname,
+                    new_size,
+                    self.dbAPI.backend,
+                )
+                self.dbAPI.fields['size'].table.update_sizes({book_id:max_size})
+            
+            # except Exception as err:
+            #    # title (author & author)
+            #    book_info = '"{title}" ({authors})'.format(
+            #        title=miA.get('title'), authors=' & '.join(miA.get('authors')),
+            #    )
+            #     self.exception_write.append( (id, book_info, err) )
+        
         for book_id, action_type in self.book_ids.items():
             # update Progress
             num = self.increment()
@@ -318,55 +364,18 @@ class ePubExtendedMetadataProgressDialog(ProgressDialog):
                 book_id=book_id,
             )
             
-            fmt = 'EPUB'
-            path = self.dbAPI.format_abspath(book_id, fmt)
+            if action_type == VALUE.EMBED:
+                for fmt in ('kepub', 'epub'):  # embed for both format
+                    path = self.dbAPI.format_abspath(book_id, fmt)
+                    if path:
+                        perform_embed(book_id, book_info, miA, fmt, path)
             
-            if path:
-                if action_type == VALUE.IMPORT:
-                    if book_id not in import_mi:
-                        debug_print('Read ePub Extended Metadata for', book_info, '\n')
-                        extended_metadata = read_extended_metadata(path)
-                        # try:
-                        import_id[book_id] = apply_extended_metadata(
-                            miA,
-                            self.prefs,
-                            extended_metadata,
-                            keep_calibre=DYNAMIC[KEY.KEEP_CALIBRE_MANUAL],
-                        )
-                        if import_id[book_id]:
-                            import_mi[book_id] = miA
-                        # except Exception as err:
-                        #     # title (author & author)
-                        #     book_info = '"{title}" ({authors})'.format(
-                        #         title=miA.get('title'), authors=' & '.join(miA.get('authors')),
-                        #     )
-                        #      self.exception_read.append( (id, book_info, err) )
-                else:
-                    debug_print('Write ePub Extended Metadata for', book_info, '\n')
-                    if action_type == VALUE.EMBED:
-                        extended_metadata = create_extended_metadata(miA, self.prefs)
-                    
-                    # try:
-                    write_extended_metadata(path, extended_metadata)
-                    export_id.append(book_id)
-                    new_size = os.path.getsize(path)
-                    if new_size is not None:
-                        fname = self.dbAPI.fields['formats'].format_fname(book_id, fmt.upper())
-                        max_size = self.dbAPI.fields['formats'].table.update_fmt(
-                            book_id,
-                            fmt.upper(),
-                            fname,
-                            new_size,
-                            self.dbAPI.backend,
-                        )
-                        self.dbAPI.fields['size'].table.update_sizes({book_id:max_size})
-                    
-                    # except Exception as err:
-                    #    # title (author & author)
-                    #    book_info = '"{title}" ({authors})'.format(
-                    #        title=miA.get('title'), authors=' & '.join(miA.get('authors')),
-                    #    )
-                    #     self.exception_write.append( (id, book_info, err) )
+            if action_type == VALUE.IMPORT:
+                path = None
+                for fmt in ('kepub', 'epub'):  # import prefer epub
+                    path = self.dbAPI.format_abspath(book_id, fmt) or path
+                if path:
+                    perform_import(book_id, book_info, miA, fmt, path)
         
         for id, miA in import_mi.items():
             self.dbAPI.set_metadata(id, miA)

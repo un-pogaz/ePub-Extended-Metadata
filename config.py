@@ -307,7 +307,7 @@ class ConfigWidget(QWidget):
         tab_titles.setLayout(_layout)
         tabs.addTab(tab_titles, _('Titles'))
         
-        _layout.addWidget(QLabel(_('Note: This feature is only supported by the ePub3 format')))
+        _layout.addWidget(QLabel(_('Note: This feature is only supported by the ePub3 format and KEPUB files')))
         
         titles_layout = QFormLayout()
         titles_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
