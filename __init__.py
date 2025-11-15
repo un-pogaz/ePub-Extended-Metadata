@@ -28,7 +28,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
                                 "and associating them to columns in your libraries.")
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
-    version                 = (0, 12, 0)
+    version                 = (0, 13, 0)
     minimum_calibre_version = (5, 0, 0)
     
     name_reader              = name + ' {Reader}'
@@ -60,8 +60,8 @@ class ePubExtendedMetadata(InterfaceActionBase):
         from .reader import MetadataReader
         from .writer import MetadataWriter
         
-        self.initialize_embedded_plugin(MetadataWriter, name=self.name_reader, description=self.description_reader)
-        self.initialize_embedded_plugin(MetadataReader, name=self.name_writer, description=self.description_writer)
+        self.initialize_embedded_plugin(MetadataReader, name=self.name_reader, description=self.description_reader)
+        self.initialize_embedded_plugin(MetadataWriter, name=self.name_writer, description=self.description_writer)
     
     def initialize_embedded_plugin(self, plugin, name: str=None, description: str=None):
         '''

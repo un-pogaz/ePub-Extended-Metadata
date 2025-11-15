@@ -1,5 +1,11 @@
 # Changelog - ePub Extended Metadata
 
+
+## [0.13.0] - 2025/11/15
+
+### Bug fixes
+- fix Reader and Writer who as be swaped, resulting to incorect behaviors
+
 ## [0.12.0] - 2025/10/17
 
 ### Changed
