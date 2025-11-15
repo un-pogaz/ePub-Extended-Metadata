@@ -17,7 +17,7 @@ try:
     from qt.core import (
         QAbstractItemView,
         QCheckBox,
-        QGridLayout,
+        QFormLayout,
         QHBoxLayout,
         QLabel,
         QPushButton,
@@ -35,7 +35,7 @@ except ImportError:
     from PyQt5.Qt import (
         QAbstractItemView,
         QCheckBox,
-        QGridLayout,
+        QFormLayout,
         QHBoxLayout,
         QLabel,
         QPushButton,
@@ -74,6 +74,13 @@ class FIELD:
         NAME = 'authors'
         LOCAL = FieldMetadata()._tb_cats['authors']['name']
         COLUMN = f'{NAME} ({LOCAL})'
+    
+    class TITLES:
+        SUBTITLE = 'subtitle'
+        SHORT = 'short'
+        EDITION = 'edition'
+        EXPANDED = 'expanded'
+        COLLECTION = 'collection'
 
 
 class KEY:
@@ -102,6 +109,7 @@ class KEY:
     # ePub3
     SERIES = 'series'
     COLLECTIONS = 'collections'
+    TITLES = 'titles'
     
     @staticmethod
     def find_plugin(key):
@@ -138,12 +146,18 @@ class KEY:
         
         if KEY.CONTRIBUTORS not in prefs or not prefs[KEY.CONTRIBUTORS]:
             prefs[KEY.CONTRIBUTORS] = {}
+        if KEY.TITLES not in prefs or not prefs[KEY.TITLES]:
+            prefs[KEY.TITLES] = {}
         
         for k,v in copy.copy(prefs).items():
             if k == KEY.CONTRIBUTORS:
                 for k,v in copy.copy(prefs[KEY.CONTRIBUTORS]).items():
                     if not k or k not in CONTRIBUTORS_ROLES or not v or v not in current_columns:
                         prefs[KEY.CONTRIBUTORS].pop(k, None)
+            elif k == KEY.TITLES:
+                for k,v in copy.copy(prefs[KEY.TITLES]).items():
+                    if not v or v not in current_columns:
+                        prefs[KEY.TITLES].pop(k, None)
             elif not v or v not in current_columns:
                 prefs.pop(k, None)
         
@@ -157,11 +171,17 @@ class KEY:
         return get_names(True)
     
     @staticmethod
+    def get_title():
+        from .common_utils.columns import get_title
+        return get_title(True)
+    
+    @staticmethod
     def get_used_columns():
         from .common_utils.columns import get_columns_where
-        treated_column = []
-        treated_column.extend([v for k,v in PREFS.items() if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, str)])
-        treated_column.extend([c for c in PREFS[KEY.CONTRIBUTORS].values() if isinstance(c, str)])
+        treated_column = set()
+        treated_column.update(v for k,v in PREFS.items() if not k.startswith(KEY.OPTION_CHAR) and isinstance(v, str))
+        treated_column.update(c for c in PREFS[KEY.CONTRIBUTORS].values() if isinstance(c, str))
+        treated_column.update(c for c in PREFS[KEY.TITLES].values() if isinstance(c, str))
         
         def predicate(column):
             return column.is_custom and column.name in treated_column
@@ -178,6 +198,13 @@ PREFS.defaults[KEY.CONTRIBUTORS] = {}
 PREFS.defaults[KEY.FIRST_CONFIG] = True
 PREFS.defaults[KEY.KEEP_CALIBRE_MANUAL] = False
 PREFS.defaults[KEY.KEEP_CALIBRE_AUTO] = True
+PREFS.defaults[KEY.TITLES] = {
+    FIELD.TITLES.SUBTITLE: '',
+    FIELD.TITLES.SHORT: '',
+    FIELD.TITLES.EDITION: '',
+    FIELD.TITLES.EXPANDED: '',
+    FIELD.TITLES.COLLECTION: '',
+}
 
 DYNAMIC = PREFS_dynamic()
 DYNAMIC.defaults = copy.deepcopy(PREFS.defaults)
@@ -271,21 +298,32 @@ class ConfigWidget(QWidget):
         
         contributor_option.addStretch(-1)
         
-        # ePub 3 tab
+        # ePub3 titles
         
-        scroll_layout = QVBoxLayout()
-        tab_epub3 = QWidget()
-        tab_epub3.setLayout(scroll_layout)
-        scrollable = QScrollArea()
-        scrollable.setWidget(tab_epub3)
-        scrollable.setWidgetResizable(True)
-        tabs.addTab(scrollable, _('ePub3 metadata'))
+        _layout = QVBoxLayout()
+        tab_titles = QWidget()
+        tab_titles.setLayout(_layout)
+        tabs.addTab(tab_titles, _('Titles'))
         
-        epub3_layout = QGridLayout()
-        scroll_layout.addLayout(epub3_layout)
-        epub3_layout.addWidget(QLabel('Work in progres', self), 0, 0, 1, 1)
+        _layout.addWidget(QLabel(_('Note: This feature is only supported by the ePub3 format')))
         
-        scroll_layout.addStretch(-1)
+        titles_layout = QFormLayout()
+        titles_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
+        titles_layout.setFormAlignment(Qt.AlignLeft)
+        _layout.addLayout(titles_layout)
+        
+        self.title_subtitle = TitleColumnComboBox(PREFS[KEY.TITLES][FIELD.TITLES.SUBTITLE], titles_layout, tab_titles)
+        self.title_short = TitleColumnComboBox(PREFS[KEY.TITLES][FIELD.TITLES.SHORT], titles_layout, tab_titles)
+        self.title_edition = TitleColumnComboBox(PREFS[KEY.TITLES][FIELD.TITLES.EDITION], titles_layout, tab_titles)
+        self.title_expanded = TitleColumnComboBox(PREFS[KEY.TITLES][FIELD.TITLES.EXPANDED], titles_layout, tab_titles)
+        self.title_collection = TitleColumnComboBox(PREFS[KEY.TITLES][FIELD.TITLES.COLLECTION], titles_layout, tab_titles)
+        titles_layout.addRow(_('Subtitle:'), self.title_subtitle)
+        titles_layout.addRow(_('Short:'), self.title_short)
+        titles_layout.addRow(_('Edition:'), self.title_edition)
+        titles_layout.addRow(_('Expanded:'), self.title_expanded)
+        titles_layout.addRow(_('Collection:'), self.title_collection)
+        
+        _layout.addStretch(-1)
         
         # Global options
         option_layout = QHBoxLayout()
@@ -325,6 +363,22 @@ class ConfigWidget(QWidget):
             import_option.setEnabled(False)
         keyboard_layout.addWidget(import_option)
     
+    def validate_titles(self):
+        values = set()
+        for w in (
+            self.title_subtitle,
+            self.title_short,
+            self.title_edition,
+            self.title_expanded,
+            self.title_collection,
+        ):
+            v = w.selected_name()
+            if v:
+                if v in values:
+                    return False
+                values.add(v)
+        return True
+    
     def validate(self):
         error = None
         if self.linkAuthors.checkState() == Qt.Checked and self.table.get_contributors_columns().get(FIELD.AUTHOR.ROLE):
@@ -337,6 +391,11 @@ class ConfigWidget(QWidget):
             error = (
                 _('Duplicate values'),
                 _('The current parameters contain duplicate values.'),
+            )
+        if not self.validate_titles():
+            error = (
+                _('Duplicate titles'),
+                _('The current parameters contain duplicate titles values.'),
             )
         
         if error:
@@ -356,6 +415,11 @@ class ConfigWidget(QWidget):
             PREFS[KEY.AUTO_IMPORT] = self.reader_button.pluginEnable
             PREFS[KEY.AUTO_EMBED] = self.writer_button.pluginEnable
             PREFS[KEY.FIRST_CONFIG] = False
+            PREFS[KEY.TITLES][FIELD.TITLES.SUBTITLE] = self.title_subtitle.selected_name()
+            PREFS[KEY.TITLES][FIELD.TITLES.SHORT] = self.title_short.selected_name()
+            PREFS[KEY.TITLES][FIELD.TITLES.EDITION] = self.title_edition.selected_name()
+            PREFS[KEY.TITLES][FIELD.TITLES.EXPANDED] = self.title_expanded.selected_name()
+            PREFS[KEY.TITLES][FIELD.TITLES.COLLECTION] = self.title_collection.selected_name()
         
         debug_print('Save settings:', PREFS,'\n')
         plugin_check_enable_library()
@@ -539,6 +603,39 @@ class ContribColumnComboBox(CustomColumnComboBox):
                 'Change the settings so that each Custom column is present only once, '
                 'otherwise the settings can not be saved.\n\nDuplicate column:')
                 + '\n' + '\n'.join(de),
+                show=True, show_copy_button=False)
+
+
+class TitleColumnComboBox(CustomColumnComboBox):
+    
+    def __init__(self, selected_column, form, parent):
+        CustomColumnComboBox.__init__(self, KEY.get_title(), selected_column, parent=parent)
+        self.form = form
+        self.currentIndexChanged.connect(self.test_column_changed)
+    
+    def wheelEvent(self, event):
+        # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
+        event.ignore()
+    
+    def test_column_changed(self, val):
+        selected_column_names = []
+        for x in range(self.form.rowCount()):
+            widget = self.form.itemAt(x, QFormLayout.FieldRole)
+            if not widget:
+                continue
+            widget = widget.widget()
+            if isinstance(widget, TitleColumnComboBox):
+                text = widget.currentText()
+                print(widget, text)
+                if text:
+                    selected_column_names.append(text)
+        
+        if selected_column_names.count(self.currentText()) > 1:
+            warning_dialog(self, _('Duplicate Custom column'),
+                _('A Custom column was duplicated!\n'
+                'Change the settings so that each Custom column is present only once, '
+                'otherwise the settings can not be saved.\n\nDuplicate column:')
+                + '\n' + '\n'.join(sorted(set(selected_column_names))),
                 show=True, show_copy_button=False)
 
 

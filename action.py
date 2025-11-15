@@ -184,9 +184,13 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
 def create_extended_metadata(miA, prefs) -> Dict[str, Any]:
     extended_metadata = default_extended_metadata()
     contributors = extended_metadata[KEY.CONTRIBUTORS]
+    titles = extended_metadata[KEY.TITLES]
     
     for role, field in prefs.get(KEY.CONTRIBUTORS, {}).items():
         contributors[role] = miA.get(field, default=[])
+    
+    for role, field in prefs.get(KEY.TITLES, {}).items():
+        titles[role] = miA.get(field, default=None)
     
     return extended_metadata
 
