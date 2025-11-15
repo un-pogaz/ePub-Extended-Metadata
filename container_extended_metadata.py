@@ -248,7 +248,6 @@ def _write_extended_metadata(container, extended_metadata):
                 idx = idx+1
     
     if container.version[0] == 3:
-        idx = get_index('creator')
         for contrib in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
             id_s = contrib.attrib.get('id')
             if id_s:
@@ -268,7 +267,8 @@ def _write_extended_metadata(container, extended_metadata):
                 # remove contributor without id
                 container.metadata.remove(contrib)
         
-        role_id = {}
+        idx = get_index('creator')
+        role_id = defaultdict(list)
         
         for role in sorted(epub_extended_metadata[KEY.CONTRIBUTORS].keys()):
             id_n = (len(role_id[role]) if role in role_id else 0) + 1
@@ -276,18 +276,16 @@ def _write_extended_metadata(container, extended_metadata):
             for contrib in epub_extended_metadata[KEY.CONTRIBUTORS][role]:
                 element = etree.Element(etree.QName(NS_DC, 'contributor'))
                 element.text = contrib
-                id_s = role+f'{id_n:02d}'
+                id_s = role+f'-{id_n:02d}'
                 element.attrib['id'] = id_s
                 container.metadata.insert(idx, element)
                 idx = idx+1
                 
-                if role not in role_id:
-                    role_id[role] = []
                 role_id[role].append(id_s)
                 
                 file = etree.Element('meta')
                 file.text = author_to_author_sort(contrib)
-                file.attrib['refines'] = '#'+id_s
+                file.attrib['refines'] = f'#{id_s}'
                 file.attrib['property'] = 'file-as'
                 container.metadata.insert(idx, file)
                 idx = idx+1
@@ -298,7 +296,7 @@ def _write_extended_metadata(container, extended_metadata):
             for id_s in role_id[role]:
                 meta = etree.Element('meta')
                 meta.text = role
-                meta.attrib['refines'] = '#'+id_s
+                meta.attrib['refines'] = f'#{id_s}'
                 meta.attrib['property'] = 'role'
                 meta.attrib['scheme'] = 'marc:relators'
                 container.metadata.insert(idx, meta)

@@ -139,6 +139,8 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
         from .common_utils.columns import get_columns_from_dict
         miA_columns = get_columns_from_dict(miA.get_all_user_metadata(True))
         for k,cc in check_user_metadata.items():
+            if not k.startswith('#'):
+                continue
             if not (cc.is_composite or cc.is_csp):
                 if k not in miA_columns:
                     if cc.is_multiple:
