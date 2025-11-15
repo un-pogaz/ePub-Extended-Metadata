@@ -661,12 +661,12 @@ class ConfigReaderWidget(QWidget):
         
         title_layout = ImageTitleLayout(ICON.PLUGIN, _('ePub Extended Metadata import options'))
         layout.addLayout(title_layout)
-        head = QLabel(_('Set here the specifics options to read and automatic addition of metadata.'))
+        head = QLabel(_('Set here the specifics options to read and automatic import of metadata.'))
         head.setWordWrap(True)
         layout.addWidget(head)
         
         conflict = QLabel(_('Choose the behavior to adopt in case of conflict between the metadata read '
-                            'by ePub Extended Metadata and the one already recorded by Calibre.')
+                            'by ePub Extended Metadata and the ones already embed by Calibre.')
         )
         conflict.setWordWrap(True)
         layout.addWidget(conflict)
@@ -683,7 +683,7 @@ class ConfigReaderWidget(QWidget):
         layout.addWidget(self.importManual)
         
         importAuto_Label = QLabel(_('During automatic import:'))
-        importAuto_ToolTip = _('The auto import is executed when Calibre add a book to the library')
+        importAuto_ToolTip = _('The automatic import is executed when Calibre add a book to the library')
         importAuto_Label.setToolTip(importAuto_ToolTip)
         layout.addWidget(importAuto_Label)
         self.importAuto = KeyValueComboBox(OPTION_AUTO, PREFS[KEY.KEEP_CALIBRE_AUTO], parent=self)
