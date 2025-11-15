@@ -14,7 +14,7 @@ from collections import defaultdict
 
 from lxml import etree
 
-from calibre.ebooks.metadata import author_to_author_sort, string_to_authors
+from calibre.ebooks.metadata import author_to_author_sort, string_to_authors, title_sort
 from calibre.ebooks.metadata.epub import EPubException, get_zip_reader
 from calibre.ebooks.metadata.opf2 import OPF
 from calibre.ebooks.metadata.opf3 import (
@@ -85,6 +85,10 @@ class ContainerExtendedMetadata:
     @property
     def metadata(self):
         return self.opf.metadata
+    
+    @property
+    def languages(self):
+        return self.opf.languages
     
     @property
     def version(self):
@@ -224,9 +228,16 @@ def _write_extended_metadata(container, extended_metadata):
     
     epub_extended_metadata = _read_extended_metadata(container)
     
+    # remove internal values
+    for role in list(epub_extended_metadata[KEY.TITLES].keys()):
+        if role.startswith(':') or role == FIELD.TITLES.MAIN:
+            epub_extended_metadata[KEY.TITLES].pop(role, None)
+    
     # merge source metadata and the new
     for role, value in extended_metadata[KEY.CONTRIBUTORS].items():
         epub_extended_metadata[KEY.CONTRIBUTORS][role] = value
+    for role, value in extended_metadata[KEY.TITLES].items():
+        epub_extended_metadata[KEY.TITLES][role] = value
     
     def get_index(tag):
         tags = container.metadata.xpath(f'dc:{tag}', namespaces=NAMESPACES)
@@ -248,6 +259,63 @@ def _write_extended_metadata(container, extended_metadata):
                 idx = idx+1
     
     if container.version[0] == 3:
+        ## titles
+        for title in container.metadata.xpath('dc:title', namespaces=NAMESPACES):
+            id_s = title.attrib.get('id')
+            if id_s:
+                is_main = False
+                xpath = f'opf:meta[@refines="#{id_s}" and @property="title-type"]'
+                for meta in container.metadata.xpath(xpath, namespaces=NAMESPACES):
+                    if meta.text == FIELD.TITLES.MAIN:
+                        is_main = True
+                    else:
+                        container.metadata.remove(meta)
+                if is_main:
+                    continue
+                # if the title has others meta linked (except "file-as")
+                xpath = f'opf:meta[@refines="#{id_s}" and not(@property="file-as")]'
+                if not container.metadata.xpath(xpath, namespaces=NAMESPACES):
+                    # if the title has no others meta linked (or only "file-as"), del the title
+                    container.metadata.remove(title)
+                    # and del the "file-as"
+                    for meta in container.metadata.xpath(f'opf:meta[@refines="#{id_s}"]', namespaces=NAMESPACES):
+                        container.metadata.remove(meta)
+        
+        idx = get_index('title')
+        title_id = {}
+        if container.languages:
+            lang = container.languages[0]
+        else:
+            lang = None
+        
+        for role, title in sorted(epub_extended_metadata[KEY.TITLES].items()):
+            if not title:
+                continue
+            element = etree.Element(etree.QName(NS_DC, 'title'))
+            element.text = title
+            id_s = f'title-{role}'
+            element.attrib['id'] = id_s
+            container.metadata.insert(idx, element)
+            idx = idx+1
+            
+            title_id[role] = id_s
+            
+            file = etree.Element('meta')
+            file.text = title_sort(title, lang=lang)
+            file.attrib['refines'] = f'#{id_s}'
+            file.attrib['property'] = 'file-as'
+            container.metadata.insert(idx, file)
+            idx = idx+1
+        
+        for role, id_s in sorted(title_id.items()):
+            meta = etree.Element('meta')
+            meta.text = role
+            meta.attrib['refines'] = f'#{id_s}'
+            meta.attrib['property'] = 'title-type'
+            container.metadata.insert(idx, meta)
+            idx = idx+1
+        
+        ## contributors
         for contrib in container.metadata.xpath('dc:contributor', namespaces=NAMESPACES):
             id_s = contrib.attrib.get('id')
             if id_s:
