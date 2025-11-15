@@ -232,7 +232,7 @@ class ConfigWidget(QWidget):
         
         contributor_table_layout = QHBoxLayout()
         contributor_layout.addLayout(contributor_table_layout)
-        tabs.addTab(tab_contributor, _('Contributor'))
+        tabs.addTab(tab_contributor, _('Contributors'))
         
         # Create a table the user can edit the menu list
         self.table = ContributorTableWidget(PREFS[KEY.CONTRIBUTORS], self)
@@ -268,15 +268,6 @@ class ConfigWidget(QWidget):
         )
         self.linkAuthors.setChecked(PREFS[KEY.LINK_AUTHOR])
         contributor_option.addWidget(self.linkAuthors)
-        
-        # self.creatorsAsAuthors = QCheckBox(_('Import all Creators as authors'), self)
-        # self.creatorsAsAuthors.setToolTip(
-        #     _('Import all Creators as {:s} in "{:s}" column.').format(
-        #        FIELD.AUTHOR.LOCAL, FIELD.AUTHOR.COLUMN
-        #     )
-        # )
-        # self.creatorsAsAuthors.setChecked(PREFS[KEY.CREATORS_AS_AUTHOR])
-        # contributor_option.addWidget(self.creatorsAsAuthors)
         
         contributor_option.addStretch(-1)
         
@@ -444,7 +435,7 @@ class ContributorTableWidget(QTableWidget):
         
         contributors_pair = contributors_pair or ('','')
         self.setCellWidget(row, self._columnContrib, ContributorsComboBox(contributors_pair[0], self))
-        self.setCellWidget(row, self._columnColumn, DuplicColumnComboBox(contributors_pair[1], self))
+        self.setCellWidget(row, self._columnColumn, ContribColumnComboBox(contributors_pair[1], self))
         self.setItem(row, self._columnSpace, ReadOnlyTableWidgetItem(''))
         
         self.resizeColumnsToContents()
@@ -529,7 +520,7 @@ class ContributorsComboBox(KeyValueComboBox):
                 show=True, show_copy_button=False)
 
 
-class DuplicColumnComboBox(CustomColumnComboBox):
+class ContribColumnComboBox(CustomColumnComboBox):
     
     def __init__(self, selected_column, table):
         CustomColumnComboBox.__init__(self, KEY.get_names(), selected_column, parent=table)
