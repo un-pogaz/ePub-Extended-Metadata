@@ -49,7 +49,8 @@ I am *French*! Although for obvious reasons, the default language of the plugin 
 
 <br><br>
 
-![configuration dialog](https://raw.githubusercontent.com/un-pogaz/ePub-Extended-Metadata/main/static/ePub_Extended_Metadata.png)
+![configuration dialog, contributors tab](https://raw.githubusercontent.com/un-pogaz/ePub-Extended-Metadata/main/static/ePub_Extended_Metadata-contributors.png)
+![configuration dialog, titles tab](https://raw.githubusercontent.com/un-pogaz/ePub-Extended-Metadata/main/static/ePub_Extended_Metadata-titles.png)
 ![configuration dialog for metadata reader](https://raw.githubusercontent.com/un-pogaz/ePub-Extended-Metadata/main/static/ePub_Extended_Metadata-reader.png)
 
 
