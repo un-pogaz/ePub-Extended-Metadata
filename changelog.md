@@ -1,6 +1,16 @@
 # Changelog - ePub Extended Metadata
 
 
+## [0.14.0] - 2025/11/16
+
+### Changed
+- Support of ePub3 title properties (subtitle, edition, ...)
+- Support of KEPUB files
+
+### Bug fixes
+- Fix error when in the rare case their is no creator tag
+
+
 ## [0.13.0] - 2025/11/15
 
 ### Bug fixes

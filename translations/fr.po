@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2025-10-17 17:52+0200\n"
-"PO-Revision-Date: 2025-10-17 17:53+0200\n"
+"POT-Creation-Date: 2025-11-16 13:33+0100\n"
+"PO-Revision-Date: 2025-11-16 13:38+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural -Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Poedit 3.8\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -50,11 +50,11 @@ msgstr "&Importer les métadonnées étendues"
 msgid "&Customize plugin…"
 msgstr "&Personnaliser l'extension…"
 
-#: action.py:229
+#: action.py:253
 msgid "Exceptions during the reading of Extended Metadata"
 msgstr "Exceptions lors de la lecture des métadonnées étendues"
 
-#: action.py:230
+#: action.py:254
 #, python-brace-format
 msgid ""
 "{:d} exceptions have occurred during the reading of Extended Metadata.\n"
@@ -64,11 +64,11 @@ msgstr ""
 "étendues.\n"
 "Certains livres peuvent ne pas avoir été mis à jour."
 
-#: action.py:242
+#: action.py:266
 msgid "Exceptions during the writing of Extended Metadata"
 msgstr "Exceptions pendant l'écriture des métadonnées étendues"
 
-#: action.py:243
+#: action.py:267
 #, python-brace-format
 msgid ""
 "{:d} exceptions have occurred during the writing of Extended Metadata.\n"
@@ -199,7 +199,7 @@ msgstr ""
 "L'enregitrement en tant que nom de fichier doit consister uniquement en un "
 "nom de fichier."
 
-#: common_utils/dialogs.py:474 config.py:469
+#: common_utils/dialogs.py:474 config.py:526
 msgid "Are you sure?"
 msgstr "Êtes-vous sûr ?"
 
@@ -330,27 +330,27 @@ msgstr "Aucune notes"
 msgid "Add New Image…"
 msgstr "Ajouter une nouvelle image…"
 
-#: config.py:222
+#: config.py:251
 msgid "ePub Extended Metadata options"
 msgstr "ePub Extended Metadata options"
 
-#: config.py:235 marc_relators.py:91
-msgid "Contributor"
-msgstr "Contributeur"
+#: config.py:264
+msgid "Contributors"
+msgstr "Contributeurs"
 
-#: config.py:245
+#: config.py:274
 msgid "Add a Column/Contributor pair"
 msgstr "Ajouter une paire Colonne/Contributeur"
 
-#: config.py:252
+#: config.py:281
 msgid "Delete Column/Contributor pair"
 msgstr "Supprimer la paire Colonne/Contributeur"
 
-#: config.py:262
+#: config.py:291
 msgid "Embed \"{:s}\" column"
 msgstr "Intégrer la colonne « {:s} »"
 
-#: config.py:264
+#: config.py:293
 msgid ""
 "Embed the \"{:s}\" column as a Contributors metadata. This a write-only "
 "option, the import action will not change the Calibre {:s} column."
@@ -359,15 +359,42 @@ msgstr ""
 "option est en écriture seule, l'action d'importation ne modifiera pas la "
 "colonne Calibre {:s}."
 
-#: config.py:291
-msgid "ePub3 metadata"
-msgstr "Métadonnées ePub3"
+#: config.py:308
+msgid "Titles"
+msgstr "Titres"
 
-#: config.py:305
+#: config.py:310
+msgid ""
+"Note: This feature is only supported by the ePub3 format and KEPUB files"
+msgstr ""
+"Remarque : Cette fonctionnalité n'est prise en charge que par le format "
+"ePub3 et les fichiers KEPUB"
+
+#: config.py:322
+msgid "Subtitle:"
+msgstr "Sous-titre :"
+
+#: config.py:323
+msgid "Short:"
+msgstr "Court :"
+
+#: config.py:324
+msgid "Edition:"
+msgstr "Édition :"
+
+#: config.py:325
+msgid "Expanded:"
+msgstr "Étendue :"
+
+#: config.py:326
+msgid "Collection:"
+msgstr "Collection :"
+
+#: config.py:336
 msgid "Automatic import"
 msgstr "Importation automatique"
 
-#: config.py:307
+#: config.py:338
 msgid ""
 "Allows to automatically import the extended metadata when adding a new book "
 "to the library"
@@ -375,11 +402,11 @@ msgstr ""
 "Permet d'importer automatiquement les métadonnées étendues lors de l'ajout "
 "d'un nouveau livre à la bibliothèque"
 
-#: config.py:311
+#: config.py:342
 msgid "Automatic embed"
 msgstr "Intégration automatique"
 
-#: config.py:313
+#: config.py:344
 msgid ""
 "Allows to to automatically embed the extended metadata at the same time as "
 "the default Calibre action"
@@ -387,15 +414,15 @@ msgstr ""
 "Permet d'intégrer automatiquement les métadonnées étendues en même temps que "
 "l'action par défaut de Calibre"
 
-#: config.py:329
+#: config.py:360
 msgid "Edit import options"
 msgstr "Modifier les options d'importation"
 
-#: config.py:341
+#: config.py:388
 msgid "Incompatible options"
 msgstr "Valeurs incompatible"
 
-#: config.py:342
+#: config.py:389
 msgid ""
 "You can't use the option <i>{0:s}</i> at the same time that a explicit "
 "contributor/column pairs that use the type \"{1:s}\"."
@@ -403,39 +430,47 @@ msgstr ""
 "Vous ne pouvez pas utiliser l'option <i>{0:s}</i> en même temps qu'une paire "
 "explicite contributeur/colonne qui utilise le type « {1:s} »."
 
-#: config.py:347
+#: config.py:394
 msgid "Duplicate values"
 msgstr "Valeurs en double"
 
-#: config.py:348
+#: config.py:395
 msgid "The current parameters contain duplicate values."
 msgstr "Les paramètres actuels contiennent des valeurs en double."
 
-#: config.py:354
+#: config.py:399
+msgid "Duplicate titles"
+msgstr "Titres en double"
+
+#: config.py:400
+msgid "The current parameters contain duplicate titles values."
+msgstr "Les paramètres actuels contiennent des valeurs de titres en double."
+
+#: config.py:406
 msgid "Your changes can't be saved and have been cancelled."
 msgstr ""
 "Vos modifications ne peuvent pas être enregistrées et ont été annulées."
 
-#: config.py:390
+#: config.py:447
 msgid ""
 "This feature has been incorrectly initialized. Restart Calibre to fix this."
 msgstr ""
 "Cette fonctionnalité a été initialisée de manière incorrecte. Redémarrez "
 "Calibre pour résoudre ce problème."
 
-#: config.py:405
+#: config.py:462
 msgid "Contributor type"
 msgstr "Type de Contributeur"
 
-#: config.py:405
+#: config.py:462
 msgid "Column"
 msgstr "Colonne"
 
-#: config.py:466
+#: config.py:523
 msgid "Are you sure you want to delete this Column/Contributor pair?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette paire Colonne/Contributeur ?"
 
-#: config.py:468
+#: config.py:525
 #, python-brace-format
 msgid ""
 "Are you sure you want to delete the selected {:d} Column/Contributor pairs?"
@@ -443,11 +478,11 @@ msgstr ""
 "Etes-vous sûr de vouloir supprimer les paires de Colonnes/Contributeurs {:d} "
 "sélectionnées ? Colonne/Contributeur sélectionnés ?"
 
-#: config.py:524
+#: config.py:581
 msgid "Duplicate Contributors type"
 msgstr "Type de Contributeur en double"
 
-#: config.py:525
+#: config.py:582
 msgid ""
 "A Contributor was duplicated!\n"
 "Change the settings so that each contributor is present only once, otherwise "
@@ -461,11 +496,11 @@ msgstr ""
 "\n"
 "Type en double :"
 
-#: config.py:546
+#: config.py:603 config.py:636
 msgid "Duplicate Custom column"
 msgstr "Colonne personnalisée en double"
 
-#: config.py:547
+#: config.py:604 config.py:637
 msgid ""
 "A Custom column was duplicated!\n"
 "Change the settings so that each Custom column is present only once, "
@@ -479,51 +514,51 @@ msgstr ""
 "\n"
 "Type en double :"
 
-#: config.py:555
+#: config.py:645
 msgid "Keep Calibre metadata, fill only the empty fields"
 msgstr "Conserver les métadonnées Calibre, ne remplir que les champs vides"
 
-#: config.py:556
+#: config.py:646
 msgid "Overwrites Calibre metadata, considers that the book always reason"
 msgstr ""
 "Écrase les métadonnées Calibre, considère que le livre a toujours raison"
 
-#: config.py:560
+#: config.py:650
 msgid "Keep Calibre embed metadata that could exist in the book"
 msgstr ""
-"Conservez les métadonnées intégrées par Calibre qui pourraient exister dans "
+"Conserver les métadonnées intégrées par Calibre qui pourraient exister dans "
 "le livre"
 
-#: config.py:561
+#: config.py:651
 msgid "Overwrites Calibre embed metadata, give priority to original metadata"
 msgstr ""
 "Écrase les métadonnées intégrées par Calibre, donne la priorité aux "
 "métadonnées originales"
 
-#: config.py:572
+#: config.py:662
 msgid "ePub Extended Metadata import options"
 msgstr "ePub Extended Metadata options d'importation"
 
-#: config.py:574
+#: config.py:664
 msgid ""
-"Set here the specifics options to read and automatic addition of metadata."
+"Set here the specifics options to read and automatic import of metadata."
 msgstr ""
-"Définissez ici les options spécifiques pour la lecture et l'ajout "
+"Définisser ici les options spécifiques pour la lecture et l'ajout "
 "automatique des métadonnées."
 
-#: config.py:578
+#: config.py:668
 msgid ""
 "Choose the behavior to adopt in case of conflict between the metadata read "
-"by ePub Extended Metadata and the one already recorded by Calibre."
+"by ePub Extended Metadata and the ones already embed by Calibre."
 msgstr ""
-"Choisissez le comportement à adopter en cas de conflit entre les métadonnées "
+"Choisisser le comportement à adopter en cas de conflit entre les métadonnées "
 "lues par ePub Extended Metadata et celles déjà enregistrées par Calibre."
 
-#: config.py:586
+#: config.py:676
 msgid "When importing manually:"
 msgstr "Lors d'une importation manuelle :"
 
-#: config.py:587
+#: config.py:677
 msgid ""
 "The manual import is executed by clicking on \"Import Extended Metadata\" in "
 "the menu of 'ePub Extended Metadata'"
@@ -531,12 +566,12 @@ msgstr ""
 "L'importation manuelle est exécutée en cliquant sur « Importer les "
 "métadonnées étendues » dans le menu de \"ePub Extended Metadata\"."
 
-#: config.py:595
+#: config.py:685
 msgid "During automatic import:"
 msgstr "Pendant l'importation automatique :"
 
-#: config.py:596
-msgid "The auto import is executed when Calibre add a book to the library"
+#: config.py:686
+msgid "The automatic import is executed when Calibre add a book to the library"
 msgstr ""
 "L'importation automatique est exécutée lorsque Calibre ajoute un livre à la "
 "bibliothèque"
@@ -816,6 +851,10 @@ msgstr "Contesté-appelé"
 #: marc_relators.py:90
 msgid "Contractor"
 msgstr "Contractant"
+
+#: marc_relators.py:91
+msgid "Contributor"
+msgstr "Contributeur"
 
 #: marc_relators.py:92
 msgid "Copyright claimant"
