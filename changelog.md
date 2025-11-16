@@ -3,7 +3,7 @@
 
 ## [0.14.0] - 2025/11/16
 
-### Changed
+### Added
 - Support of ePub3 title properties (subtitle, edition, ...)
 - Support of KEPUB files
 
