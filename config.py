@@ -614,6 +614,7 @@ class TitleColumnComboBox(CustomColumnComboBox):
         CustomColumnComboBox.__init__(self, KEY.get_title(), selected_column, parent=parent)
         self.form = form
         self.currentIndexChanged.connect(self.test_column_changed)
+        self.setMinimumWidth(100)
     
     def wheelEvent(self, event):
         # Disable the mouse wheel on top of the combo box changing selection as plays havoc in a grid
