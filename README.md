@@ -9,19 +9,21 @@
 *ePub Extended Metadata* is a plugin whose objective is to allow to read and write a wider range of ePub metadata according to the ePub standard.
 
 * Read and write contributors \<dc:contributor\> in columns (type names)
+* Read and write titles properties in columns (ePub3 only)
 
 Once the different metadata is set, you will be able to import or embed its advanced metadata in your ePub in one click.
 
-It is also possible to activate the automatic import/reading of its metadata when adding a book to your library.
-Also, it is possible to activate a automatic integration of them at the same time as the default Calibre Embed action, without having to specifically activate.
-Of course, other metadata not set in your plugin are kept.
+It's possible to activate the automatic import/reading of such metadata when adding a book to your library.
+It's also possible to activate the automatic writing of them at the same time as the default Calibre Embed action, without having to specifically activate it.
+Of course, the other metadata that was not defined in your settings are kept.
 
 
 **Note:**
 
-1. the setting of "ePub Extended Metadata" is done by *Library*.
+1. The setting of "ePub Extended Metadata" are configured by *Library*.
 2. "ePub Extended Metadata" came with 2 companion plugin "ePub Extended Metadata {Reader}" and "ePub Extended Metadata {Writer}" that are auto-installed, so do not be surprised to see them appear, it means the plugin has been properly installed.
-3. The plugin use custom colums "Comma separated text, like tags", with the option "Contains names" checked to make the value separated by a Ampersand & (like Authors)
+3. The contributors use custom colums "Comma separated text, like tags", with the option "Contains names" checked to make the value separated by a Ampersand & (like Authors). The titles use custom colums "Long text, not shown in the Tag browser" with the option "Short text, like a title".
+4. The plugin support KEPUB files, since their (mostly) just ePub with a other name.
 
 
 **Credits:**
