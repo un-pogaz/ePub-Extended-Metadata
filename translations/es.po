@@ -1,0 +1,2635 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2025-11-16 13:36+0100\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Dunhill\n"
+"Language-Team: Dunhill\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.2\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: __init__.py:27
+msgid "Read and write a wider range of metadata for ePub's files and associating them to columns in your libraries."
+msgstr "Lee y escribe una gama más amplia de metadatos para los archivos ePub y asígnalos a las columnas de tus bibliotecas."
+
+#: __init__.py:37
+msgid "This is an companion (and embeded) plugin of \"{:s}\"."
+msgstr "Este es un complemento (e integrado) de \"{:s}\"."
+
+#: __init__.py:38
+msgid "Read a wider range of metadata from the ePub file."
+msgstr "Lee una gama más amplia de metadatos del archivo ePub."
+
+#: __init__.py:39
+msgid "Write a wider range of metadata in the ePub file."
+msgstr "Escribe una gama más amplia de metadatos en el archivo ePub."
+
+#: action.py:40
+msgid "Edit the Extended Metadata of the ePub files"
+msgstr "Editar los metadatos extendidos de los archivos ePub"
+
+#: action.py:55
+msgid "&Embed Extended Metadata"
+msgstr "&Incrustar metadatos extendidos"
+
+#: action.py:60
+msgid "&Import Extended Metadata"
+msgstr "&Importar metadatos extendidos"
+
+#: action.py:77
+msgid "&Customize plugin…"
+msgstr "&Personalizar complemento…"
+
+#: action.py:253
+msgid "Exceptions during the reading of Extended Metadata"
+msgstr "Excepciones durante la lectura de metadatos extendidos"
+
+#: action.py:254
+#, python-brace-format
+msgid ""
+"{:d} exceptions have occurred during the reading of Extended Metadata.\n"
+"Some books may not have been updated."
+msgstr ""
+"Se han producido {:d} excepciones durante la lectura de los metadatos extendidos.\n"
+"Es posible que algunos libros no se hayan actualizado."
+
+#: action.py:266
+msgid "Exceptions during the writing of Extended Metadata"
+msgstr "Excepciones durante la escritura de metadatos extendidos"
+
+#: action.py:267
+#, python-brace-format
+msgid ""
+"{:d} exceptions have occurred during the writing of Extended Metadata.\n"
+"Some books may not have been updated."
+msgstr ""
+"Se han producido {:d} excepciones durante la escritura de los metadatos extendidos.\n"
+"Es posible que algunos libros no se hayan actualizado."
+
+#: common_utils/__init__.py:434
+msgid "You cannot configure this plugin before calibre is restarted."
+msgstr "No puede configurar este complemento antes de reiniciar Calibre."
+
+#: common_utils/dialogs.py:81 common_utils/dialogs.py:115
+msgid "Keyboard shortcuts"
+msgstr "Atajos de teclado"
+
+#: common_utils/dialogs.py:118
+msgid "Edit the keyboard shortcuts associated with this plugin"
+msgstr "Editar los atajos de teclado asociados a este complemento"
+
+#: common_utils/dialogs.py:134
+msgid "Preferences for:"
+msgstr "Preferencias para:"
+
+#: common_utils/dialogs.py:157
+msgid "Clear all settings for this plugin"
+msgstr "Borrar toda la configuración de este complemento"
+
+#: common_utils/dialogs.py:199
+msgid "The changes cannot be applied."
+msgstr "Los cambios no se pueden aplicar."
+
+#: common_utils/dialogs.py:203
+msgid "Are you sure you want to change your settings in this library for this plugin?"
+msgstr "¿Está seguro de que desea cambiar su configuración en esta biblioteca para este complemento?"
+
+#: common_utils/dialogs.py:204 common_utils/dialogs.py:216
+msgid "Any settings in other libraries or stored in a JSON file in your calibre plugins folder will not be touched."
+msgstr "La configuración en otras bibliotecas o almacenada en un archivo JSON en la carpeta de complementos de Calibre no se modificará."
+
+#: common_utils/dialogs.py:215
+msgid "Are you sure you want to clear your settings in this library for this plugin?"
+msgstr "¿Está seguro de que desea borrar su configuración en esta biblioteca para este complemento?"
+
+#: common_utils/dialogs.py:238
+msgid "View library preferences"
+msgstr "Ver preferencias de la biblioteca"
+
+#: common_utils/dialogs.py:239
+msgid "View data stored in the library database for this plugin"
+msgstr "Ver datos almacenados en la base de datos de la biblioteca para este complemento"
+
+#: common_utils/dialogs.py:269
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: common_utils/dialogs.py:279
+#, python-brace-format
+msgid "{PLUGIN_NAME} progress"
+msgstr "Progreso de {PLUGIN_NAME}"
+
+#: common_utils/dialogs.py:335
+#, python-brace-format
+msgid "Book {:d} of {:d}"
+msgstr "Libro {:d} de {:d}"
+
+#: common_utils/dialogs.py:371
+msgid "Copy to clipboard"
+msgstr "Copiar al portapapeles"
+
+#: common_utils/dialogs.py:390
+msgid "Add New Image"
+msgstr "Agregar nueva imagen"
+
+#: common_utils/dialogs.py:398
+msgid "&Select image source"
+msgstr "&Seleccionar fuente de imagen"
+
+#: common_utils/dialogs.py:401
+msgid "From &web domain favicon"
+msgstr "Desde favicon de dominio &web"
+
+#: common_utils/dialogs.py:408
+msgid "From .png &file"
+msgstr "Desde archivo .png"
+
+#: common_utils/dialogs.py:421
+msgid "&Save as filename:"
+msgstr "&Guardar como nombre de archivo:"
+
+#: common_utils/dialogs.py:444
+msgid "Select a .png file for the menu icon"
+msgstr "Seleccione un archivo .png para el ícono del menú"
+
+#: common_utils/dialogs.py:452 common_utils/dialogs.py:461
+#: common_utils/dialogs.py:465 common_utils/dialogs.py:487
+#: common_utils/dialogs.py:493 common_utils/dialogs.py:495
+#: common_utils/dialogs.py:497
+msgid "Cannot import image"
+msgstr "No se puede importar la imagen"
+
+#: common_utils/dialogs.py:452 common_utils/dialogs.py:495
+msgid "Source image must be a .png file."
+msgstr "La imagen de origen debe ser un archivo .png."
+
+#: common_utils/dialogs.py:461
+msgid "You must specify a filename to save as."
+msgstr "Debe especificar un nombre de archivo para guardar."
+
+#: common_utils/dialogs.py:466
+msgid "The save as filename should consist of a filename only."
+msgstr "El nombre de archivo para guardar debe consistir únicamente en un nombre de archivo."
+
+#: common_utils/dialogs.py:474 config.py:526
+msgid "Are you sure?"
+msgstr "¿Está seguro?"
+
+#: common_utils/dialogs.py:475
+msgid "An image with this name already exists - overwrite it?"
+msgstr "Ya existe una imagen con este nombre, ¿desea sobrescribirla?"
+
+#: common_utils/dialogs.py:487
+msgid "You must specify a web domain url"
+msgstr "Debe especificar una URL de dominio web"
+
+#: common_utils/dialogs.py:493
+msgid "You must specify a source file."
+msgstr "Debe especificar un archivo de origen."
+
+#: common_utils/dialogs.py:497
+msgid "Source image does not exist!"
+msgstr "¡La imagen de origen no existe!"
+
+#: common_utils/dialogs.py:505
+msgid "Select a ZIP archive file to import…"
+msgstr "Seleccione un archivo ZIP para importar…"
+
+#: common_utils/dialogs.py:517
+msgid "Save ZIP archive file as…"
+msgstr "Guardar archivo ZIP como…"
+
+#: common_utils/dialogs.py:530
+msgid "Select a JSON file to import…"
+msgstr "Seleccione un archivo JSON para importar…"
+
+#: common_utils/dialogs.py:542
+msgid "Save the JSON file as…"
+msgstr "Guardar el archivo JSON como…"
+
+#: common_utils/dialogs.py:579
+#, python-brace-format
+msgid "The {PLUGIN_NAME} plugin has encounter a unhandled exception."
+msgstr "El complemento {PLUGIN_NAME} ha encontrado una excepción no controlada."
+
+#: common_utils/dialogs.py:593
+msgid "Unhandled exception"
+msgstr "Excepción no controlada"
+
+#: common_utils/librarys.py:49
+msgid "Could not to launch {:s}"
+msgstr "No se pudo iniciar {:s}"
+
+#: common_utils/librarys.py:68
+msgid "No book selected"
+msgstr "Ningún libro seleccionado"
+
+#: common_utils/librarys.py:74
+msgid "No book in the library"
+msgstr "No hay libros en la biblioteca"
+
+#: common_utils/librarys.py:80 common_utils/librarys.py:87
+msgid "No book in the virtual library"
+msgstr "No hay libros en la biblioteca virtual"
+
+#: common_utils/librarys.py:93
+msgid "No book in the current search"
+msgstr "No hay libros en la búsqueda actual"
+
+#: common_utils/templates.py:49
+msgid "Unknown"
+msgstr "Desconocido"
+
+#: common_utils/templates.py:56
+msgid "Template Error"
+msgstr "Error de plantilla"
+
+#: common_utils/templates.py:57
+msgid "Running the template returned an error:"
+msgstr "La ejecución de la plantilla devolvió un error:"
+
+#: common_utils/templates.py:70
+msgid "Enter a template to test using data from the selected book"
+msgstr "Ingrese una plantilla para probar usando datos del libro seleccionado"
+
+#: common_utils/templates.py:77
+msgid "Template editor"
+msgstr "Editor de plantillas"
+
+#: common_utils/templates.py:106 common_utils/templates.py:109
+msgid "Open the template editor"
+msgstr "Abrir el editor de plantillas"
+
+#: common_utils/widgets.py:86
+msgid "Restart required"
+msgstr "Se requiere reinicio"
+
+#: common_utils/widgets.py:87
+msgid "Title image not found - you must restart Calibre before using this plugin!"
+msgstr "Imagen de título no encontrada - debe reiniciar Calibre antes de usar este complemento!"
+
+#: common_utils/widgets.py:144
+msgid "Undefined"
+msgstr "Indefinido"
+
+#: common_utils/widgets.py:298
+msgid "Subset of values associate to the books"
+msgstr "Subconjunto de valores asociados a los libros"
+
+#: common_utils/widgets.py:299
+msgid "No books"
+msgstr "Sin libros"
+
+#: common_utils/widgets.py:300
+#, python-brace-format
+msgid "{:d} books (no values)"
+msgstr "{:d} libros (sin valores)"
+
+#: common_utils/widgets.py:301
+#, python-brace-format
+msgid "{:d} books"
+msgstr "{:d} libros"
+
+#: common_utils/widgets.py:426
+msgid "No notes"
+msgstr "Sin notas"
+
+#: common_utils/widgets.py:480
+msgid "Add New Image…"
+msgstr "Agregar nueva imagen…"
+
+#: config.py:251
+msgid "ePub Extended Metadata options"
+msgstr "ePub Extended Metadata Opciones"
+
+#: config.py:264
+msgid "Contributors"
+msgstr "Colaboradores"
+
+#: config.py:274
+msgid "Add a Column/Contributor pair"
+msgstr "Agregar un par Columna/Colaborador"
+
+#: config.py:281
+msgid "Delete Column/Contributor pair"
+msgstr "Eliminar par Columna/Colaborador"
+
+#: config.py:291
+msgid "Embed \"{:s}\" column"
+msgstr "Incrustar columna \"{:s}\""
+
+#: config.py:293
+msgid "Embed the \"{:s}\" column as a Contributors metadata. This a write-only option, the import action will not change the Calibre {:s} column."
+msgstr "Incrusta la columna \"{:s}\" como metadato de Colaboradores. Esta es una opción solo de escritura, la acción de importar no modificará la columna {:s} de Calibre."
+
+#: config.py:308
+msgid "Titles"
+msgstr "Títulos"
+
+#: config.py:310
+msgid "Note: This feature is only supported by the ePub3 format and KEPUB files"
+msgstr "Nota: Esta función solo es compatible con el formato ePub3 y los archivos KEPUB"
+
+#: config.py:322
+msgid "Subtitle:"
+msgstr "Subtítulo:"
+
+#: config.py:323
+msgid "Short:"
+msgstr "Breve:"
+
+#: config.py:324
+msgid "Edition:"
+msgstr "Edición:"
+
+#: config.py:325
+msgid "Expanded:"
+msgstr "Ampliado:"
+
+#: config.py:326
+msgid "Collection:"
+msgstr "Colección:"
+
+#: config.py:336
+msgid "Automatic import"
+msgstr "Importación automática"
+
+#: config.py:338
+msgid "Allows to automatically import the extended metadata when adding a new book to the library"
+msgstr "Permite importar automáticamente los metadatos extendidos al añadir un nuevo libro a la biblioteca"
+
+#: config.py:342
+msgid "Automatic embed"
+msgstr "Incrustación automática"
+
+#: config.py:344
+msgid "Allows to to automatically embed the extended metadata at the same time as the default Calibre action"
+msgstr "Permite incrustar automáticamente los metadatos extendidos al mismo tiempo que la acción predeterminada de Calibre"
+
+#: config.py:360
+msgid "Edit import options"
+msgstr "Editar opciones de importación"
+
+#: config.py:388
+msgid "Incompatible options"
+msgstr "Opciones incompatibles"
+
+#: config.py:389
+msgid "You can't use the option <i>{0:s}</i> at the same time that a explicit contributor/column pairs that use the type \"{1:s}\"."
+msgstr "No puede usar la opción <i>{0:s}</i> al mismo tiempo que pares explícitos de colaborador/columna que usan el tipo \"{1:s}\"."
+
+#: config.py:394
+msgid "Duplicate values"
+msgstr "Valores duplicados"
+
+#: config.py:395
+msgid "The current parameters contain duplicate values."
+msgstr "Los parámetros actuales contienen valores duplicados."
+
+#: config.py:399
+msgid "Duplicate titles"
+msgstr "Títulos duplicados"
+
+#: config.py:400
+msgid "The current parameters contain duplicate titles values."
+msgstr "Los parámetros actuales contienen valores de títulos duplicados."
+
+#: config.py:406
+msgid "Your changes can't be saved and have been cancelled."
+msgstr "Sus cambios no se pueden guardar y han sido cancelados."
+
+#: config.py:447
+msgid "This feature has been incorrectly initialized. Restart Calibre to fix this."
+msgstr "Esta función se ha inicializado incorrectamente. Reinicie Calibre para solucionarlo."
+
+#: config.py:462
+msgid "Contributor type"
+msgstr "Tipo de colaborador"
+
+#: config.py:462
+msgid "Column"
+msgstr "Columna"
+
+#: config.py:523
+msgid "Are you sure you want to delete this Column/Contributor pair?"
+msgstr "¿Está seguro de que desea eliminar este par Columna/Colaborador?"
+
+#: config.py:525
+#, python-brace-format
+msgid "Are you sure you want to delete the selected {:d} Column/Contributor pairs?"
+msgstr "¿Está seguro de que desea eliminar los {:d} pares Columna/Colaborador seleccionados?"
+
+#: config.py:581
+msgid "Duplicate Contributors type"
+msgstr "Tipo de colaboradores duplicado"
+
+#: config.py:582
+msgid ""
+"A Contributor was duplicated!\n"
+"Change the settings so that each contributor is present only once, otherwise the settings can not be saved.\n"
+"\n"
+"Duplicate type:"
+msgstr ""
+"¡Un colaborador fue duplicado!\n"
+"Cambie la configuración para que cada colaborador esté presente solo una vez, de lo contrario no se podrán guardar los ajustes.\n"
+"\n"
+"Tipo duplicado:"
+
+#: config.py:603 config.py:636
+msgid "Duplicate Custom column"
+msgstr "Columna personalizada duplicada"
+
+#: config.py:604 config.py:637
+msgid ""
+"A Custom column was duplicated!\n"
+"Change the settings so that each Custom column is present only once, otherwise the settings can not be saved.\n"
+"\n"
+"Duplicate column:"
+msgstr ""
+"¡Una columna personalizada fue duplicada!\n"
+"Cambie la configuración para que cada columna personalizada esté presente solo una vez, de lo contrario no se podrán guardar los ajustes.\n"
+"\n"
+"Columna duplicada:"
+
+#: config.py:645
+msgid "Keep Calibre metadata, fill only the empty fields"
+msgstr "Mantener los metadatos de Calibre, rellenar solo los campos vacíos"
+
+#: config.py:646
+msgid "Overwrites Calibre metadata, considers that the book always reason"
+msgstr "Sobrescribe los metadatos de Calibre, considerando que el libro siempre tiene prioridad"
+
+#: config.py:650
+msgid "Keep Calibre embed metadata that could exist in the book"
+msgstr "Mantener los metadatos incrustados de Calibre que puedan existir en el libro"
+
+#: config.py:651
+msgid "Overwrites Calibre embed metadata, give priority to original metadata"
+msgstr "Sobrescribe los metadatos incrustados de Calibre, dando prioridad a los metadatos originales"
+
+#: config.py:662
+msgid "ePub Extended Metadata import options"
+msgstr "ePub Extended Metadata importar opciones"
+
+#: config.py:664
+msgid "Set here the specifics options to read and automatic import of metadata."
+msgstr "Configure aquí las opciones específicas para la lectura e importación automática de metadatos."
+
+#: config.py:668
+msgid "Choose the behavior to adopt in case of conflict between the metadata read by ePub Extended Metadata and the ones already embed by Calibre."
+msgstr "Elija el comportamiento a adoptar en caso de conflicto entre los metadatos leídos por ePub Extended Metadata y los ya incrustados por Calibre."
+
+#: config.py:676
+msgid "When importing manually:"
+msgstr "Al importar manualmente:"
+
+#: config.py:677
+msgid "The manual import is executed by clicking on \"Import Extended Metadata\" in the menu of 'ePub Extended Metadata'"
+msgstr "La importación manual se ejecuta haciendo clic en \"Importar metadatos extendidos\" en el menú de 'ePub Extended Metadata'"
+
+#: config.py:685
+msgid "During automatic import:"
+msgstr "Durante la importación automática:"
+
+#: config.py:686
+msgid "The automatic import is executed when Calibre add a book to the library"
+msgstr "La importación automática se ejecuta cuando Calibre añade un libro a la biblioteca"
+
+#: marc_relators.py:19
+msgid "//// MARC CONTRIBUTORS ROLES"
+msgstr "//// ROLES DE COLABORADORES MARC"
+
+#: marc_relators.py:23
+msgid "Abridger"
+msgstr "Abreviador"
+
+#: marc_relators.py:24
+msgid "Actor"
+msgstr "Actor"
+
+#: marc_relators.py:25
+msgid "Adapter"
+msgstr "Adaptador"
+
+#: marc_relators.py:26
+msgid "Analyst"
+msgstr "Analista"
+
+#: marc_relators.py:27
+msgid "Animator"
+msgstr "Animador"
+
+#: marc_relators.py:28
+msgid "Annotator"
+msgstr "Anotador"
+
+#: marc_relators.py:29
+msgid "Appellant"
+msgstr "Apelante"
+
+#: marc_relators.py:30
+msgid "Appellee"
+msgstr "Apelado"
+
+#: marc_relators.py:31
+msgid "Applicant"
+msgstr "Solicitante"
+
+#: marc_relators.py:32
+msgid "Architect"
+msgstr "Arquitecto"
+
+#: marc_relators.py:33
+msgid "Arranger"
+msgstr "Arreglista"
+
+#: marc_relators.py:34
+msgid "Art copyist"
+msgstr "Copista artístico"
+
+#: marc_relators.py:35
+msgid "Art director"
+msgstr "Director artístico"
+
+#: marc_relators.py:36
+msgid "Artist"
+msgstr "Artista"
+
+#: marc_relators.py:37
+msgid "Artistic director"
+msgstr "Director artístico"
+
+#: marc_relators.py:38
+msgid "Assignee"
+msgstr "Cesionario"
+
+#: marc_relators.py:39
+msgid "Associated name"
+msgstr "Nombre asociado"
+
+#: marc_relators.py:40
+msgid "Attributed name"
+msgstr "Nombre atribuido"
+
+#: marc_relators.py:41
+msgid "Auctioneer"
+msgstr "Subastador"
+
+#: marc_relators.py:42
+msgid "Author"
+msgstr "Autor"
+
+#: marc_relators.py:43
+msgid "Author in quotations or text extracts"
+msgstr "Autor en citas o extractos de texto"
+
+#: marc_relators.py:44
+msgid "Author of afterword, colophon, etc."
+msgstr "Autor de epílogo, colofón, etc."
+
+#: marc_relators.py:45
+msgid "Author of dialog"
+msgstr "Autor de diálogo"
+
+#: marc_relators.py:46
+msgid "Author of introduction, etc."
+msgstr "Autor de introducción, etc."
+
+#: marc_relators.py:47
+msgid "Author of screenplay, etc."
+msgstr "Autor de guion, etc."
+
+#: marc_relators.py:48
+msgid "Autographer"
+msgstr "Autógrafo"
+
+#: marc_relators.py:49
+msgid "Bibliographic antecedent"
+msgstr "Antecedente bibliográfico"
+
+#: marc_relators.py:50
+msgid "Binder"
+msgstr "Encuadernador"
+
+#: marc_relators.py:51
+msgid "Binding designer"
+msgstr "Diseñador de encuadernación"
+
+#: marc_relators.py:52
+msgid "Blurb writer"
+msgstr "Redactor de reseña"
+
+#: marc_relators.py:53
+msgid "Book designer"
+msgstr "Diseñador de libros"
+
+#: marc_relators.py:54
+msgid "Book producer"
+msgstr "Productor de libros"
+
+#: marc_relators.py:55
+msgid "Bookjacket designer"
+msgstr "Diseñador de sobrecubierta"
+
+#: marc_relators.py:56
+msgid "Bookplate designer"
+msgstr "Diseñador de exlibris"
+
+#: marc_relators.py:57
+msgid "Bookseller"
+msgstr "Librero"
+
+#: marc_relators.py:58
+msgid "Braille embosser"
+msgstr "Impresor Braille"
+
+#: marc_relators.py:59
+msgid "Broadcaster"
+msgstr "Locutor"
+
+#: marc_relators.py:60
+msgid "Calligrapher"
+msgstr "Calígrafo"
+
+#: marc_relators.py:61
+msgid "Cartographer"
+msgstr "Cartógrafo"
+
+#: marc_relators.py:62
+msgid "Caster"
+msgstr "Fundidor"
+
+#: marc_relators.py:63
+msgid "Censor"
+msgstr "Censor"
+
+#: marc_relators.py:64
+msgid "Choreographer"
+msgstr "Coreógrafo"
+
+#: marc_relators.py:65
+msgid "Cinematographer"
+msgstr "Cinematógrafo"
+
+#: marc_relators.py:66
+msgid "Client"
+msgstr "Cliente"
+
+#: marc_relators.py:67
+msgid "Collection registrar"
+msgstr "Registrador de colección"
+
+#: marc_relators.py:68
+msgid "Collector"
+msgstr "Coleccionista"
+
+#: marc_relators.py:69
+msgid "Collotyper"
+msgstr "Colotipista"
+
+#: marc_relators.py:70
+msgid "Colorist"
+msgstr "Colorista"
+
+#: marc_relators.py:71
+msgid "Commentator"
+msgstr "Comentarista"
+
+#: marc_relators.py:72
+msgid "Commentator for written text"
+msgstr "Comentarista de texto escrito"
+
+#: marc_relators.py:73
+msgid "Compiler"
+msgstr "Compilador"
+
+#: marc_relators.py:74
+msgid "Complainant"
+msgstr "Demandante"
+
+#: marc_relators.py:75
+msgid "Complainant-appellant"
+msgstr "Demandante-apelante"
+
+#: marc_relators.py:76
+msgid "Complainant-appellee"
+msgstr "Demandante-apelado"
+
+#: marc_relators.py:77
+msgid "Composer"
+msgstr "Compositor"
+
+#: marc_relators.py:78
+msgid "Compositor"
+msgstr "Tipógrafo"
+
+#: marc_relators.py:79
+msgid "Conceptor"
+msgstr "Conceptista"
+
+#: marc_relators.py:80
+msgid "Conductor"
+msgstr "Director de orquesta"
+
+#: marc_relators.py:81
+msgid "Conservator"
+msgstr "Conservador"
+
+#: marc_relators.py:82
+msgid "Consultant"
+msgstr "Consultor"
+
+#: marc_relators.py:83
+msgid "Consultant to a project"
+msgstr "Consultor de proyecto"
+
+#: marc_relators.py:84
+msgid "Contestant"
+msgstr "Concursante"
+
+#: marc_relators.py:85
+msgid "Contestant-appellant"
+msgstr "Concursante-apelante"
+
+#: marc_relators.py:86
+msgid "Contestant-appellee"
+msgstr "Concursante-apelado"
+
+#: marc_relators.py:87
+msgid "Contestee"
+msgstr "Contrincante"
+
+#: marc_relators.py:88
+msgid "Contestee-appellant"
+msgstr "Contrincante-apelante"
+
+#: marc_relators.py:89
+msgid "Contestee-appellee"
+msgstr "Contrincante-apelado"
+
+#: marc_relators.py:90
+msgid "Contractor"
+msgstr "Contratista"
+
+#: marc_relators.py:91
+msgid "Contributor"
+msgstr "Colaborador"
+
+#: marc_relators.py:92
+msgid "Copyright claimant"
+msgstr "Reclamante de copyright"
+
+#: marc_relators.py:93
+msgid "Copyright holder"
+msgstr "Titular de copyright"
+
+#: marc_relators.py:94
+msgid "Corrector"
+msgstr "Corrector"
+
+#: marc_relators.py:95
+msgid "Correspondent"
+msgstr "Corresponsal"
+
+#: marc_relators.py:96
+msgid "Costume designer"
+msgstr "Diseñador de vestuario"
+
+#: marc_relators.py:97
+msgid "Court governed"
+msgstr "Tribunal competente"
+
+#: marc_relators.py:98
+msgid "Court reporter"
+msgstr "Taquígrafo judicial"
+
+#: marc_relators.py:99
+msgid "Cover designer"
+msgstr "Diseñador de portada"
+
+#: marc_relators.py:100
+msgid "Creator"
+msgstr "Creador"
+
+#: marc_relators.py:101
+msgid "Curator of an exhibition"
+msgstr "Curador de una exposición"
+
+#: marc_relators.py:102
+msgid "Dancer"
+msgstr "Bailarín"
+
+#: marc_relators.py:103
+msgid "Data contributor"
+msgstr "Colaborador de datos"
+
+#: marc_relators.py:104
+msgid "Data manager"
+msgstr "Gestor de datos"
+
+#: marc_relators.py:105
+msgid "Dedicatee"
+msgstr "Dedicatario"
+
+#: marc_relators.py:106
+msgid "Dedicator"
+msgstr "Dedicador"
+
+#: marc_relators.py:107
+msgid "Defendant"
+msgstr "Acusado"
+
+#: marc_relators.py:108
+msgid "Defendant-appellant"
+msgstr "Acusado-apelante"
+
+#: marc_relators.py:109
+msgid "Defendant-appellee"
+msgstr "Acusado-apelado"
+
+#: marc_relators.py:110
+msgid "Degree grantor"
+msgstr "Institución que otorga el título"
+
+#: marc_relators.py:111
+msgid "Delineator"
+msgstr "Delineante"
+
+#: marc_relators.py:112
+msgid "Depicted"
+msgstr "Representado"
+
+#: marc_relators.py:113
+msgid "Depositor"
+msgstr "Depositante"
+
+#: marc_relators.py:114
+msgid "Designer"
+msgstr "Diseñador"
+
+#: marc_relators.py:115
+msgid "Director"
+msgstr "Director"
+
+#: marc_relators.py:116
+msgid "Dissertant"
+msgstr "Tesista"
+
+#: marc_relators.py:117
+msgid "Distribution place"
+msgstr "Lugar de distribución"
+
+#: marc_relators.py:118
+msgid "Distributor"
+msgstr "Distribuidor"
+
+#: marc_relators.py:119
+msgid "Donor"
+msgstr "Donante"
+
+#: marc_relators.py:120
+msgid "Draftsman"
+msgstr "Dibujante técnico"
+
+#: marc_relators.py:121
+msgid "Dubious author"
+msgstr "Autor dudoso"
+
+#: marc_relators.py:122
+msgid "Editor"
+msgstr "Editor"
+
+#: marc_relators.py:123
+msgid "Editor of compilation"
+msgstr "Editor de compilación"
+
+#: marc_relators.py:124
+msgid "Editor of moving image work"
+msgstr "Editor de obra audiovisual"
+
+#: marc_relators.py:125
+msgid "Electrician"
+msgstr "Electricista"
+
+#: marc_relators.py:126
+msgid "Electrotyper"
+msgstr "Electrotipista"
+
+#: marc_relators.py:127
+msgid "Engineer"
+msgstr "Ingeniero"
+
+#: marc_relators.py:128
+msgid "Engraver"
+msgstr "Grabador"
+
+#: marc_relators.py:129
+msgid "Etcher"
+msgstr "Grabador al aguafuerte"
+
+#: marc_relators.py:130
+msgid "Event place"
+msgstr "Lugar del evento"
+
+#: marc_relators.py:131
+msgid "Expert"
+msgstr "Experto"
+
+#: marc_relators.py:132
+msgid "Facsimilist"
+msgstr "Facsimilar"
+
+#: marc_relators.py:133
+msgid "Field director"
+msgstr "Director de campo"
+
+#: marc_relators.py:134
+msgid "Film director"
+msgstr "Director de cine"
+
+#: marc_relators.py:135
+msgid "Film distributor"
+msgstr "Distribuidor de cine"
+
+#: marc_relators.py:136
+msgid "Film editor"
+msgstr "Editor de cine"
+
+#: marc_relators.py:137
+msgid "Film producer"
+msgstr "Productor de cine"
+
+#: marc_relators.py:138
+msgid "Filmmaker"
+msgstr "Cineasta"
+
+#: marc_relators.py:139
+msgid "First party"
+msgstr "Primera parte"
+
+#: marc_relators.py:140
+msgid "Forger"
+msgstr "Falsificador"
+
+#: marc_relators.py:141
+msgid "Former owner"
+msgstr "Antiguo propietario"
+
+#: marc_relators.py:142
+msgid "Funder"
+msgstr "Financiador"
+
+#: marc_relators.py:143
+msgid "Geographic information specialist"
+msgstr "Especialista en información geográfica"
+
+#: marc_relators.py:144
+msgid "Honoree"
+msgstr "Homenajeado"
+
+#: marc_relators.py:145
+msgid "Host"
+msgstr "Anfitrión"
+
+#: marc_relators.py:146
+msgid "Host institution"
+msgstr "Institución anfitriona"
+
+#: marc_relators.py:147
+msgid "Illuminator"
+msgstr "Iluminador"
+
+#: marc_relators.py:148
+msgid "Illustrator"
+msgstr "Ilustrador"
+
+#: marc_relators.py:149
+msgid "Inscriber"
+msgstr "Inscriptor"
+
+#: marc_relators.py:150
+msgid "Instrumentalist"
+msgstr "Instrumentista"
+
+#: marc_relators.py:151
+msgid "Interviewee"
+msgstr "Entrevistado"
+
+#: marc_relators.py:152
+msgid "Interviewer"
+msgstr "Entrevistador"
+
+#: marc_relators.py:153
+msgid "Inventor"
+msgstr "Inventor"
+
+#: marc_relators.py:154
+msgid "Issuing body"
+msgstr "Entidad emisora"
+
+#: marc_relators.py:155
+msgid "Judge"
+msgstr "Juez"
+
+#: marc_relators.py:156
+msgid "Jurisdiction governed"
+msgstr "Jurisdicción regida"
+
+#: marc_relators.py:157
+msgid "Laboratory"
+msgstr "Laboratorio"
+
+#: marc_relators.py:158
+msgid "Laboratory director"
+msgstr "Director de laboratorio"
+
+#: marc_relators.py:159
+msgid "Landscape architect"
+msgstr "Arquitecto paisajista"
+
+#: marc_relators.py:160
+msgid "Lead"
+msgstr "Protagonista"
+
+#: marc_relators.py:161
+msgid "Lender"
+msgstr "Prestamista"
+
+#: marc_relators.py:162
+msgid "Libelant"
+msgstr "Demandante por difamación"
+
+#: marc_relators.py:163
+msgid "Libelant-appellant"
+msgstr "Demandante-apelante por difamación"
+
+#: marc_relators.py:164
+msgid "Libelant-appellee"
+msgstr "Demandante-apelado por difamación"
+
+#: marc_relators.py:165
+msgid "Libelee"
+msgstr "Demandado por difamación"
+
+#: marc_relators.py:166
+msgid "Libelee-appellant"
+msgstr "Demandado-apelante por difamación"
+
+#: marc_relators.py:167
+msgid "Libelee-appellee"
+msgstr "Demandado-apelado por difamación"
+
+#: marc_relators.py:168
+msgid "Librettist"
+msgstr "Libretista"
+
+#: marc_relators.py:169
+msgid "Licensee"
+msgstr "Licenciatario"
+
+#: marc_relators.py:170
+msgid "Licensor"
+msgstr "Licenciante"
+
+#: marc_relators.py:171
+msgid "Lighting designer"
+msgstr "Diseñador de iluminación"
+
+#: marc_relators.py:172
+msgid "Lithographer"
+msgstr "Litógrafo"
+
+#: marc_relators.py:173
+msgid "Lyricist"
+msgstr "Letrista"
+
+#: marc_relators.py:174
+msgid "Manufacture place"
+msgstr "Lugar de fabricación"
+
+#: marc_relators.py:175
+msgid "Manufacturer"
+msgstr "Fabricante"
+
+#: marc_relators.py:176
+msgid "Marbler"
+msgstr "Marmolista"
+
+#: marc_relators.py:177
+msgid "Markup editor"
+msgstr "Editor de marcado"
+
+#: marc_relators.py:178
+msgid "Medium"
+msgstr "Medio"
+
+#: marc_relators.py:179
+msgid "Metadata contact"
+msgstr "Contacto de metadatos"
+
+#: marc_relators.py:180
+msgid "Metal-engraver"
+msgstr "Grabador en metal"
+
+#: marc_relators.py:181
+msgid "Minute taker"
+msgstr "Secretario de actas"
+
+#: marc_relators.py:182
+msgid "Moderator"
+msgstr "Moderador"
+
+#: marc_relators.py:183
+msgid "Monitor"
+msgstr "Supervisor"
+
+#: marc_relators.py:184
+msgid "Music copyist"
+msgstr "Copista musical"
+
+#: marc_relators.py:185
+msgid "Musical director"
+msgstr "Director musical"
+
+#: marc_relators.py:186
+msgid "Musician"
+msgstr "Músico"
+
+#: marc_relators.py:187
+msgid "Narrator"
+msgstr "Narrador"
+
+#: marc_relators.py:188
+msgid "Onscreen presenter"
+msgstr "Presentador en pantalla"
+
+#: marc_relators.py:189
+msgid "Opponent"
+msgstr "Oponente"
+
+#: marc_relators.py:190
+msgid "Organizer of meeting"
+msgstr "Organizador de reunión"
+
+#: marc_relators.py:191
+msgid "Originator"
+msgstr "Originador"
+
+#: marc_relators.py:192
+msgid "Other"
+msgstr "Otro"
+
+#: marc_relators.py:193
+msgid "Owner"
+msgstr "Propietario"
+
+#: marc_relators.py:194
+msgid "Panelist"
+msgstr "Panelista"
+
+#: marc_relators.py:195
+msgid "Papermaker"
+msgstr "Fabricante de papel"
+
+#: marc_relators.py:196
+msgid "Patent applicant"
+msgstr "Solicitante de patente"
+
+#: marc_relators.py:197
+msgid "Patent holder"
+msgstr "Titular de patente"
+
+#: marc_relators.py:198
+msgid "Patron"
+msgstr "Patrocinador"
+
+#: marc_relators.py:199
+msgid "Performer"
+msgstr "Intérprete"
+
+#: marc_relators.py:200
+msgid "Permitting agency"
+msgstr "Agencia autorizante"
+
+#: marc_relators.py:201
+msgid "Photographer"
+msgstr "Fotógrafo"
+
+#: marc_relators.py:202
+msgid "Plaintiff"
+msgstr "Demandante"
+
+#: marc_relators.py:203
+msgid "Plaintiff-appellant"
+msgstr "Demandante-apelante"
+
+#: marc_relators.py:204
+msgid "Plaintiff-appellee"
+msgstr "Demandante-apelado"
+
+#: marc_relators.py:205
+msgid "Platemaker"
+msgstr "Fabricante de planchas"
+
+#: marc_relators.py:206
+msgid "Praeses"
+msgstr "Presidente"
+
+#: marc_relators.py:207
+msgid "Presenter"
+msgstr "Presentador"
+
+#: marc_relators.py:208
+msgid "Printer"
+msgstr "Impresor"
+
+#: marc_relators.py:209
+msgid "Printer of plates"
+msgstr "Impresor de planchas"
+
+#: marc_relators.py:210
+msgid "Printmaker"
+msgstr "Grabador de impresiones"
+
+#: marc_relators.py:211
+msgid "Process contact"
+msgstr "Contacto de proceso"
+
+#: marc_relators.py:212
+msgid "Producer"
+msgstr "Productor"
+
+#: marc_relators.py:213
+msgid "Production company"
+msgstr "Compañía de producción"
+
+#: marc_relators.py:214
+msgid "Production designer"
+msgstr "Diseñador de producción"
+
+#: marc_relators.py:215
+msgid "Production manager"
+msgstr "Gerente de producción"
+
+#: marc_relators.py:216
+msgid "Production personnel"
+msgstr "Personal de producción"
+
+#: marc_relators.py:217
+msgid "Production place"
+msgstr "Lugar de producción"
+
+#: marc_relators.py:218
+msgid "Programmer"
+msgstr "Programador"
+
+#: marc_relators.py:219
+msgid "Project director"
+msgstr "Director de proyecto"
+
+#: marc_relators.py:220
+msgid "Proofreader"
+msgstr "Corrector de pruebas"
+
+#: marc_relators.py:221
+msgid "Provider"
+msgstr "Proveedor"
+
+#: marc_relators.py:222
+msgid "Publication place"
+msgstr "Lugar de publicación"
+
+#: marc_relators.py:223
+msgid "Publisher"
+msgstr "Editorial"
+
+#: marc_relators.py:224
+msgid "Publishing director"
+msgstr "Director editorial"
+
+#: marc_relators.py:225
+msgid "Puppeteer"
+msgstr "Titiretero"
+
+#: marc_relators.py:226
+msgid "Radio director"
+msgstr "Director de radio"
+
+#: marc_relators.py:227
+msgid "Radio producer"
+msgstr "Productor de radio"
+
+#: marc_relators.py:228
+msgid "Recipient"
+msgstr "Destinatario"
+
+#: marc_relators.py:229 marc_relators.py:230
+msgid "Recording engineer"
+msgstr "Ingeniero de grabación"
+
+#: marc_relators.py:231
+msgid "Redactor"
+msgstr "Redactor"
+
+#: marc_relators.py:232
+msgid "Renderer"
+msgstr "Renderizador"
+
+#: marc_relators.py:233
+msgid "Reporter"
+msgstr "Reportero"
+
+#: marc_relators.py:234
+msgid "Repository"
+msgstr "Repositorio"
+
+#: marc_relators.py:235
+msgid "Research team head"
+msgstr "Jefe de equipo de investigación"
+
+#: marc_relators.py:236
+msgid "Research team member"
+msgstr "Miembro del equipo de investigación"
+
+#: marc_relators.py:237
+msgid "Researcher"
+msgstr "Investigador"
+
+#: marc_relators.py:238
+msgid "Respondent"
+msgstr "Respondiente"
+
+#: marc_relators.py:239
+msgid "Respondent-appellant"
+msgstr "Respondiente-apelante"
+
+#: marc_relators.py:240
+msgid "Respondent-appellee"
+msgstr "Respondiente-apelado"
+
+#: marc_relators.py:241
+msgid "Responsible party"
+msgstr "Parte responsable"
+
+#: marc_relators.py:242
+msgid "Restager"
+msgstr "Reescenificador"
+
+#: marc_relators.py:243
+msgid "Restorationist"
+msgstr "Restaurador"
+
+#: marc_relators.py:244
+msgid "Reviewer"
+msgstr "Reseñador"
+
+#: marc_relators.py:245
+msgid "Rubricator"
+msgstr "Rubricador"
+
+#: marc_relators.py:246
+msgid "Scenarist"
+msgstr "Guionista"
+
+#: marc_relators.py:247
+msgid "Scientific advisor"
+msgstr "Asesor científico"
+
+#: marc_relators.py:248
+msgid "Scribe"
+msgstr "Escriba"
+
+#: marc_relators.py:249
+msgid "Sculptor"
+msgstr "Escultor"
+
+#: marc_relators.py:250
+msgid "Second party"
+msgstr "Segunda parte"
+
+#: marc_relators.py:251
+msgid "Secretary"
+msgstr "Secretario"
+
+#: marc_relators.py:252
+msgid "Seller"
+msgstr "Vendedor"
+
+#: marc_relators.py:253
+msgid "Set designer"
+msgstr "Escenógrafo"
+
+#: marc_relators.py:254
+msgid "Setting"
+msgstr "Ambientación"
+
+#: marc_relators.py:255
+msgid "Signer"
+msgstr "Firmante"
+
+#: marc_relators.py:256
+msgid "Singer"
+msgstr "Cantante"
+
+#: marc_relators.py:257
+msgid "Sound designer"
+msgstr "Diseñador de sonido"
+
+#: marc_relators.py:258
+msgid "Speaker"
+msgstr "Orador"
+
+#: marc_relators.py:259
+msgid "Sponsor"
+msgstr "Patrocinador"
+
+#: marc_relators.py:260
+msgid "Stage director"
+msgstr "Director de escena"
+
+#: marc_relators.py:261
+msgid "Stage manager"
+msgstr "Regidor"
+
+#: marc_relators.py:262
+msgid "Standards body"
+msgstr "Organismo de normalización"
+
+#: marc_relators.py:263
+msgid "Stereotyper"
+msgstr "Estereotipista"
+
+#: marc_relators.py:264
+msgid "Storyteller"
+msgstr "Narrador"
+
+#: marc_relators.py:265
+msgid "Supporting host"
+msgstr "Anfitrión de apoyo"
+
+#: marc_relators.py:266
+msgid "Surveyor"
+msgstr "Topógrafo"
+
+#: marc_relators.py:267
+msgid "Teacher"
+msgstr "Profesor"
+
+#: marc_relators.py:268
+msgid "Technical director"
+msgstr "Director técnico"
+
+#: marc_relators.py:269
+msgid "Television director"
+msgstr "Director de televisión"
+
+#: marc_relators.py:270
+msgid "Television producer"
+msgstr "Productor de televisión"
+
+#: marc_relators.py:271
+msgid "Thesis advisor"
+msgstr "Director de tesis"
+
+#: marc_relators.py:272
+msgid "Transcriber"
+msgstr "Transcriptor"
+
+#: marc_relators.py:273
+msgid "Translator"
+msgstr "Traductor"
+
+#: marc_relators.py:274
+msgid "Type designer"
+msgstr "Diseñador tipográfico"
+
+#: marc_relators.py:275
+msgid "Typographer"
+msgstr "Tipógrafo"
+
+#: marc_relators.py:276
+msgid "University place"
+msgstr "Lugar universitario"
+
+#: marc_relators.py:277
+msgid "Videographer"
+msgstr "Videógrafo"
+
+#: marc_relators.py:278
+msgid "Voice actor"
+msgstr "Actor de voz"
+
+#: marc_relators.py:279
+msgid "Witness"
+msgstr "Testigo"
+
+#: marc_relators.py:280
+msgid "Wood-engraver"
+msgstr "Grabador en madera"
+
+#: marc_relators.py:281
+msgid "Woodcutter"
+msgstr "Leñador"
+
+#: marc_relators.py:282
+msgid "Writer of accompanying material"
+msgstr "Autor de material complementario"
+
+#: marc_relators.py:283
+msgid "Writer of added commentary"
+msgstr "Autor de comentario adicional"
+
+#: marc_relators.py:284
+msgid "Writer of added lyrics"
+msgstr "Autor de letras adicionales"
+
+#: marc_relators.py:285
+msgid "Writer of added text"
+msgstr "Autor de texto adicional"
+
+#: marc_relators.py:286
+msgid "Writer of introduction"
+msgstr "Autor de introducción"
+
+#: marc_relators.py:287
+msgid "Writer of preface"
+msgstr "Autor de prólogo"
+
+#: marc_relators.py:288
+msgid "Writer of supplementary textual content"
+msgstr "Autor de contenido textual suplementario"
+
+#: marc_relators.py:291
+msgid "//// MARC CONTRIBUTORS DESCRIPTION"
+msgstr "//// DESCRIPCIÓN DE COLABORADORES MARC"
+
+#: marc_relators.py:294
+msgid "A person, family, or organization contributing to a resource by shortening or condensing the original work but leaving the nature and content of the original work substantially unchanged. For substantial modifications that result in the creation of a new work, see Author."
+msgstr "Persona, familia u organización que contribuye a un recurso abreviando o condensando la obra original pero dejando sustancialmente sin cambios la naturaleza y el contenido de la obra. Para modificaciones sustanciales que resulten en la creación de una nueva obra, véase Autor."
+
+#: marc_relators.py:295
+msgid "Use for a person or organization who principally exhibits acting skills in a musical or dramatic presentation or entertainment."
+msgstr "Se usa para una persona u organización que principalmente demuestra habilidades de actuación en una presentación musical, dramática o de entretenimiento."
+
+#: marc_relators.py:296
+msgid "Use for a person or organization who 1) reworks a musical composition, usually for a different medium, or 2) rewrites novels or stories for motion pictures or other audiovisual medium."
+msgstr "Se usa para una persona u organización que 1) reelabora una composición musical, generalmente para un medio diferente, o 2) reescribe novelas o historias para películas u otros medios audiovisuales."
+
+#: marc_relators.py:297
+msgid "Use for a person or organization that reviews, examines and interprets data or information in a specific area."
+msgstr "Se usa para una persona u organización que revisa, examina e interpreta datos o información en un área específica."
+
+#: marc_relators.py:298
+msgid "Use for a person or organization who draws the two-dimensional figures, manipulates the three dimensional objects and/or also programs the computer to move objects and images for the purpose of animated film processing. Animation cameras, stands, celluloid screens, transparencies and inks are some of the tools of the animator."
+msgstr "Se usa para una persona u organización que dibuja figuras bidimensionales, manipula objetos tridimensionales y/o programa la computadora para mover objetos e imágenes con fines de procesamiento de películas animadas. Cámaras de animación, soportes, pantallas de celuloide, transparencias y tintas son algunas de las herramientas del animador."
+
+#: marc_relators.py:299
+msgid "Use for a person who writes manuscript annotations on a printed item."
+msgstr "Se usa para una persona que escribe anotaciones manuscritas en un ítem impreso."
+
+#: marc_relators.py:300
+msgid "A person or organization who appeals a lower court's decision."
+msgstr "Persona u organización que apela una decisión de un tribunal inferior."
+
+#: marc_relators.py:301
+msgid "A person or organization against whom an appeal is taken."
+msgstr "Persona u organización contra la cual se presenta una apelación."
+
+#: marc_relators.py:302
+msgid "Use for a person or organization responsible for the submission of an application or who is named as eligible for the results of the processing of the application (e.g., bestowing of rights, reward, title, position)."
+msgstr "Se usa para una persona u organización responsable de la presentación de una solicitud o que es nombrada como elegible para los resultados del procesamiento de la solicitud (por ejemplo, concesión de derechos, premio, título, cargo)."
+
+#: marc_relators.py:303
+msgid "Use for a person or organization who designs structures or oversees their construction."
+msgstr "Se usa para una persona u organización que diseña estructuras o supervisa su construcción."
+
+#: marc_relators.py:304
+msgid "Use for a person or organization who transcribes a musical composition, usually for a different medium from that of the original; in an arrangement the musical substance remains essentially unchanged."
+msgstr "Se usa para una persona u organización que transcribe una composición musical, generalmente para un medio diferente al original; en un arreglo la sustancia musical permanece esencialmente sin cambios."
+
+#: marc_relators.py:305
+msgid "Use for a person (e.g., a painter or sculptor) who makes copies of works of visual art."
+msgstr "Se usa para una persona (por ejemplo, un pintor o escultor) que realiza copias de obras de arte visual."
+
+#: marc_relators.py:306
+msgid "A person contributing to a motion picture or television production by overseeing the artists and craftspeople who build the sets."
+msgstr "Persona que contribuye a una producción cinematográfica o televisiva supervisando a los artistas y artesanos que construyen los decorados."
+
+#: marc_relators.py:307
+msgid "Use for a person (e.g., a painter) or organization who conceives, and perhaps also implements, an original graphic design or work of art, if specific codes (e.g., [egr], [etr]) are not desired. For book illustrators, prefer Illustrator [ill]."
+msgstr "Se usa para una persona (por ejemplo, un pintor) u organización que concibe, y quizás también implementa, un diseño gráfico original o una obra de arte, si no se desean códigos específicos (por ejemplo, [egr], [etr]). Para ilustradores de libros, preferir Ilustrador [ill]."
+
+#: marc_relators.py:308
+msgid "Use for a person responsible for controlling the development of the artistic style of an entire production, including the choice of works to be presented and selection of senior production staff."
+msgstr "Se usa para una persona responsable de controlar el desarrollo del estilo artístico de toda una producción, incluyendo la elección de las obras a presentar y la selección del personal de producción senior."
+
+#: marc_relators.py:309
+msgid "Use for a person or organization to whom a license for printing or publishing has been transferred."
+msgstr "Se usa para una persona u organización a la que se le ha transferido una licencia de impresión o publicación."
+
+#: marc_relators.py:310
+msgid "Use for a person or organization associated with or found in an item or collection, which cannot be determined to be that of a Former owner [fmo] or other designated relator indicative of provenance."
+msgstr "Se usa para una persona u organización asociada o encontrada en un ítem o colección, que no puede determinarse como un Antiguo propietario [fmo] u otro relator designado indicativo de procedencia."
+
+#: marc_relators.py:311
+msgid "Use for an author, artist, etc., relating him/her to a work for which there is or once was substantial authority for designating that person as author, creator, etc. of the work."
+msgstr "Se usa para un autor, artista, etc., relacionado con una obra para la cual existe o existió autoridad sustancial para designar a esa persona como autor, creador, etc. de la obra."
+
+#: marc_relators.py:312
+msgid "Use for a person or organization in charge of the estimation and public auctioning of goods, particularly books, artistic works, etc."
+msgstr "Se usa para una persona u organización encargada de la tasación y subasta pública de bienes, particularmente libros, obras artísticas, etc."
+
+#: marc_relators.py:313
+msgid "Use for a person or organization chiefly responsible for the intellectual or artistic content of a work, usually printed text. This term may also be used when more than one person or body bears such responsibility."
+msgstr "Se usa para una persona u organización principalmente responsable del contenido intelectual o artístico de una obra, generalmente texto impreso. Este término también puede usarse cuando más de una persona u organismo comparte dicha responsabilidad."
+
+#: marc_relators.py:314
+msgid "Use for a person or organization whose work is largely quoted or extracted in works to which he or she did not contribute directly. Such quotations are found particularly in exhibition catalogs, collections of photographs, etc."
+msgstr "Se usa para una persona u organización cuyo trabajo es citado o extraído en gran medida en obras a las que no contribuyó directamente. Tales citas se encuentran particularmente en catálogos de exposiciones, colecciones de fotografías, etc."
+
+#: marc_relators.py:315
+msgid "Use for a person or organization responsible for an afterword, postface, colophon, etc. but who is not the chief author of a work."
+msgstr "Se usa para una persona u organización responsable de un epílogo, postfacio, colofón, etc., pero que no es el autor principal de la obra."
+
+#: marc_relators.py:316
+msgid "Use for a person or organization responsible for the dialog or spoken commentary for a screenplay or sound recording."
+msgstr "Se usa para una persona u organización responsable del diálogo o comentario hablado de un guion o grabación sonora."
+
+#: marc_relators.py:317
+msgid "Use for a person or organization responsible for an introduction, preface, foreword, or other critical introductory matter, but who is not the chief author."
+msgstr "Se usa para una persona u organización responsable de una introducción, prólogo, prefacio u otro texto crítico introductorio, pero que no es el autor principal."
+
+#: marc_relators.py:318
+msgid "Use for a person or organization responsible for a motion picture screenplay, dialog, spoken commentary, etc."
+msgstr "Se usa para una persona u organización responsable de un guion cinematográfico, diálogo, comentario hablado, etc."
+
+#: marc_relators.py:319
+msgid "A person whose manuscript signature appears on an item."
+msgstr "Persona cuya firma manuscrita aparece en un ítem."
+
+#: marc_relators.py:320
+msgid "Use for a person or organization responsible for a work upon which the work represented by the catalog record is based. This may be appropriate for adaptations, sequels, continuations, indexes, etc."
+msgstr "Se usa para una persona u organización responsable de una obra en la que se basa la obra representada por el registro del catálogo. Esto puede ser apropiado para adaptaciones, secuelas, continuaciones, índices, etc."
+
+#: marc_relators.py:321
+msgid "Use for a person or organization responsible for the binding of printed or manuscript materials."
+msgstr "Se usa para una persona u organización responsable de la encuadernación de materiales impresos o manuscritos."
+
+#: marc_relators.py:322
+msgid "Use for a person or organization responsible for the binding design of a book, including the type of binding, the type of materials used, and any decorative aspects of the binding."
+msgstr "Se usa para una persona u organización responsable del diseño de la encuadernación de un libro, incluyendo el tipo de encuadernación, los materiales utilizados y los aspectos decorativos."
+
+#: marc_relators.py:323
+msgid "A person or organization responsible for writing a commendation or testimonial for a work, which appears on or within the publication itself, frequently on the back or dust jacket of print publications or on advertising material for all media."
+msgstr "Persona u organización responsable de redactar una recomendación o testimonio para una obra, que aparece en la propia publicación, frecuentemente en la contraportada o sobrecubierta de publicaciones impresas o en material publicitario de cualquier medio."
+
+#: marc_relators.py:324
+msgid "Use for a person or organization responsible for the entire graphic design of a book, including arrangement of type and illustration, choice of materials, and process used."
+msgstr "Se usa para una persona u organización responsable del diseño gráfico completo de un libro, incluyendo la disposición de tipografía e ilustraciones, elección de materiales y proceso utilizado."
+
+#: marc_relators.py:325
+msgid "Use for a person or organization responsible for the production of books and other print media, if specific codes (e.g., [bkd], [egr], [tyd], [prt]) are not desired."
+msgstr "Se usa para una persona u organización responsable de la producción de libros y otros medios impresos, si no se desean códigos específicos (por ejemplo, [bkd], [egr], [tyd], [prt])."
+
+#: marc_relators.py:326
+msgid "Use for a person or organization responsible for the design of flexible covers designed for or published with a book, including the type of materials used, and any decorative aspects of the bookjacket."
+msgstr "Se usa para una persona u organización responsable del diseño de cubiertas flexibles creadas para o publicadas con un libro, incluyendo los materiales utilizados y los aspectos decorativos de la sobrecubierta."
+
+#: marc_relators.py:327
+msgid "Use for a person or organization responsible for the design of a book owner's identification label that is most commonly pasted to the inside front cover of a book."
+msgstr "Se usa para una persona u organización responsable del diseño de la etiqueta de identificación de un propietario de libro, que comúnmente se pega en la parte interior de la tapa delantera."
+
+#: marc_relators.py:328
+msgid "Use for a person or organization who makes books and other bibliographic materials available for purchase. Interest in the materials is primarily lucrative."
+msgstr "Se usa para una persona u organización que pone a disposición libros y otros materiales bibliográficos para su compra. El interés en los materiales es principalmente lucrativo."
+
+#: marc_relators.py:329
+msgid "A person, family, or organization involved in manufacturing a resource by embossing Braille cells using a stylus, special embossing printer, or other device."
+msgstr "Persona, familia u organización involucrada en la fabricación de un recurso mediante el grabado de celdas Braille usando un punzón, impresora especial o dispositivo similar."
+
+#: marc_relators.py:330
+msgid "A person, family, or organization involved in broadcasting a resource to an audience via radio, television, webcast, etc."
+msgstr "Persona, familia u organización involucrada en la transmisión de un recurso a una audiencia mediante radio, televisión, webcast, etc."
+
+#: marc_relators.py:331
+msgid "Use for a person or organization who writes in an artistic hand, usually as a copyist and or engrosser."
+msgstr "Se usa para una persona u organización que escribe con una caligrafía artística, generalmente como copista o escribiente."
+
+#: marc_relators.py:332
+msgid "Use for a person or organization responsible for the creation of maps and other cartographic materials."
+msgstr "Se usa para una persona u organización responsable de la creación de mapas y otros materiales cartográficos."
+
+#: marc_relators.py:333
+msgid "Use for a person, family, or organization involved in manufacturing a resource by collotype process."
+msgstr "Se usa para una persona, familia u organización involucrada en la fabricación de un recurso mediante el proceso de colotipia."
+
+#: marc_relators.py:334
+msgid "Use for a person or organization responsible for applying color to drawings, prints, photographs, maps, etc."
+msgstr "Se usa para una persona u organización responsable de aplicar color a dibujos, grabados, fotografías, mapas, etc."
+
+#: marc_relators.py:335
+msgid "Use for a person or organization who provides critical or explanatory notes about a work."
+msgstr "Se usa para una persona u organización que proporciona notas críticas o explicativas sobre una obra."
+
+#: marc_relators.py:336
+msgid "Use for a person or organization who provides commentary for written texts."
+msgstr "Se usa para una persona u organización que proporciona comentarios sobre textos escritos."
+
+#: marc_relators.py:337
+msgid "Use for a person or organization responsible for compiling data, information, or works."
+msgstr "Se usa para una persona u organización responsable de compilar datos, información u obras."
+
+#: marc_relators.py:338
+msgid "Use for a person or organization who makes a formal complaint in a legal context."
+msgstr "Se usa para una persona u organización que presenta una queja formal en un contexto legal."
+
+#: marc_relators.py:339
+msgid "Use for a complainant who appeals a court decision."
+msgstr "Se usa para un demandante que apela una decisión judicial."
+
+#: marc_relators.py:340
+msgid "Use for a complainant against whom an appeal is taken."
+msgstr "Se usa para un demandante contra el cual se presenta una apelación."
+
+#: marc_relators.py:341
+msgid "Use for a person or organization responsible for creating music."
+msgstr "Se usa para una persona u organización responsable de crear música."
+
+#: marc_relators.py:342
+msgid "Use for a person or organization responsible for setting type or arranging text for printing."
+msgstr "Se usa para una persona u organización responsable de componer tipografía o disponer texto para impresión."
+
+#: marc_relators.py:343
+msgid "Use for a person or organization who conceives ideas or concepts for a work."
+msgstr "Se usa para una persona u organización que concibe ideas o conceptos para una obra."
+
+#: marc_relators.py:344
+msgid "Use for a person who directs a musical performance."
+msgstr "Se usa para una persona que dirige una interpretación musical."
+
+#: marc_relators.py:345
+msgid "Use for a person or organization responsible for preserving and maintaining works or collections."
+msgstr "Se usa para una persona u organización responsable de preservar y mantener obras o colecciones."
+
+#: marc_relators.py:346
+msgid "Use for a person or organization who provides expert advice in a specific field."
+msgstr "Se usa para una persona u organización que proporciona asesoramiento experto en un campo específico."
+
+#: marc_relators.py:347
+msgid "Use for a consultant specifically engaged for a project."
+msgstr "Se usa para un consultor contratado específicamente para un proyecto."
+
+#: marc_relators.py:348
+msgid "Use for a person or organization who participates in a contest."
+msgstr "Se usa para una persona u organización que participa en un concurso."
+
+#: marc_relators.py:349
+msgid "Use for a contestant who appeals a decision."
+msgstr "Se usa para un concursante que apela una decisión."
+
+#: marc_relators.py:350
+msgid "Use for a contestant against whom an appeal is taken."
+msgstr "Se usa para un concursante contra el cual se presenta una apelación."
+
+#: marc_relators.py:351
+msgid "Use for a person or organization against whom a contest is directed."
+msgstr "Se usa para una persona u organización contra la cual se dirige un concurso."
+
+#: marc_relators.py:352
+msgid "Use for a contestee who appeals a decision."
+msgstr "Se usa para un contrincante que apela una decisión."
+
+#: marc_relators.py:353
+msgid "Use for a contestee against whom an appeal is taken."
+msgstr "Se usa para un contrincante contra el cual se presenta una apelación."
+
+#: marc_relators.py:354
+msgid "Use for a person or organization who undertakes a contract to perform work or provide services."
+msgstr "Se usa para una persona u organización que asume un contrato para realizar un trabajo o prestar servicios."
+
+#: marc_relators.py:355
+msgid "Use for a person, family, or organization contributing to a resource without being the primary creator."
+msgstr "Se usa para una persona, familia u organización que contribuye a un recurso sin ser el creador principal."
+
+#: marc_relators.py:356
+msgid "Use for a person or organization who claims copyright for a work."
+msgstr "Se usa para una persona u organización que reclama el copyright de una obra."
+
+#: marc_relators.py:357
+msgid "Use for a person or organization who holds the copyright for a work."
+msgstr "Se usa para una persona u organización que posee el copyright de una obra."
+
+#: marc_relators.py:358
+msgid "Use for a person who corrects errors in a text."
+msgstr "Se usa para una persona que corrige errores en un texto."
+
+#: marc_relators.py:359
+msgid "Use for a person who corresponds with another, especially in writing."
+msgstr "Se usa para una persona que mantiene correspondencia con otra, especialmente por escrito."
+
+#: marc_relators.py:360
+msgid "Use for a person or organization responsible for designing costumes for a production."
+msgstr "Se usa para una persona u organización responsable de diseñar vestuario para una producción."
+
+#: marc_relators.py:361
+msgid "Use for a court that governs or has jurisdiction over a case."
+msgstr "Se usa para un tribunal que gobierna o tiene jurisdicción sobre un caso."
+
+#: marc_relators.py:362
+msgid "Use for a person who records court proceedings."
+msgstr "Se usa para una persona que registra los procedimientos judiciales."
+
+#: marc_relators.py:363
+msgid "Use for a person or organization responsible for designing the cover of a book or other resource."
+msgstr "Se usa para una persona u organización responsable de diseñar la portada de un libro u otro recurso."
+
+#: marc_relators.py:364
+msgid "Use for a person or organization who creates a work."
+msgstr "Se usa para una persona u organización que crea una obra."
+
+#: marc_relators.py:365
+msgid "Use for a person or organization responsible for curating an exhibition."
+msgstr "Se usa para una persona u organización responsable de curar una exposición."
+
+#: marc_relators.py:366
+msgid "Use for a person who performs dance."
+msgstr "Se usa para una persona que realiza danza."
+
+#: marc_relators.py:367
+msgid "Use for a person or organization who contributes data to a resource."
+msgstr "Se usa para una persona u organización que aporta datos a un recurso."
+
+#: marc_relators.py:368
+msgid "Use for a person or organization responsible for managing data."
+msgstr "Se usa para una persona u organización responsable de gestionar datos."
+
+#: marc_relators.py:369
+msgid "Use for a person to whom a work is dedicated."
+msgstr "Se usa para una persona a quien se dedica una obra."
+
+#: marc_relators.py:370
+msgid "Use for a person who dedicates a work."
+msgstr "Se usa para una persona que dedica una obra."
+
+#: marc_relators.py:371
+msgid "Use for a person or organization against whom a legal action is brought."
+msgstr "Se usa para una persona u organización contra la cual se presenta una acción legal."
+
+#: marc_relators.py:372
+msgid "Use for a defendant who appeals a decision."
+msgstr "Se usa para un acusado que apela una decisión."
+
+#: marc_relators.py:373
+msgid "Use for a defendant against whom an appeal is taken."
+msgstr "Se usa para un acusado contra el cual se presenta una apelación."
+
+#: marc_relators.py:374
+msgid "Use for a person or organization that grants academic degrees."
+msgstr "Se usa para una persona u organización que otorga títulos académicos."
+
+#: marc_relators.py:375
+msgid "Use for a person who draws or delineates designs."
+msgstr "Se usa para una persona que dibuja o delinea diseños."
+
+#: marc_relators.py:376
+msgid "Use for a person or organization represented or depicted in a work."
+msgstr "Se usa para una persona u organización representada en una obra."
+
+#: marc_relators.py:377
+msgid "Use for a person or organization who deposits materials in a repository."
+msgstr "Se usa para una persona u organización que deposita materiales en un repositorio."
+
+#: marc_relators.py:378
+msgid "Use for a person or organization responsible for designing a work."
+msgstr "Se usa para una persona u organización responsable de diseñar una obra."
+
+#: marc_relators.py:379
+msgid "Use for a person who directs a production."
+msgstr "Se usa para una persona que dirige una producción."
+
+#: marc_relators.py:380
+msgid "Use for a person who submits a dissertation or thesis."
+msgstr "Se usa para una persona que presenta una disertación o tesis."
+
+#: marc_relators.py:381
+msgid "Use for a place where a resource is distributed."
+msgstr "Se usa para un lugar donde se distribuye un recurso."
+
+#: marc_relators.py:382
+msgid "Use for a person or organization responsible for distributing a resource."
+msgstr "Se usa para una persona u organización responsable de distribuir un recurso."
+
+#: marc_relators.py:383
+msgid "Use for a person or organization who donates a resource."
+msgstr "Se usa para una persona u organización que dona un recurso."
+
+#: marc_relators.py:384
+msgid "Use for a person who drafts technical drawings."
+msgstr "Se usa para una persona que realiza dibujos técnicos."
+
+#: marc_relators.py:385
+msgid "Use for a person or organization whose authorship of a work is doubtful."
+msgstr "Se usa para una persona u organización cuya autoría de una obra es dudosa."
+
+#: marc_relators.py:386
+msgid "Use for a person or organization responsible for editing a work."
+msgstr "Se usa para una persona u organización responsable de editar una obra."
+
+#: marc_relators.py:387
+msgid "Use for a person or organization responsible for editing a compilation."
+msgstr "Se usa para una persona u organización responsable de editar una compilación."
+
+#: marc_relators.py:388
+msgid "Use for a person or organization responsible for editing a moving image work."
+msgstr "Se usa para una persona u organización responsable de editar una obra audiovisual."
+
+#: marc_relators.py:389
+msgid "Use for a person who installs or maintains electrical systems."
+msgstr "Se usa para una persona que instala o mantiene sistemas eléctricos."
+
+#: marc_relators.py:390
+msgid "Use for a person who makes electrotype plates."
+msgstr "Se usa para una persona que fabrica planchas de electrotipia."
+
+#: marc_relators.py:391
+msgid "Use for a person who designs or oversees engineering projects."
+msgstr "Se usa para una persona que diseña o supervisa proyectos de ingeniería."
+
+#: marc_relators.py:392
+msgid "Use for a person who engraves designs on a surface."
+msgstr "Se usa para una persona que graba diseños en una superficie."
+
+#: marc_relators.py:393
+msgid "Use for a person who etches designs onto a surface."
+msgstr "Se usa para una persona que realiza grabados al aguafuerte en una superficie."
+
+#: marc_relators.py:394
+msgid "Use for a place where an event occurs."
+msgstr "Se usa para un lugar donde ocurre un evento."
+
+#: marc_relators.py:395
+msgid "Use for a person who provides expert knowledge or skills."
+msgstr "Se usa para una persona que aporta conocimientos o habilidades expertas."
+
+#: marc_relators.py:396
+msgid "Use for a person who creates facsimiles of works."
+msgstr "Se usa para una persona que crea facsímiles de obras."
+
+#: marc_relators.py:397
+msgid "Use for a person who directs fieldwork."
+msgstr "Se usa para una persona que dirige trabajo de campo."
+
+#: marc_relators.py:398
+msgid "Use for a person who directs a film."
+msgstr "Se usa para una persona que dirige una película."
+
+#: marc_relators.py:399
+msgid "Use for a person or organization responsible for distributing films."
+msgstr "Se usa para una persona u organización responsable de distribuir películas."
+
+#: marc_relators.py:400
+msgid "Use for a person who edits films."
+msgstr "Se usa para una persona que edita películas."
+
+#: marc_relators.py:401
+msgid "Use for a person or organization responsible for producing films."
+msgstr "Se usa para una persona u organización responsable de producir películas."
+
+#: marc_relators.py:402
+msgid "Use for a person who makes films."
+msgstr "Se usa para una persona que realiza películas."
+
+#: marc_relators.py:403
+msgid "Use for a person or organization designated as the first party in a legal or contractual context."
+msgstr "Se usa para una persona u organización designada como la primera parte en un contexto legal o contractual."
+
+#: marc_relators.py:404
+msgid "Use for a person who falsifies works or documents."
+msgstr "Se usa para una persona que falsifica obras o documentos."
+
+#: marc_relators.py:405
+msgid "Use for a person or organization who formerly owned a resource."
+msgstr "Se usa para una persona u organización que anteriormente poseía un recurso."
+
+#: marc_relators.py:406
+msgid "Use for a person or organization who provides funding for a resource."
+msgstr "Se usa para una persona u organización que financia un recurso."
+
+#: marc_relators.py:407
+msgid "Use for a person who specializes in geographic information."
+msgstr "Se usa para una persona que se especializa en información geográfica."
+
+#: marc_relators.py:408
+msgid "Use for a person who is honored by a resource."
+msgstr "Se usa para una persona que es homenajeada por un recurso."
+
+#: marc_relators.py:409
+msgid "Use for a person who hosts an event or resource."
+msgstr "Se usa para una persona que organiza un evento o recurso."
+
+#: marc_relators.py:410
+msgid "Use for an institution that hosts an event or resource."
+msgstr "Se usa para una institución que organiza un evento o recurso."
+
+#: marc_relators.py:411
+msgid "Use for a person who illuminates manuscripts."
+msgstr "Se usa para una persona que ilumina manuscritos."
+
+#: marc_relators.py:412
+msgid "Use for a person who illustrates works."
+msgstr "Se usa para una persona que ilustra obras."
+
+#: marc_relators.py:413
+msgid "Use for a person who inscribes text in a work."
+msgstr "Se usa para una persona que inscribe texto en una obra."
+
+#: marc_relators.py:414
+msgid "Use for a person who performs music with instruments."
+msgstr "Se usa para una persona que interpreta música con instrumentos."
+
+#: marc_relators.py:415
+msgid "Use for a person who is interviewed."
+msgstr "Se usa para una persona que es entrevistada."
+
+#: marc_relators.py:416
+msgid "Use for a person who conducts an interview."
+msgstr "Se usa para una persona que realiza una entrevista."
+
+#: marc_relators.py:417
+msgid "Use for a person who invents something."
+msgstr "Se usa para una persona que inventa algo."
+
+#: marc_relators.py:418
+msgid "Use for a body that issues publications or resources."
+msgstr "Se usa para una entidad que emite publicaciones o recursos."
+
+#: marc_relators.py:419
+msgid "Use for a person who serves as a judge."
+msgstr "Se usa para una persona que actúa como juez."
+
+#: marc_relators.py:420
+msgid "Use for a jurisdiction that governs a resource."
+msgstr "Se usa para una jurisdicción que regula un recurso."
+
+#: marc_relators.py:421
+msgid "Use for a laboratory where research or experiments are conducted."
+msgstr "Se usa para un laboratorio donde se realizan investigaciones o experimentos."
+
+#: marc_relators.py:422
+msgid "Use for a person who directs a laboratory."
+msgstr "Se usa para una persona que dirige un laboratorio."
+
+#: marc_relators.py:423
+msgid "Use for a person who designs landscapes."
+msgstr "Se usa para una persona que diseña paisajes."
+
+#: marc_relators.py:424
+msgid "Use for a person who plays a leading role."
+msgstr "Se usa para una persona que desempeña un papel principal."
+
+#: marc_relators.py:425
+msgid "Use for a person or organization who lends resources."
+msgstr "Se usa para una persona u organización que presta recursos."
+
+#: marc_relators.py:426
+msgid "Use for a person or organization who files a libel suit."
+msgstr "Se usa para una persona u organización que presenta una demanda por difamación."
+
+#: marc_relators.py:427
+msgid "Use for a libelant who appeals a decision."
+msgstr "Se usa para un demandante por difamación que apela una decisión."
+
+#: marc_relators.py:428
+msgid "Use for a libelant against whom an appeal is taken."
+msgstr "Se usa para un demandante por difamación contra el cual se presenta una apelación."
+
+#: marc_relators.py:429
+msgid "Use for a person or organization accused of libel."
+msgstr "Se usa para una persona u organización acusada de difamación."
+
+#: marc_relators.py:430
+msgid "Use for a libelee who appeals a decision."
+msgstr "Se usa para un acusado de difamación que apela una decisión."
+
+#: marc_relators.py:431
+msgid "Use for a libelee against whom an appeal is taken."
+msgstr "Se usa para un acusado de difamación contra el cual se presenta una apelación."
+
+#: marc_relators.py:432
+msgid "Use for a person who writes librettos."
+msgstr "Se usa para una persona que escribe libretos."
+
+#: marc_relators.py:433
+msgid "Use for a person or organization who receives a license."
+msgstr "Se usa para una persona u organización que recibe una licencia."
+
+#: marc_relators.py:434
+msgid "Use for a person or organization who grants a license."
+msgstr "Se usa para una persona u organización que otorga una licencia."
+
+#: marc_relators.py:435
+msgid "Use for a person who designs lighting for a production."
+msgstr "Se usa para una persona que diseña la iluminación de una producción."
+
+#: marc_relators.py:436
+msgid "Use for a person who makes lithographs."
+msgstr "Se usa para una persona que realiza litografías."
+
+#: marc_relators.py:437
+msgid "Use for a person who writes song lyrics."
+msgstr "Se usa para una persona que escribe letras de canciones."
+
+#: marc_relators.py:438
+msgid "Use for a place where a resource is manufactured."
+msgstr "Se usa para un lugar donde se fabrica un recurso."
+
+#: marc_relators.py:439
+msgid "Use for a person or organization who manufactures a resource."
+msgstr "Se usa para una persona u organización que fabrica un recurso."
+
+#: marc_relators.py:440
+msgid "Use for a person who creates marbled paper."
+msgstr "Se usa para una persona que crea papel marmoleado."
+
+#: marc_relators.py:441
+msgid "Use for a person who edits markup or coding in a resource."
+msgstr "Se usa para una persona que edita marcado o código en un recurso."
+
+#: marc_relators.py:442
+msgid "Use for the medium through which a resource is conveyed."
+msgstr "Se usa para el medio a través del cual se transmite un recurso."
+
+#: marc_relators.py:443
+msgid "Use for a person or organization who serves as a contact for metadata."
+msgstr "Se usa para una persona u organización que sirve como contacto de metadatos."
+
+#: marc_relators.py:444
+msgid "Use for a person who engraves designs on metal."
+msgstr "Se usa para una persona que graba diseños en metal."
+
+#: marc_relators.py:445
+msgid "Use for a person who records minutes of meetings."
+msgstr "Se usa para una persona que redacta las actas de reuniones."
+
+#: marc_relators.py:446
+msgid "Use for a person who moderates discussions."
+msgstr "Se usa para una persona que modera discusiones."
+
+#: marc_relators.py:447
+msgid "Use for a person who monitors activities or processes."
+msgstr "Se usa para una persona que supervisa actividades o procesos."
+
+#: marc_relators.py:448
+msgid "Use for a person who copies music manuscripts."
+msgstr "Se usa para una persona que copia partituras musicales."
+
+#: marc_relators.py:449
+msgid "Use for a person who directs musical performances."
+msgstr "Se usa para una persona que dirige interpretaciones musicales."
+
+#: marc_relators.py:450
+msgid "Use for a person who performs music."
+msgstr "Se usa para una persona que interpreta música."
+
+#: marc_relators.py:451
+msgid "Use for a person who narrates a work."
+msgstr "Se usa para una persona que narra una obra."
+
+#: marc_relators.py:452
+msgid "Use for a person who presents content onscreen."
+msgstr "Se usa para una persona que presenta contenido en pantalla."
+
+#: marc_relators.py:453
+msgid "Use for a person or organization who opposes something."
+msgstr "Se usa para una persona u organización que se opone a algo."
+
+#: marc_relators.py:454
+msgid "Use for a person or organization who organizes a meeting."
+msgstr "Se usa para una persona u organización que organiza una reunión."
+
+#: marc_relators.py:455
+msgid "Use for a person or organization who originates a work."
+msgstr "Se usa para una persona u organización que origina una obra."
+
+#: marc_relators.py:456
+msgid "Use for other roles not specified."
+msgstr "Se usa para otros roles no especificados."
+
+#: marc_relators.py:457
+msgid "Use for a person or organization who owns a resource."
+msgstr "Se usa para una persona u organización que posee un recurso."
+
+#: marc_relators.py:458
+msgid "Use for a person who participates as a panelist."
+msgstr "Se usa para una persona que participa como panelista."
+
+#: marc_relators.py:459
+msgid "Use for a person who makes paper."
+msgstr "Se usa para una persona que fabrica papel."
+
+#: marc_relators.py:460
+msgid "Use for a person or organization who applies for a patent."
+msgstr "Se usa para una persona u organización que solicita una patente."
+
+#: marc_relators.py:461
+msgid "Use for a person or organization who holds a patent."
+msgstr "Se usa para una persona u organización que posee una patente."
+
+#: marc_relators.py:462
+msgid "Use for a person who supports or sponsors a resource."
+msgstr "Se usa para una persona que apoya o patrocina un recurso."
+
+#: marc_relators.py:463
+msgid "Use for a person who performs a work."
+msgstr "Se usa para una persona que interpreta una obra."
+
+#: marc_relators.py:464
+msgid "Use for an agency that grants permission for a resource."
+msgstr "Se usa para una agencia que otorga permisos para un recurso."
+
+#: marc_relators.py:465
+msgid "Use for a person who takes photographs."
+msgstr "Se usa para una persona que toma fotografías."
+
+#: marc_relators.py:466
+msgid "Use for a person or organization who brings a legal case."
+msgstr "Se usa para una persona u organización que presenta un caso legal."
+
+#: marc_relators.py:467
+msgid "Use for a plaintiff who appeals a decision."
+msgstr "Se usa para un demandante que apela una decisión."
+
+#: marc_relators.py:468
+msgid "Use for a plaintiff against whom an appeal is taken."
+msgstr "Se usa para un demandante contra el cual se presenta una apelación."
+
+#: marc_relators.py:469
+msgid "Use for a person who makes printing plates."
+msgstr "Se usa para una persona que fabrica planchas de impresión."
+
+#: marc_relators.py:470
+msgid "Use for a person who presides over an academic defense."
+msgstr "Se usa para una persona que preside una defensa académica."
+
+#: marc_relators.py:471
+msgid "Use for a person who presents a resource."
+msgstr "Se usa para una persona que presenta un recurso."
+
+#: marc_relators.py:472
+msgid "Use for a person or organization who prints resources."
+msgstr "Se usa para una persona u organización que imprime recursos."
+
+#: marc_relators.py:473
+msgid "Use for a person who prints plates."
+msgstr "Se usa para una persona que imprime planchas."
+
+#: marc_relators.py:474
+msgid "Use for a person who makes prints."
+msgstr "Se usa para una persona que realiza grabados."
+
+#: marc_relators.py:475
+msgid "Use for a person or organization who serves as a contact for processes."
+msgstr "Se usa para una persona u organización que sirve como contacto de procesos."
+
+#: marc_relators.py:476
+msgid "Use for a person or organization who produces a resource."
+msgstr "Se usa para una persona u organización que produce un recurso."
+
+#: marc_relators.py:477
+msgid "Use for a company that produces resources."
+msgstr "Se usa para una compañía que produce recursos."
+
+#: marc_relators.py:478
+msgid "Use for a person who designs production elements."
+msgstr "Se usa para una persona que diseña elementos de producción."
+
+#: marc_relators.py:479
+msgid "Use for a person who manages production."
+msgstr "Se usa para una persona que gestiona la producción."
+
+#: marc_relators.py:480
+msgid "Use for personnel involved in production."
+msgstr "Se usa para personal involucrado en la producción."
+
+#: marc_relators.py:481
+msgid "Use for a place where production occurs."
+msgstr "Se usa para un lugar donde ocurre la producción."
+
+#: marc_relators.py:482
+msgid "Use for a person who programs resources."
+msgstr "Se usa para una persona que programa recursos."
+
+#: marc_relators.py:483
+msgid "Use for a person who directs a project."
+msgstr "Se usa para una persona que dirige un proyecto."
+
+#: marc_relators.py:484
+msgid "Use for a person who proofreads texts."
+msgstr "Se usa para una persona que corrige pruebas de textos."
+
+#: marc_relators.py:485
+msgid "Use for a person or organization who provides resources."
+msgstr "Se usa para una persona u organización que provee recursos."
+
+#: marc_relators.py:486
+msgid "Use for a place where a resource is published."
+msgstr "Se usa para un lugar donde se publica un recurso."
+
+#: marc_relators.py:487
+msgid "Use for a person or organization who publishes resources."
+msgstr "Se usa para una persona u organización que publica recursos."
+
+#: marc_relators.py:488
+msgid "Use for a person who directs publishing activities."
+msgstr "Se usa para una persona que dirige actividades editoriales."
+
+#: marc_relators.py:489
+msgid "Use for a person who manipulates puppets."
+msgstr "Se usa para una persona que manipula títeres."
+
+#: marc_relators.py:490
+msgid "Use for a person who directs radio programs."
+msgstr "Se usa para una persona que dirige programas de radio."
+
+#: marc_relators.py:491
+msgid "Use for a person who produces radio programs."
+msgstr "Se usa para una persona que produce programas de radio."
+
+#: marc_relators.py:492
+msgid "Use for a person or organization who receives a resource."
+msgstr "Se usa para una persona u organización que recibe un recurso."
+
+#: marc_relators.py:493
+msgid "Use for a person who records sound."
+msgstr "Se usa para una persona que graba sonido."
+
+#: marc_relators.py:494
+msgid "Use for a person who edits or prepares text."
+msgstr "Se usa para una persona que edita o prepara texto."
+
+#: marc_relators.py:495
+msgid "Use for a person who renders artistic or technical work."
+msgstr "Se usa para una persona que realiza trabajos artísticos o técnicos."
+
+#: marc_relators.py:496
+msgid "Use for a person who reports news or events."
+msgstr "Se usa para una persona que informa noticias o eventos."
+
+#: marc_relators.py:497
+msgid "Use for a place where resources are stored."
+msgstr "Se usa para un lugar donde se almacenan recursos."
+
+#: marc_relators.py:498
+msgid "Use for a person who leads a research team."
+msgstr "Se usa para una persona que lidera un equipo de investigación."
+
+#: marc_relators.py:499
+msgid "Use for a person who is a member of a research team."
+msgstr "Se usa para una persona que es miembro de un equipo de investigación."
+
+#: marc_relators.py:500
+msgid "Use for a person who conducts research."
+msgstr "Se usa para una persona que realiza investigaciones."
+
+#: marc_relators.py:501
+msgid "Use for a person or organization who responds in a legal case."
+msgstr "Se usa para una persona u organización que responde en un caso legal."
+
+#: marc_relators.py:502
+msgid "Use for a respondent who appeals a decision."
+msgstr "Se usa para un respondiente que apela una decisión."
+
+#: marc_relators.py:503
+msgid "Use for a respondent against whom an appeal is taken."
+msgstr "Se usa para un respondiente contra el cual se presenta una apelación."
+
+#: marc_relators.py:504
+msgid "Use for a person or organization responsible for a resource."
+msgstr "Se usa para una persona u organización responsable de un recurso."
+
+#: marc_relators.py:505
+msgid "Use for a person who restages a performance."
+msgstr "Se usa para una persona que reescenifica una representación."
+
+#: marc_relators.py:506
+msgid "Use for a person who restores works."
+msgstr "Se usa para una persona que restaura obras."
+
+#: marc_relators.py:507
+msgid "Use for a person who reviews works."
+msgstr "Se usa para una persona que reseña obras."
+
+#: marc_relators.py:508
+msgid "Use for a person who adds rubrication to manuscripts."
+msgstr "Se usa para una persona que añade rúbricas a manuscritos."
+
+#: marc_relators.py:509
+msgid "Use for a person who writes screenplays."
+msgstr "Se usa para una persona que escribe guiones."
+
+#: marc_relators.py:510
+msgid "Use for a person who advises on scientific matters."
+msgstr "Se usa para una persona que asesora en asuntos científicos."
+
+#: marc_relators.py:511
+msgid "Use for a person who writes manuscripts."
+msgstr "Se usa para una persona que escribe manuscritos."
+
+#: marc_relators.py:512
+msgid "Use for a person who sculpts works."
+msgstr "Se usa para una persona que esculpe obras."
+
+#: marc_relators.py:513
+msgid "Use for a person or organization designated as the second party in a legal or contractual context."
+msgstr "Se usa para una persona u organización designada como la segunda parte en un contexto legal o contractual."
+
+#: marc_relators.py:514
+msgid "Use for a person who serves as a secretary."
+msgstr "Se usa para una persona que actúa como secretario."
+
+#: marc_relators.py:515
+msgid "Use for a person or organization who sells resources."
+msgstr "Se usa para una persona u organización que vende recursos."
+
+#: marc_relators.py:516
+msgid "Use for a person who designs sets for productions."
+msgstr "Se usa para una persona que diseña escenografías para producciones."
+
+#: marc_relators.py:517
+msgid "Use for the setting of a resource."
+msgstr "Se usa para la ambientación de un recurso."
+
+#: marc_relators.py:518
+msgid "Use for a person who signs a resource."
+msgstr "Se usa para una persona que firma un recurso."
+
+#: marc_relators.py:519
+msgid "Use for a person who sings."
+msgstr "Se usa para una persona que canta."
+
+#: marc_relators.py:520
+msgid "Use for a person who designs sound for a production."
+msgstr "Se usa para una persona que diseña el sonido de una producción."
+
+#: marc_relators.py:521
+msgid "Use for a person who speaks in a resource."
+msgstr "Se usa para una persona que habla en un recurso."
+
+#: marc_relators.py:522
+msgid "Use for a person or organization who sponsors a resource."
+msgstr "Se usa para una persona u organización que patrocina un recurso."
+
+#: marc_relators.py:523
+msgid "Use for a person who directs stage productions."
+msgstr "Se usa para una persona que dirige producciones teatrales."
+
+#: marc_relators.py:524
+msgid "Use for a person who manages stage productions."
+msgstr "Se usa para una persona que gestiona producciones teatrales."
+
+#: marc_relators.py:525
+msgid "Use for a body that sets standards."
+msgstr "Se usa para un organismo que establece normas."
+
+#: marc_relators.py:526
+msgid "Use for a person who makes stereotypes for printing."
+msgstr "Se usa para una persona que fabrica estereotipos para impresión."
+
+#: marc_relators.py:527
+msgid "Use for a person who tells stories."
+msgstr "Se usa para una persona que cuenta historias."
+
+#: marc_relators.py:528
+msgid "Use for a person who supports a host."
+msgstr "Se usa para una persona que apoya a un anfitrión."
+
+#: marc_relators.py:529
+msgid "Use for a person who surveys land."
+msgstr "Se usa para una persona que realiza levantamientos topográficos."
+
+#: marc_relators.py:530
+msgid "Use for a person who teaches."
+msgstr "Se usa para una persona que enseña."
+
+#: marc_relators.py:531
+msgid "Use for a person who directs technical aspects of a production."
+msgstr "Se usa para una persona que dirige aspectos técnicos de una producción."
+
+#: marc_relators.py:532
+msgid "Use for a person who directs television programs."
+msgstr "Se usa para una persona que dirige programas de televisión."
+
+#: marc_relators.py:533
+msgid "Use for a person who produces television programs."
+msgstr "Se usa para una persona que produce programas de televisión."
+
+#: marc_relators.py:534
+msgid "Use for a person who advises on theses."
+msgstr "Se usa para una persona que asesora en tesis."
+
+#: marc_relators.py:535
+msgid "Use for a person who transcribes texts."
+msgstr "Se usa para una persona que transcribe textos."
+
+#: marc_relators.py:536
+msgid "Use for a person who translates texts."
+msgstr "Se usa para una persona que traduce textos."
+
+#: marc_relators.py:537
+msgid "Use for a person who designs typefaces."
+msgstr "Se usa para una persona que diseña tipografías."
+
+#: marc_relators.py:538
+msgid "Use for a person who arranges typography."
+msgstr "Se usa para una persona que organiza tipografía."
+
+#: marc_relators.py:539
+msgid "Use for a place associated with a university."
+msgstr "Se usa para un lugar asociado con una universidad."
+
+#: marc_relators.py:540
+msgid "Use for a person who makes videos."
+msgstr "Se usa para una persona que realiza videos."
+
+#: marc_relators.py:541
+msgid "Use for a person who provides voice acting."
+msgstr "Se usa para una persona que realiza actuación de voz."
+
+#: marc_relators.py:542
+msgid "Use for a person who serves as a witness."
+msgstr "Se usa para una persona que actúa como testigo."
+
+#: marc_relators.py:543
+msgid "Use for a person who engraves wood."
+msgstr "Se usa para una persona que graba madera."
+
+#: marc_relators.py:544
+msgid "Use for a person who cuts wood."
+msgstr "Se usa para una persona que corta madera."
+
+#: marc_relators.py:545
+msgid "Use for a person who writes accompanying material."
+msgstr "Se usa para una persona que escribe material complementario."
+
+#: marc_relators.py:546
+msgid "Use for a person who writes added commentary."
+msgstr "Se usa para una persona que escribe comentarios adicionales."
+
+#: marc_relators.py:547
+msgid "A place where a university that is associated with a resource is located, for example, a university where an academic dissertation or thesis was presented."
+msgstr "Lugar donde se encuentra una universidad asociada con un recurso, por ejemplo, una universidad donde se presentó una disertación o tesis académica."
+
+#: marc_relators.py:548
+msgid "Use for a person or organization in charge of a video production, e.g. the video recording of a stage production as opposed to a commercial motion picture. The videographer may be the camera operator or may supervise one or more camera operators. Do not confuse with cinematographer."
+msgstr "Se usa para una persona u organización a cargo de una producción de video, por ejemplo, la grabación en video de una producción teatral en lugar de una película comercial. El videógrafo puede ser el operador de cámara o supervisar a uno o más operadores de cámara. No confundir con cinematógrafo."
+
+#: marc_relators.py:549
+msgid "An actor contributing to a resource by providing the voice for characters in radio and audio productions and for animated characters in moving image works, as well as by providing voice overs in radio and television commercials, dubbed resources, etc."
+msgstr "Actor que contribuye a un recurso proporcionando la voz para personajes en producciones de radio y audio, y para personajes animados en obras audiovisuales, así como realizando doblajes en comerciales de radio y televisión, recursos doblados, etc."
+
+#: marc_relators.py:550
+msgid "Use for a person who verifies the truthfulness of an event or action."
+msgstr "Se usa para una persona que verifica la veracidad de un evento o acción."
+
+#: marc_relators.py:551
+msgid "Use for a person or organization who makes prints by cutting the image in relief on the end-grain of a wood block."
+msgstr "Se usa para una persona u organización que realiza grabados cortando la imagen en relieve en la testa de un bloque de madera."
+
+#: marc_relators.py:552
+msgid "Use for a person or organization who makes prints by cutting the image in relief on the plank side of a wood block."
+msgstr "Se usa para una persona u organización que realiza grabados cortando la imagen en relieve en el lado plano de un bloque de madera."
+
+#: marc_relators.py:553
+msgid "Use for a person or organization who writes significant material which accompanies a sound recording or other audiovisual material."
+msgstr "Se usa para una persona u organización que escribe material significativo que acompaña una grabación sonora u otro material audiovisual."
+
+#: marc_relators.py:554
+msgid "A person, family, or organization contributing to an expression of a work by providing an interpretation or critical explanation of the original work."
+msgstr "Persona, familia u organización que contribuye a la expresión de una obra proporcionando una interpretación o explicación crítica de la obra original."
+
+#: marc_relators.py:555
+msgid "A writer of words added to an expression of a musical work. For lyric writing in collaboration with a composer to form an original work, see lyricist."
+msgstr "Autor de palabras añadidas a la expresión de una obra musical. Para escritura de letras en colaboración con un compositor para formar una obra original, véase letrista."
+
+#: marc_relators.py:556
+msgid "A person, family, or organization contributing to a non-textual resource by providing text for the non-textual work (e.g., writing captions for photographs, descriptions of maps.)"
+msgstr "Persona, familia u organización que contribuye a un recurso no textual proporcionando texto para la obra no textual (por ejemplo, escribiendo pies de foto, descripciones de mapas)."
+
+#: marc_relators.py:557
+msgid "A person, family, or organization contributing to a resource by providing an introduction to the original work."
+msgstr "Persona, familia u organización que contribuye a un recurso proporcionando una introducción a la obra original."
+
+#: marc_relators.py:558
+msgid "A person, family, or organization contributing to a resource by providing a preface to the original work."
+msgstr "Persona, familia u organización que contribuye a un recurso proporcionando un prólogo a la obra original."
+
+#: marc_relators.py:559
+msgid "A person, family, or organization contributing to a resource by providing supplementary textual content (e.g., an introduction, a preface) to the original work."
+msgstr "Persona, familia u organización que contribuye a un recurso proporcionando contenido textual suplementario (por ejemplo, una introducción, un prólogo) a la obra original."

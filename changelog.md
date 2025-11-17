@@ -1,6 +1,12 @@
 # Changelog - ePub Extended Metadata
 
 
+## [0.14.1] - 2025/11/17
+
+### Added
+- Add Spanish translation. Thanks *Dunhill*
+
+
 ## [0.14.0] - 2025/11/16
 
 ### Added
