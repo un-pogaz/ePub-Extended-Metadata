@@ -27,8 +27,6 @@ class MetadataWriter(MetadataWriterPlugin):
         from calibre.customize.builtins import EPUBMetadataWriter
         from calibre.customize.ui import apply_null_metadata, config, find_plugin, force_identifiers
         
-        from ..common_utils import get_plugin_attribut
-        
         # Use the Calibre EPUBMetadataWriter
         if hasattr(stream, 'seek'):
             stream.seek(0)
@@ -38,7 +36,7 @@ class MetadataWriter(MetadataWriterPlugin):
         calibre_writer.site_customization = config['plugin_customization'].get(calibre_writer.name, '')
         calibre_writer.set_metadata(stream, mi, type)
         
-        if find_plugin(get_plugin_attribut('name')):
+        if find_plugin(self.name):
             if hasattr(stream, 'seek'):
                 stream.seek(0)
             from ..action import write_metadata
@@ -53,9 +51,7 @@ class MetadataWriter(MetadataWriterPlugin):
     
     def config_widget(self):
         from calibre.customize.ui import find_plugin
-        
-        from ..common_utils import get_plugin_attribut
-        return find_plugin(get_plugin_attribut('name')).config_widget()
+        return find_plugin(self.name).config_widget()
     
     def save_settings(self, config_widget):
         config_widget.save_settings()

@@ -27,8 +27,6 @@ class MetadataReader(MetadataReaderPlugin):
         from calibre.customize.builtins import EPUBMetadataReader
         from calibre.customize.ui import find_plugin, quick_metadata
         
-        from ..common_utils import get_plugin_attribut
-        
         # Use the Calibre EPUBMetadataReader
         if hasattr(stream, 'seek'):
             stream.seek(0)
@@ -36,7 +34,7 @@ class MetadataReader(MetadataReaderPlugin):
         calibre_reader.quick = quick_metadata.quick
         mi = calibre_reader.get_metadata(stream, type)
         
-        if find_plugin(get_plugin_attribut('name')):
+        if find_plugin(self.name):
             if hasattr(stream, 'seek'):
                 stream.seek(0)
             from ..action import read_metadata
