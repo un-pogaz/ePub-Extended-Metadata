@@ -168,6 +168,11 @@ def _read_extended_metadata(container):
     if not container.opf:
         return extended_metadata
     
+    def contributors_append(role, author):
+        # we cannot use set because we want to keep the ordre
+        if author not in contributors[role]:
+            contributors[role].append(author)
+    
     tag_role = (
         ('dc:creator', 'aut'),
         ('dc:contributor', 'oth'),
@@ -179,7 +184,7 @@ def _read_extended_metadata(container):
                 role = tbl[0] if tbl else drole
                 role = role.strip() or drole
                 for author in string_to_authors(child.text):
-                    contributors[role].append(author)
+                    contributors_append(role, author)
     
     if container.version[0] == 3:
         for tag, drole in tag_role:
@@ -194,11 +199,11 @@ def _read_extended_metadata(container):
                 
                 for author in string_to_authors(child.text):
                     for role in roles:
-                        contributors[role].append(author)
+                        contributors_append(role, author)
             
             for child in container.metadata.xpath(f'{tag}[not(@id)]', namespaces=NAMESPACES):
                 for author in string_to_authors(child.text):
-                    contributors[drole].append(author)
+                    contributors_append(role, author)
         
         ## titles
         prefixes, refines = read_prefixes(container.root), read_refines(container.root)
