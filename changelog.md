@@ -1,6 +1,14 @@
 # Changelog - ePub Extended Metadata
 
 
+## [0.14.2] - 2025/11/17
+
+### Bug fixes
+- fix extended metadata not writen when using "Save to disk"
+- fix contributors duplications (can grow endlessly)
+- Don't duplicate author role if 'Embed "authors (Authors)" column' not enable
+
+
 ## [0.14.1] - 2025/11/17
 
 ### Added
@@ -14,7 +22,7 @@
 - Support of KEPUB files
 
 ### Bug fixes
-- Fix error when in the rare case their is no creator tag
+- fix error when in the rare case their is no creator tag
 
 
 ## [0.13.0] - 2025/11/15
