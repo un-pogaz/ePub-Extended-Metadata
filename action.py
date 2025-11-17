@@ -411,16 +411,24 @@ def write_metadata(stream, fmt, miA):
     import sys
     import traceback
     
-    from calibre.customize.builtins import ActionEmbed
-    
     # ---------------
     # Write Extended Metadata
+    from calibre.customize.builtins import ActionEmbed
     from calibre.customize.ui import find_plugin
-    i, book_ids, pd, only_fmts, errors = find_plugin(ActionEmbed.name).actual_plugin_.job_data
     
-    def report_error(mi, fmt, tb):
-        miA.book_id = book_ids[i]
-        errors.append((miA, fmt, tb))
+    i = None
+    book_ids = None
+    pd = None
+    only_fmts = None
+    errors = None
+    report_error = None
+    
+    action_embed = find_plugin(ActionEmbed.name).actual_plugin_
+    if action_embed:
+        i, book_ids, pd, only_fmts, errors = find_plugin(ActionEmbed.name).actual_plugin_.job_data
+        def report_error(mi, fmt, tb):
+            miA.book_id = book_ids[i]
+            errors.append((miA, fmt, tb))
     
     try:
         extended_metadata = create_extended_metadata(miA, KEY.get_current_prefs())
