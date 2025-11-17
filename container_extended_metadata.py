@@ -238,6 +238,9 @@ def _write_extended_metadata(container, extended_metadata):
         if role.startswith(':') or role == FIELD.TITLES.MAIN:
             epub_extended_metadata[KEY.TITLES].pop(role, None)
     
+    # pop authors role, duplicate value if LINK_AUTHOR not enable
+    epub_extended_metadata[KEY.CONTRIBUTORS].pop(FIELD.AUTHOR.ROLE, None)
+    
     # merge source metadata and the new
     for role, value in extended_metadata[KEY.CONTRIBUTORS].items():
         epub_extended_metadata[KEY.CONTRIBUTORS][role] = value
