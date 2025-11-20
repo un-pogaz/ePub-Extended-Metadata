@@ -10,6 +10,7 @@ except NameError:
     pass  # load_translations() added in calibre 1.9
 
 import os.path
+from contextlib import suppress
 from typing import Any, Dict, List
 
 try:
@@ -424,11 +425,13 @@ def write_metadata(stream, fmt, miA):
     report_error = None
     
     action_embed = find_plugin(ActionEmbed.name).actual_plugin_
-    if action_embed:
-        i, book_ids, pd, only_fmts, errors = find_plugin(ActionEmbed.name).actual_plugin_.job_data
-        def report_error(mi, fmt, tb):
-            miA.book_id = book_ids[i]
-            errors.append((miA, fmt, tb))
+    job_data = getattr(action_embed, 'job_data', None)
+    if action_embed and job_data:
+        with suppress(Exception):
+            i, book_ids, pd, only_fmts, errors = job_data
+            def report_error(mi, fmt, tb):
+                miA.book_id = book_ids[i]
+                errors.append((miA, fmt, tb))
     
     try:
         extended_metadata = create_extended_metadata(miA, KEY.get_current_prefs())
