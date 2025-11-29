@@ -1,6 +1,12 @@
 # Changelog - ePub Extended Metadata
 
 
+## [0.14.3] - 2025/11/29
+
+### Bug fixes
+- fix extended metadata not writen when using "Send to device"
+
+
 ## [0.14.2] - 2025/11/17
 
 ### Bug fixes
