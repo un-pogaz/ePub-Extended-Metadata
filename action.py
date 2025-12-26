@@ -44,7 +44,7 @@ class ePubExtendedMetadataAction(InterfaceAction):
     dont_add_to = frozenset(['context-menu-device'])
     
     def genesis(self):
-        self.menu = QMenu(GUI)
+        self.menu = QMenu()
         self.qaction.setMenu(self.menu)
         self.qaction.setIcon(get_icon(ICON.PLUGIN))
         # self.qaction.triggered.connect(self.toolbar_triggered)
