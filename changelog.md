@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.14.4] - 2025/12/26
+
+### Bug fixes
+- linux: don't use gui as parent for menu (raise a warning)
+
 ## [0.14.3] - 2025/11/29
 
 ### Bug fixes

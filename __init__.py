@@ -28,7 +28,7 @@ class ePubExtendedMetadata(InterfaceActionBase):
                                 "and associating them to columns in your libraries.")
     supported_platforms     = ['windows', 'osx', 'linux']
     author                  = 'un_pogaz'
-    version                 = (0, 14, 3)
+    version                 = (0, 14, 4)
     minimum_calibre_version = (5, 0, 0)
     
     name_reader              = name + ' {Reader}'
