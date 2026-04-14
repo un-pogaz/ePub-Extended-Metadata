@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.14.6] - 2026/04/14
+
+### Bug fixes
+- fail to import the metadata when their no id attached to the tag
+
 ## [0.14.5] - 2026/01/31
 
 ### Changed
