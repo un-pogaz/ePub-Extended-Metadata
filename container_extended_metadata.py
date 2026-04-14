@@ -203,7 +203,7 @@ def _read_extended_metadata(container):
             
             for child in container.metadata.xpath(f'{tag}[not(@id)]', namespaces=NAMESPACES):
                 for author in string_to_authors(child.text):
-                    contributors_append(role, author)
+                    contributors_append(drole, author)
         
         ## titles
         prefixes, refines = read_prefixes(container.root), read_refines(container.root)
