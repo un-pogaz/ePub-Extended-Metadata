@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.14.7] - 2026/04/29
+
+### Bug fixes
+- fix a broken pipe error due to a incorect zip
+
 ## [0.14.6] - 2026/04/14
 
 ### Bug fixes
