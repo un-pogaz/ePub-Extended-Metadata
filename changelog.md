@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.14.8] - 2026/06/21
+
+### Bug fixes
+- fix that various dialogs doesn't pass the focus properly
+
 ## [0.14.7] - 2026/04/29
 
 ### Bug fixes
