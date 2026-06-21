@@ -21,7 +21,6 @@ try:
         QHBoxLayout,
         QLabel,
         QPushButton,
-        QScrollArea,
         QSizePolicy,
         QSpacerItem,
         Qt,
@@ -39,7 +38,6 @@ except ImportError:
         QHBoxLayout,
         QLabel,
         QPushButton,
-        QScrollArea,
         QSizePolicy,
         QSpacerItem,
         Qt,
@@ -318,7 +316,9 @@ class ConfigWidget(QWidget):
         self.title_short = TitleColumnComboBox(PREFS[KEY.TITLES][FIELD.TITLES.SHORT], titles_layout, tab_titles)
         self.title_edition = TitleColumnComboBox(PREFS[KEY.TITLES][FIELD.TITLES.EDITION], titles_layout, tab_titles)
         self.title_expanded = TitleColumnComboBox(PREFS[KEY.TITLES][FIELD.TITLES.EXPANDED], titles_layout, tab_titles)
-        self.title_collection = TitleColumnComboBox(PREFS[KEY.TITLES][FIELD.TITLES.COLLECTION], titles_layout, tab_titles)
+        self.title_collection = TitleColumnComboBox(
+            PREFS[KEY.TITLES][FIELD.TITLES.COLLECTION], titles_layout, tab_titles
+        )
         titles_layout.addRow(_('Subtitle:'), self.title_subtitle)
         titles_layout.addRow(_('Short:'), self.title_short)
         titles_layout.addRow(_('Edition:'), self.title_edition)
@@ -351,7 +351,7 @@ class ConfigWidget(QWidget):
         layout.addLayout(keyboard_layout)
         keyboard_layout.addWidget(KeyboardConfigDialogButton(parent=self))
         
-        view_prefs_button = LibraryPrefsViewerDialogButton()
+        view_prefs_button = LibraryPrefsViewerDialogButton(parent=self)
         view_prefs_button.library_prefs_changed.connect(self.library_prefs_changed)
         keyboard_layout.addWidget(view_prefs_button)
         
