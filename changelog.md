@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.14.9] - 2026/06/30
+
+### Bug fixes
+- fix a issue that make some files unable to be loaded
+
 ## [0.14.8] - 2026/06/21
 
 ### Bug fixes
