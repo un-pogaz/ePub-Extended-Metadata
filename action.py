@@ -184,7 +184,7 @@ def apply_extended_metadata(miA, prefs, extended_metadata, keep_calibre=False, c
     titles = extended_metadata[KEY.TITLES]
     # overwrite the calibre behavior that merge subtitle into main-title
     # iff a subtitle field is defined
-    if prefs.get(KEY.TITLES, {}).get(FIELD.TITLES.SUBTITLE):
+    if titles and prefs.get(KEY.TITLES, {}).get(FIELD.TITLES.SUBTITLE):
         if miA.get('title') == titles[FIELD.TITLES.READ]:
             miA.set('title', titles[FIELD.TITLES.MAIN])
             field_change.append('title')
