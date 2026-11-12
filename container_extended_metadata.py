@@ -19,7 +19,6 @@ from calibre.ebooks.metadata.epub import EPubException, get_zip_reader
 from calibre.ebooks.metadata.opf2 import OPF
 from calibre.ebooks.metadata.opf3 import (
     find_main_title,
-    find_subtitle,
     normalize_whitespace,
     properties_for_id,
     read_prefixes,
@@ -38,6 +37,24 @@ NS_DC = 'http://purl.org/dc/elements/1.1/'
 NS_NCX = 'http://www.daisy.org/z3986/2005/ncx/'
 
 NAMESPACES={'opf':NS_OPF, 'dc':NS_DC, 'ocf':NS_OCF, 'ncx':NS_NCX}
+
+
+try:
+    # calibre 9.19+
+    from calibre.ebooks.metadata.opf3 import find_subtitles as subtitle_function
+    
+    def find_subtitle(root, refines, main_title):
+        return next(iter(subtitle_function(root, refines, main_title)), None)
+    
+except ImportError:
+    # calibre <9.18
+    from calibre.ebooks.metadata.opf3 import find_subtitle as subtitle_function
+    
+    def find_subtitle(root, refines, main_title):
+        rslt = subtitle_function(root, refines)
+        if rslt is not main_title:
+            return rslt
+        return None
 
 
 class ParseError(ValueError):
@@ -218,8 +235,9 @@ def _read_extended_metadata(container):
         for role in roles:
             titles[role] = to_text(find_title_role(container.root, refines, role))
         
-        titles[FIELD.TITLES.MAIN] = to_text(find_main_title(container.root, refines))
-        titles[FIELD.TITLES.SUBTITLE] = to_text(find_subtitle(container.root, refines))
+        main_title = find_main_title(container.root, refines)
+        titles[FIELD.TITLES.MAIN] = to_text(main_title)
+        titles[FIELD.TITLES.SUBTITLE] = to_text(find_subtitle(container.root, refines, main_title))
         titles[FIELD.TITLES.READ] = read_title(container.root, prefixes, refines)
     
     debug_print('extended_metadata:', extended_metadata)
