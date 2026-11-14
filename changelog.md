@@ -1,5 +1,10 @@
 # Changelog - ePub Extended Metadata
 
+## [0.14.10] - 2026/11/13
+
+### Bug fixes
+- fix import error du to breaking change in Calibre 9.19
+
 ## [0.14.9] - 2026/06/30
 
 ### Bug fixes
